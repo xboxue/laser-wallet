@@ -1,11 +1,18 @@
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NativeBaseProvider } from "native-base";
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import HomeScreen from "./src/screens/HomeScreen";
+
+const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
     <NativeBaseProvider>
-      <Text>Open up App.tsx to start working on your app!</Text>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Home" component={HomeScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </NativeBaseProvider>
   );
 };
