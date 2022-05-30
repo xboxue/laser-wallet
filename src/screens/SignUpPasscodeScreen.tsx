@@ -34,7 +34,11 @@ const SignUpPasscodeScreen = () => {
   }, [passcode]);
 
   return (
-    <Box flex={1} alignItems="center" pb="4">
+    <Box flex={1} pb="4">
+      <Box p="4">
+        <Text variant="subtitle1">Protect your wallet</Text>
+        <Text>Enter a passcode to keep your wallet safe.</Text>
+      </Box>
       <Box flex={1} justifyContent="center" alignItems="center">
         <Box flexDirection="row" mb="3">
           {range(PASSCODE_LENGTH).map((value, index) => (
