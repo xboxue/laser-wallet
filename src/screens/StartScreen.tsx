@@ -5,8 +5,10 @@ const StartScreen = () => {
   const navigation = useNavigation();
 
   return (
-    <Box flex={1} justifyContent="center" alignItems="center">
-      <Text variant="h4">Laser Wallet</Text>
+    <Box flex={1} justifyContent="center" px="4">
+      <Text variant="h4" textAlign="center" mb="5">
+        Laser Wallet
+      </Text>
       <Button onPress={() => navigation.navigate("SignUpPasscode")}>
         Create new wallet
       </Button>

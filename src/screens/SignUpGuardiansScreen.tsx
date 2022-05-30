@@ -5,8 +5,18 @@ const SignUpGuardiansScreen = () => {
   const navigation = useNavigation();
 
   return (
-    <Box flex={1} justifyContent="center" alignItems="center">
-      <Text>Laser Wallet</Text>
+    <Box>
+      <Box p="4">
+        <Text variant="subtitle1">Choose your guardians</Text>
+        <Text>
+          Guardians ensure you can recover your wallet in case your device is
+          lost.
+        </Text>
+        <Button mt="4">Add guardian</Button>
+        <Button mt="4" onPress={() => navigation.navigate("SignUpBackUp")}>
+          Next
+        </Button>
+      </Box>
     </Box>
   );
 };
