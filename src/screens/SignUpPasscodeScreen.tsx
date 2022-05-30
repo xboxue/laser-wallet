@@ -21,6 +21,7 @@ const SignUpPasscodeScreen = () => {
       if (firstPasscode) {
         if (passcode === firstPasscode) {
           // Store
+          navigation.navigate("SignUpGuardians");
         } else {
           setPasscode("");
           setError("Incorrect");
@@ -33,20 +34,22 @@ const SignUpPasscodeScreen = () => {
   }, [passcode]);
 
   return (
-    <Box flex={1} justifyContent="flex-end" alignItems="center" pb="4">
-      <Box flexDirection="row">
-        {range(PASSCODE_LENGTH).map((value, index) => (
-          <Circle
-            key={value}
-            size="3"
-            bg="black"
-            mx="1"
-            opacity={index >= passcode.length ? "0.3" : "1"}
-          />
-        ))}
+    <Box flex={1} alignItems="center" pb="4">
+      <Box flex={1} justifyContent="center" alignItems="center">
+        <Box flexDirection="row" mb="3">
+          {range(PASSCODE_LENGTH).map((value, index) => (
+            <Circle
+              key={value}
+              size="3"
+              bg="black"
+              mx="1"
+              opacity={index >= passcode.length ? "0.3" : "1"}
+            />
+          ))}
+        </Box>
+        {firstPasscode && <Text>Confirm passcode</Text>}
+        {error && <Text>{error}</Text>}
       </Box>
-      {firstPasscode && <Text>Confirm passcode</Text>}
-      {error && <Text>{error}</Text>}
       <NumberPad
         onChange={value => {
           if (value === "backspace") {

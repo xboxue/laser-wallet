@@ -1,18 +1,23 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  createStackNavigator,
+  TransitionPresets,
+} from "@react-navigation/stack";
 import { NativeBaseProvider } from "native-base";
 import SignUpBackUpScreen from "./src/screens/SignUpBackUpScreen";
 import SignUpGuardiansScreen from "./src/screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "./src/screens/SignUpPasscodeScreen";
 import StartScreen from "./src/screens/StartScreen";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const App = () => {
   return (
     <NativeBaseProvider>
       <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator
+          screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}
+        >
           <Stack.Screen name="Start" component={StartScreen} />
           <Stack.Screen
             name="SignUpPasscode"
