@@ -11,6 +11,7 @@ import {
   TransitionPresets,
 } from "@react-navigation/stack";
 import { NativeBaseProvider } from "native-base";
+import useSecureStore from "./src/hooks/useSecureStore";
 import HomeScreen from "./src/screens/HomeScreen";
 import SignUpBackUpScreen from "./src/screens/SignUpBackUpScreen";
 import SignUpGuardiansScreen from "./src/screens/SignUpGuardiansScreen";
@@ -27,6 +28,7 @@ const App = () => {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const ownerAddress = useSecureStore("ownerAddress");
 
   return (
     <NativeBaseProvider theme={theme}>
@@ -34,17 +36,25 @@ const App = () => {
         <Stack.Navigator
           screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}
         >
-          <Stack.Screen name="Start" component={StartScreen} />
-          <Stack.Screen
-            name="SignUpPasscode"
-            component={SignUpPasscodeScreen}
-          />
-          <Stack.Screen
-            name="SignUpGuardians"
-            component={SignUpGuardiansScreen}
-          />
-          <Stack.Screen name="SignUpBackUp" component={SignUpBackUpScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
+          {ownerAddress ? (
+            <Stack.Screen name="Home" component={HomeScreen} />
+          ) : (
+            <>
+              <Stack.Screen name="Start" component={StartScreen} />
+              <Stack.Screen
+                name="SignUpPasscode"
+                component={SignUpPasscodeScreen}
+              />
+              <Stack.Screen
+                name="SignUpGuardians"
+                component={SignUpGuardiansScreen}
+              />
+              <Stack.Screen
+                name="SignUpBackUp"
+                component={SignUpBackUpScreen}
+              />
+            </>
+          )}
         </Stack.Navigator>
       </NavigationContainer>
     </NativeBaseProvider>

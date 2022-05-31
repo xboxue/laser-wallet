@@ -1,33 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
-import "react-native-get-random-values";
-import "@ethersproject/shims";
 import { ethers } from "ethers";
-import { Box, Button, Text } from "native-base";
-import { Laser, LaserFactory } from "laser-sdk/src";
 import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import { LaserFactory } from "laser-sdk/src";
+import { Box, Button, Text } from "native-base";
+import useSecureStore from "../hooks/useSecureStore";
+import WalletBalance from "../components/WalletBalance/WalletBalance";
 
 const ENTRY_POINT_ADDRESS = "0xcCed5B88f14f1e133680117d01dEFeB38fC9a5A3";
 const LASER_GUARDIAN_ADDRESS = "0x0D073B061819d7B7E648d1bb34593c701FFaE666";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const [ownerAddress, setOwnerAddress] = useState("");
-
-  useEffect(() => {
-    const getAddress = async () => {
-      const ownerAddress = await SecureStore.getItemAsync("ownerAddress");
-      if (ownerAddress) setOwnerAddress(ownerAddress);
-    };
-
-    getAddress();
-  }, []);
-
-  const createWallet = async () => {
-    const owner = ethers.Wallet.createRandom();
-    await SecureStore.setItemAsync("ownerAddress", owner.address);
-    await SecureStore.setItemAsync("ownerPrivateKey", owner.privateKey);
-  };
+  const walletAddress = useSecureStore("walletAddress");
 
   const deploy = async () => {
     const ownerAddress = await SecureStore.getItemAsync("ownerAddress");
@@ -55,10 +39,7 @@ const HomeScreen = () => {
         [LASER_GUARDIAN_ADDRESS],
         ENTRY_POINT_ADDRESS
       );
-      await SecureStore.setItemAsync(
-        "walletAddress",
-        "0x6450c79979D9DC296c92495576D2DE43b7737a55"
-      );
+      await SecureStore.setItemAsync("walletAddress", walletAddress);
     } catch (error) {
       throw new Error(`Error with createProxy ${error}`);
     }
@@ -68,14 +49,16 @@ const HomeScreen = () => {
     <Box>
       <Box p="4">
         <Text variant="subtitle1"></Text>
-        <Text>{ownerAddress}</Text>
-        <Button mt="4" onPress={createWallet}>
-          Create wallet
-        </Button>
-
-        <Button mt="4" onPress={deploy}>
-          Deploy smart contract
-        </Button>
+        <Text>{walletAddress}</Text>
+        {walletAddress ? (
+          <>
+            <WalletBalance />
+          </>
+        ) : (
+          <Button mt="4" onPress={deploy}>
+            Deploy smart contract
+          </Button>
+        )}
       </Box>
     </Box>
   );
