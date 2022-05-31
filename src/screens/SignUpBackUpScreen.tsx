@@ -4,9 +4,16 @@ import "@ethersproject/shims";
 import { ethers } from "ethers";
 import { Box, Button, Text } from "native-base";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import * as SecureStore from "expo-secure-store";
 
 const SignUpBackUpScreen = () => {
   const navigation = useNavigation();
+
+  const createWallet = async () => {
+    const owner = ethers.Wallet.createRandom();
+    await SecureStore.setItemAsync("ownerAddress", owner.address);
+    await SecureStore.setItemAsync("ownerPrivateKey", owner.privateKey);
+  };
 
   return (
     <Box>
@@ -26,6 +33,8 @@ const SignUpBackUpScreen = () => {
                 scopes: ["https://www.googleapis.com/auth/drive.file"],
               });
               await GoogleSignin.signIn();
+
+              await createWallet();
               navigation.navigate("Home");
             } catch (error) {
               console.log(error);
