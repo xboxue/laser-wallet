@@ -3,6 +3,7 @@ import "react-native-get-random-values";
 import "@ethersproject/shims";
 import { ethers } from "ethers";
 import { Box, Button, Text } from "native-base";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const SignUpBackUpScreen = () => {
   const navigation = useNavigation();
@@ -18,8 +19,16 @@ const SignUpBackUpScreen = () => {
 
         <Button
           mt="4"
-          onPress={() => {
+          onPress={async () => {
             const recoveryWallet = ethers.Wallet.createRandom();
+            try {
+              GoogleSignin.configure({
+                scopes: ["https://www.googleapis.com/auth/drive.file"],
+              });
+              await GoogleSignin.signIn();
+            } catch (error) {
+              console.log(error);
+            }
           }}
         >
           Back up on Google Drive
