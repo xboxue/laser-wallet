@@ -26,6 +26,7 @@ const SignUpBackUpScreen = () => {
                 scopes: ["https://www.googleapis.com/auth/drive.file"],
               });
               await GoogleSignin.signIn();
+              navigation.navigate("Home");
             } catch (error) {
               console.log(error);
             }

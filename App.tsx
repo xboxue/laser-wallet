@@ -11,6 +11,7 @@ import {
   TransitionPresets,
 } from "@react-navigation/stack";
 import { NativeBaseProvider } from "native-base";
+import HomeScreen from "./src/screens/HomeScreen";
 import SignUpBackUpScreen from "./src/screens/SignUpBackUpScreen";
 import SignUpGuardiansScreen from "./src/screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "./src/screens/SignUpPasscodeScreen";
@@ -43,6 +44,7 @@ const App = () => {
             component={SignUpGuardiansScreen}
           />
           <Stack.Screen name="SignUpBackUp" component={SignUpBackUpScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </NativeBaseProvider>
