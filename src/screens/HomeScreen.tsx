@@ -53,6 +53,9 @@ const HomeScreen = () => {
         {walletAddress ? (
           <>
             <WalletBalance />
+            <Button onPress={() => navigation.navigate("SendAddress")}>
+              Send
+            </Button>
           </>
         ) : (
           <Button mt="4" onPress={deploy}>

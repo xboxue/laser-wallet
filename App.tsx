@@ -13,6 +13,8 @@ import {
 import { NativeBaseProvider } from "native-base";
 import useSecureStore from "./src/hooks/useSecureStore";
 import HomeScreen from "./src/screens/HomeScreen";
+import SendAddressScreen from "./src/screens/SendAddressScreen";
+import SendAssetScreen from "./src/screens/SendAssetScreen";
 import SignUpBackUpScreen from "./src/screens/SignUpBackUpScreen";
 import SignUpGuardiansScreen from "./src/screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "./src/screens/SignUpPasscodeScreen";
@@ -37,7 +39,11 @@ const App = () => {
           screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}
         >
           {ownerAddress ? (
-            <Stack.Screen name="Home" component={HomeScreen} />
+            <>
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="SendAddress" component={SendAddressScreen} />
+              <Stack.Screen name="SendAsset" component={SendAssetScreen} />
+            </>
           ) : (
             <>
               <Stack.Screen name="Start" component={StartScreen} />
