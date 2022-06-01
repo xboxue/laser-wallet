@@ -4159,6 +4159,16 @@ crypt@0.0.2, crypt@~0.0.1:
   resolved "https://registry.yarnpkg.com/crypt/-/crypt-0.0.2.tgz#88d7ff7ec0dfb86f713dc87bbb42d044d3e6c41b"
   integrity sha512-mCxBlsHFYh9C+HVpiEacem8FEBnMXgU9gy4zmNC+SXAZNB/1idgp/aulFJ4FgCi7GPEVbfyng092GqL2k2rmow==
 
+crypto-icons-plus-128@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/crypto-icons-plus-128/-/crypto-icons-plus-128-1.0.1.tgz#47d7b54ca56431e4a6e80388eb6e5cb47d73d647"
+  integrity sha512-+AUEBW3lqdGe5S5ihnG0XUnatc1GAZBzw9N5obsG+CFLOyviHMMPmm72StvOfYB2sPUnn3n9q9o05XJ3Rggvhg==
+
+crypto-icons-plus@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/crypto-icons-plus/-/crypto-icons-plus-1.0.1.tgz#3c0c135e8a40e5116ad39a8bbe242b5eec1311b4"
+  integrity sha512-IcgUUuCinyzPRmJAsVxfCswvIfjx2BbEiM6MegYw/RI8Jxejz5FaVdn+gDwK+nNXMcixq8TdLYWe2AisW0d4Rg==
+
 crypto-random-string@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-1.0.0.tgz#a230f64f568310e1498009940790ec99545bca7e"

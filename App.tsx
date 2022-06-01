@@ -14,6 +14,7 @@ import { NativeBaseProvider } from "native-base";
 import useSecureStore from "./src/hooks/useSecureStore";
 import HomeScreen from "./src/screens/HomeScreen";
 import SendAddressScreen from "./src/screens/SendAddressScreen";
+import SendAmountScreen from "./src/screens/SendAmountScreen";
 import SendAssetScreen from "./src/screens/SendAssetScreen";
 import SignUpBackUpScreen from "./src/screens/SignUpBackUpScreen";
 import SignUpGuardiansScreen from "./src/screens/SignUpGuardiansScreen";
@@ -43,6 +44,7 @@ const App = () => {
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="SendAddress" component={SendAddressScreen} />
               <Stack.Screen name="SendAsset" component={SendAssetScreen} />
+              <Stack.Screen name="SendAmount" component={SendAmountScreen} />
             </>
           ) : (
             <>
