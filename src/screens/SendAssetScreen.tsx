@@ -3,7 +3,7 @@ import icon from "crypto-icons-plus-128/src/ethereum.png";
 import { Box, Image, Pressable, Text } from "native-base";
 import useWalletContract from "../hooks/useWalletContract";
 
-const SendAssetScreen = () => {
+const SendAssetScreen = ({ route }) => {
   const navigation = useNavigation();
   const {
     data: balance,
@@ -15,7 +15,14 @@ const SendAssetScreen = () => {
     <Box>
       <Box p="4">
         <Text variant="subtitle1">Choose asset</Text>
-        <Pressable onPress={() => navigation.navigate("SendAmount")}>
+        <Pressable
+          onPress={() =>
+            navigation.navigate("SendAmount", {
+              ...route.params,
+              asset: "eth",
+            })
+          }
+        >
           <Box flexDirection="row" alignItems="center" mt="2">
             <Image source={icon} size="10" alt="ethereum-icon" />
             <Text variant="subtitle1">ETH</Text>

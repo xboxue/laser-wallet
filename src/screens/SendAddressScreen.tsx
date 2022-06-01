@@ -35,7 +35,9 @@ const SendAddressScreen = () => {
           }
         />
         {value && isAddress(value) ? (
-          <Pressable onPress={() => navigation.navigate("SendAsset")}>
+          <Pressable
+            onPress={() => navigation.navigate("SendAsset", { address: value })}
+          >
             <Box flexDirection="row" alignItems="center" mt="3">
               <Avatar>0x</Avatar>
               <Text ml="2" variant="subtitle1">

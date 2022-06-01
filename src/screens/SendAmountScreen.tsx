@@ -1,10 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
+import { StackScreenProps } from "@react-navigation/stack";
 import { Box, Button, Text } from "native-base";
 import { useState } from "react";
 import NumberPad from "../components/NumberPad/NumberPad";
 import useWalletContract from "../hooks/useWalletContract";
 
-const SendAmountScreen = () => {
+const SendAmountScreen = ({ route }) => {
   const navigation = useNavigation();
   const {
     data: balance,
@@ -21,7 +22,15 @@ const SendAmountScreen = () => {
           {amount || "0"}
         </Text>
         <Text>ETH balance: {balance}</Text>
-        <Button mt="5" onPress={() => navigation.navigate("SendConfirm")}>
+        <Button
+          mt="5"
+          onPress={() =>
+            navigation.navigate("SendConfirm", {
+              ...route.params,
+              amount,
+            })
+          }
+        >
           Next
         </Button>
       </Box>
