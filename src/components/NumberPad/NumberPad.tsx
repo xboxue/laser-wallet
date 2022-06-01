@@ -5,14 +5,27 @@ import NumberPadButton from "./NumberPadButton";
 interface Props {
   onChange: (value: string) => void;
   backspaceIcon?: JSX.Element;
+  isDecimal?: boolean;
 }
 
-const NumberPad = ({ onChange }: Props) => {
-  const inputs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+const NumberPad = ({ onChange, isDecimal = false }: Props) => {
+  const inputs = [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    ...(isDecimal ? ["."] : []),
+    "0",
+  ];
 
   return (
     <Box flexDirection="row" flexWrap="wrap" justifyContent="flex-end">
-      {inputs.map(value => {
+      {inputs.map((value) => {
         return (
           <NumberPadButton
             value={value}

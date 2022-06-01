@@ -16,6 +16,7 @@ import HomeScreen from "./src/screens/HomeScreen";
 import SendAddressScreen from "./src/screens/SendAddressScreen";
 import SendAmountScreen from "./src/screens/SendAmountScreen";
 import SendAssetScreen from "./src/screens/SendAssetScreen";
+import SendConfirmScreen from "./src/screens/SendConfirmScreen";
 import SignUpBackUpScreen from "./src/screens/SignUpBackUpScreen";
 import SignUpGuardiansScreen from "./src/screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "./src/screens/SignUpPasscodeScreen";
@@ -45,6 +46,7 @@ const App = () => {
               <Stack.Screen name="SendAddress" component={SendAddressScreen} />
               <Stack.Screen name="SendAsset" component={SendAssetScreen} />
               <Stack.Screen name="SendAmount" component={SendAmountScreen} />
+              <Stack.Screen name="SendConfirm" component={SendConfirmScreen} />
             </>
           ) : (
             <>
