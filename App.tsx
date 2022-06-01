@@ -11,6 +11,7 @@ import {
   TransitionPresets,
 } from "@react-navigation/stack";
 import { NativeBaseProvider } from "native-base";
+import { QueryClient, QueryClientProvider } from "react-query";
 import useSecureStore from "./src/hooks/useSecureStore";
 import HomeScreen from "./src/screens/HomeScreen";
 import SendAddressScreen from "./src/screens/SendAddressScreen";
@@ -24,6 +25,7 @@ import StartScreen from "./src/screens/StartScreen";
 import theme from "./src/styles/theme";
 
 const Stack = createStackNavigator();
+const queryClient = new QueryClient();
 
 const App = () => {
   useFonts({
@@ -35,39 +37,47 @@ const App = () => {
   const ownerAddress = useSecureStore("ownerAddress");
 
   return (
-    <NativeBaseProvider theme={theme}>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}
-        >
-          {ownerAddress ? (
-            <>
-              <Stack.Screen name="Home" component={HomeScreen} />
-              <Stack.Screen name="SendAddress" component={SendAddressScreen} />
-              <Stack.Screen name="SendAsset" component={SendAssetScreen} />
-              <Stack.Screen name="SendAmount" component={SendAmountScreen} />
-              <Stack.Screen name="SendConfirm" component={SendConfirmScreen} />
-            </>
-          ) : (
-            <>
-              <Stack.Screen name="Start" component={StartScreen} />
-              <Stack.Screen
-                name="SignUpPasscode"
-                component={SignUpPasscodeScreen}
-              />
-              <Stack.Screen
-                name="SignUpGuardians"
-                component={SignUpGuardiansScreen}
-              />
-              <Stack.Screen
-                name="SignUpBackUp"
-                component={SignUpBackUpScreen}
-              />
-            </>
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
-    </NativeBaseProvider>
+    <QueryClientProvider client={queryClient}>
+      <NativeBaseProvider theme={theme}>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}
+          >
+            {ownerAddress ? (
+              <>
+                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen
+                  name="SendAddress"
+                  component={SendAddressScreen}
+                />
+                <Stack.Screen name="SendAsset" component={SendAssetScreen} />
+                <Stack.Screen name="SendAmount" component={SendAmountScreen} />
+                <Stack.Screen
+                  name="SendConfirm"
+                  component={SendConfirmScreen}
+                />
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Start" component={StartScreen} />
+                <Stack.Screen
+                  name="SignUpPasscode"
+                  component={SignUpPasscodeScreen}
+                />
+                <Stack.Screen
+                  name="SignUpGuardians"
+                  component={SignUpGuardiansScreen}
+                />
+                <Stack.Screen
+                  name="SignUpBackUp"
+                  component={SignUpBackUpScreen}
+                />
+              </>
+            )}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </NativeBaseProvider>
+    </QueryClientProvider>
   );
 };
 
