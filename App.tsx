@@ -1,3 +1,4 @@
+import "./src/global";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -23,6 +24,11 @@ import SignUpGuardiansScreen from "./src/screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "./src/screens/SignUpPasscodeScreen";
 import StartScreen from "./src/screens/StartScreen";
 import theme from "./src/styles/theme";
+import WalletConnect from "@walletconnect/client";
+
+const connector = new WalletConnect({
+  bridge: "https://bridge.walletconnect.org",
+});
 
 const Stack = createStackNavigator();
 const queryClient = new QueryClient();
