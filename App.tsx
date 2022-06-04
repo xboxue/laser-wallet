@@ -24,11 +24,9 @@ import SignUpGuardiansScreen from "./src/screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "./src/screens/SignUpPasscodeScreen";
 import StartScreen from "./src/screens/StartScreen";
 import theme from "./src/styles/theme";
-import WalletConnect from "@walletconnect/client";
-
-const connector = new WalletConnect({
-  bridge: "https://bridge.walletconnect.org",
-});
+import QRCodeScanScreen from "./src/screens/QRCodeScanScreen";
+import { Provider } from "react-redux";
+import { store } from "./src/store";
 
 const Stack = createStackNavigator();
 const queryClient = new QueryClient();
@@ -43,47 +41,56 @@ const App = () => {
   const ownerAddress = useSecureStore("ownerAddress");
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <NativeBaseProvider theme={theme}>
-        <NavigationContainer>
-          <Stack.Navigator
-            screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}
-          >
-            {ownerAddress ? (
-              <>
-                <Stack.Screen name="Home" component={HomeScreen} />
-                <Stack.Screen
-                  name="SendAddress"
-                  component={SendAddressScreen}
-                />
-                <Stack.Screen name="SendAsset" component={SendAssetScreen} />
-                <Stack.Screen name="SendAmount" component={SendAmountScreen} />
-                <Stack.Screen
-                  name="SendConfirm"
-                  component={SendConfirmScreen}
-                />
-              </>
-            ) : (
-              <>
-                <Stack.Screen name="Start" component={StartScreen} />
-                <Stack.Screen
-                  name="SignUpPasscode"
-                  component={SignUpPasscodeScreen}
-                />
-                <Stack.Screen
-                  name="SignUpGuardians"
-                  component={SignUpGuardiansScreen}
-                />
-                <Stack.Screen
-                  name="SignUpBackUp"
-                  component={SignUpBackUpScreen}
-                />
-              </>
-            )}
-          </Stack.Navigator>
-        </NavigationContainer>
-      </NativeBaseProvider>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <NativeBaseProvider theme={theme}>
+          <NavigationContainer>
+            <Stack.Navigator
+              screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}
+            >
+              {ownerAddress ? (
+                <>
+                  <Stack.Screen name="Home" component={HomeScreen} />
+                  <Stack.Screen
+                    name="SendAddress"
+                    component={SendAddressScreen}
+                  />
+                  <Stack.Screen name="SendAsset" component={SendAssetScreen} />
+                  <Stack.Screen
+                    name="SendAmount"
+                    component={SendAmountScreen}
+                  />
+                  <Stack.Screen
+                    name="SendConfirm"
+                    component={SendConfirmScreen}
+                  />
+                  <Stack.Screen
+                    name="QRCodeScan"
+                    component={QRCodeScanScreen}
+                  />
+                </>
+              ) : (
+                <>
+                  <Stack.Screen name="Start" component={StartScreen} />
+                  <Stack.Screen
+                    name="SignUpPasscode"
+                    component={SignUpPasscodeScreen}
+                  />
+                  <Stack.Screen
+                    name="SignUpGuardians"
+                    component={SignUpGuardiansScreen}
+                  />
+                  <Stack.Screen
+                    name="SignUpBackUp"
+                    component={SignUpBackUpScreen}
+                  />
+                </>
+              )}
+            </Stack.Navigator>
+          </NavigationContainer>
+        </NativeBaseProvider>
+      </QueryClientProvider>
+    </Provider>
   );
 };
 

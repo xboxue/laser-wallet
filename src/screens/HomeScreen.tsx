@@ -2,9 +2,26 @@ import { useNavigation } from "@react-navigation/native";
 import { ethers } from "ethers";
 import * as SecureStore from "expo-secure-store";
 import { LaserFactory } from "laser-sdk/src";
-import { Box, Button, Text } from "native-base";
+import {
+  Actionsheet,
+  Box,
+  Button,
+  Icon,
+  IconButton,
+  Image,
+  Stack,
+  Text,
+} from "native-base";
 import useSecureStore from "../hooks/useSecureStore";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectPending,
+  selectConnector,
+  selectPeerMeta,
+  setConnector,
+} from "../features/walletConnect/walletConnectSlice";
 
 const ENTRY_POINT_ADDRESS = "0xcCed5B88f14f1e133680117d01dEFeB38fC9a5A3";
 const LASER_GUARDIAN_ADDRESS = "0x0D073B061819d7B7E648d1bb34593c701FFaE666";
@@ -12,6 +29,9 @@ const LASER_GUARDIAN_ADDRESS = "0x0D073B061819d7B7E648d1bb34593c701FFaE666";
 const HomeScreen = () => {
   const navigation = useNavigation();
   const walletAddress = useSecureStore("walletAddress");
+  const connector = useSelector(selectConnector);
+  const peerMeta = useSelector(selectPeerMeta);
+  const pending = useSelector(selectPending);
 
   const deploy = async () => {
     const ownerAddress = await SecureStore.getItemAsync("ownerAddress");
@@ -48,6 +68,12 @@ const HomeScreen = () => {
   return (
     <Box>
       <Box p="4">
+        <IconButton
+          icon={<Icon as={Ionicons} name="qr-code-outline" />}
+          onPress={() => {
+            navigation.navigate("QRCodeScan");
+          }}
+        />
         <Text variant="subtitle1"></Text>
         <Text>{walletAddress}</Text>
         {walletAddress ? (
@@ -63,6 +89,28 @@ const HomeScreen = () => {
           </Button>
         )}
       </Box>
+      {peerMeta && connector && pending && walletAddress && (
+        <Actionsheet isOpen onClose={() => connector.rejectSession()}>
+          <Actionsheet.Content>
+            <Text>{peerMeta.name} wants to connect</Text>
+            <Text>{peerMeta.url}</Text>
+            <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
+            <Stack space="3" direction="row">
+              <Button
+                onPress={() =>
+                  connector.approveSession({
+                    accounts: [walletAddress],
+                    chainId: 5,
+                  })
+                }
+              >
+                Approve
+              </Button>
+              <Button onPress={() => connector.rejectSession()}>Reject</Button>
+            </Stack>
+          </Actionsheet.Content>
+        </Actionsheet>
+      )}
     </Box>
   );
 };
