@@ -12,6 +12,7 @@ import {
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { isAddress } from "ethers/lib/utils";
+import formatAddress from "../utils/formatAddress";
 
 const SendAddressScreen = () => {
   const navigation = useNavigation();
@@ -41,7 +42,7 @@ const SendAddressScreen = () => {
             <Box flexDirection="row" alignItems="center" mt="3">
               <Avatar>0x</Avatar>
               <Text ml="2" variant="subtitle1">
-                {value.slice(0, 6)}...{value.slice(-4)}
+                {formatAddress(value)}
               </Text>
             </Box>
           </Pressable>

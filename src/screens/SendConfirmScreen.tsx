@@ -3,6 +3,7 @@ import { formatUnits } from "ethers/lib/utils";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useQuery } from "react-query";
 import useWalletContract from "../hooks/useWalletContract";
+import formatAddress from "../utils/formatAddress";
 
 const SendConfirmScreen = ({ route }) => {
   const { data, isLoading, isError } = useQuery("gasPrices", () =>
@@ -34,8 +35,7 @@ const SendConfirmScreen = ({ route }) => {
           <Box flexDirection="row" justifyContent="space-between">
             <Text variant="subtitle2">To</Text>
             <Text variant="subtitle2">
-              {route.params.address.slice(0, 7)}...
-              {route.params.address.slice(-4)}
+              {formatAddress(route.params.address)}
             </Text>
           </Box>
           <Box flexDirection="row" justifyContent="space-between">

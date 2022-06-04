@@ -27,6 +27,7 @@ import theme from "./src/styles/theme";
 import QRCodeScanScreen from "./src/screens/QRCodeScanScreen";
 import { Provider } from "react-redux";
 import { store } from "./src/store";
+import SignUpAddGuardianScreen from "./src/screens/SignUpAddGuardianScreen";
 
 const Stack = createStackNavigator();
 const queryClient = new QueryClient();
@@ -79,6 +80,10 @@ const App = () => {
                   <Stack.Screen
                     name="SignUpGuardians"
                     component={SignUpGuardiansScreen}
+                  />
+                  <Stack.Screen
+                    name="SignUpAddGuardian"
+                    component={SignUpAddGuardianScreen}
                   />
                   <Stack.Screen
                     name="SignUpBackUp"
