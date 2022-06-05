@@ -21,6 +21,8 @@ const SignUpPasscodeScreen = () => {
       if (firstPasscode) {
         if (passcode === firstPasscode) {
           // Store
+          setPasscode("");
+          setFirstPasscode("");
           navigation.navigate("SignUpGuardians");
         } else {
           setPasscode("");
@@ -55,7 +57,7 @@ const SignUpPasscodeScreen = () => {
         {error && <Text>{error}</Text>}
       </Box>
       <NumberPad
-        onChange={value => {
+        onChange={(value) => {
           if (value === "backspace") {
             setPasscode(passcode.slice(0, passcode.length - 1));
           } else if (value === "clear") {

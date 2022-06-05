@@ -1,4 +1,5 @@
 import "./src/global";
+import "react-native-get-random-values";
 import {
   Inter_400Regular,
   Inter_500Medium,

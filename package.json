@@ -18,6 +18,7 @@
     "@react-navigation/stack": "^6.2.1",
     "@reduxjs/toolkit": "^1.8.2",
     "@walletconnect/client": "^1.7.8",
+    "axios": "^0.27.2",
     "crypto-browserify": "^3.12.0",
     "crypto-icons-plus": "^1.0.1",
     "crypto-icons-plus-128": "^1.0.1",
