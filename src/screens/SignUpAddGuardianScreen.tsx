@@ -9,19 +9,31 @@ const SignUpAddGuardianScreen = () => {
   const navigation = useNavigation();
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
   const dispatch = useDispatch();
 
   return (
     <Box>
       <Box p="4">
-        <Text variant="subtitle1">Add guardian</Text>
-        <Input placeholder="Name" value={name} onChangeText={setName} />
+        <Text variant="subtitle1" mb="4">
+          Add guardian
+        </Text>
+        <Input
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
+          autoFocus
+          size="lg"
+        />
         <Input
           mt="3"
           placeholder="Address or ENS"
           value={address}
-          onChangeText={setAddress}
+          onChangeText={(value) => {
+            setAddress(value);
+            setError(null);
+          }}
+          size="lg"
         />
         {error && <Text>{error}</Text>}
         <Button

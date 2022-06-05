@@ -14,22 +14,25 @@ import { Provider } from "react-redux";
 import AppNavigator from "./src/navigators/AppNavigator";
 import { store } from "./src/store";
 import theme from "./src/styles/theme";
+import AppLoading from "expo-app-loading";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  useFonts({
+  const [loaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
 
+  if (!loaded) return <AppLoading />;
+
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <NativeBaseProvider theme={theme}>
-          <NavigationContainer>
+          <NavigationContainer theme={{ colors: { background: "white" } }}>
             <AppNavigator />
           </NavigationContainer>
         </NativeBaseProvider>

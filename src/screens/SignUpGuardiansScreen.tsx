@@ -12,7 +12,7 @@ const SignUpGuardiansScreen = () => {
     <Box>
       <Box p="4">
         <Text variant="subtitle1">Choose your guardians</Text>
-        <Text>
+        <Text mb="4">
           Guardians ensure you can recover your wallet in case your device is
           lost.
         </Text>
@@ -20,7 +20,7 @@ const SignUpGuardiansScreen = () => {
           <Box
             flexDirection="row"
             alignItems="center"
-            mt="2"
+            mb="2"
             key={guardian.address}
           >
             <Avatar>{guardian.name[0]}</Avatar>

@@ -6,11 +6,13 @@ import * as SecureStore from "expo-secure-store";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setOwnerAddress } from "../features/auth/authSlice";
+import { useState } from "react";
 
 const GOOGLE_DRIVE_API_KEY = "AIzaSyCitBIU7-UU1QM6yslKIeVq2zgexDUL188";
 
 const SignUpBackUpScreen = () => {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
 
   const createWallet = async () => {
     const owner = ethers.Wallet.createRandom();
@@ -27,7 +29,6 @@ const SignUpBackUpScreen = () => {
         { name: "Laser", mimeType: "application/vnd.google-apps.folder" },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-      console.log(folder.id);
 
       // TODO: Fix this
       const { data } = await axios.post(
@@ -54,6 +55,7 @@ const SignUpBackUpScreen = () => {
         </Text>
 
         <Button
+          isLoading={loading}
           mt="4"
           onPress={async () => {
             try {
@@ -63,11 +65,13 @@ const SignUpBackUpScreen = () => {
 
               await GoogleSignin.signIn();
               const { accessToken } = await GoogleSignin.getTokens();
+              setLoading(true);
               await createFolder(accessToken);
               await createWallet();
             } catch (error) {
               console.log(error);
             }
+            setLoading(false);
           }}
         >
           Back up on Google Drive

@@ -25,7 +25,12 @@ const AppNavigator = () => {
   const storedOwnerAddress = useSecureStore("ownerAddress");
 
   return (
-    <Stack.Navigator screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}>
+    <Stack.Navigator
+      screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
+        headerTitleStyle: { display: "none" },
+      }}
+    >
       {ownerAddress || storedOwnerAddress ? (
         <>
           <Stack.Screen name="Home" component={HomeScreen} />
@@ -37,7 +42,11 @@ const AppNavigator = () => {
         </>
       ) : (
         <>
-          <Stack.Screen name="Start" component={StartScreen} />
+          <Stack.Screen
+            name="Start"
+            component={StartScreen}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen
             name="SignUpPasscode"
             component={SignUpPasscodeScreen}

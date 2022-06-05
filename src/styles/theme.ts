@@ -32,6 +32,16 @@ const theme = extendTheme({
         },
       },
     },
+    Button: {
+      baseStyle: {
+        borderRadius: "3",
+      },
+      variants: {
+        solid: {
+          bgColor: "#319795",
+        },
+      },
+    },
   },
   fontConfig: {
     Inter: {
