@@ -14,7 +14,9 @@ const SendAssetScreen = ({ route }) => {
   return (
     <Box>
       <Box p="4">
-        <Text variant="subtitle1">Choose asset</Text>
+        <Text variant="subtitle1" mb="3">
+          Choose asset
+        </Text>
         <Pressable
           onPress={() =>
             navigation.navigate("SendAmount", {
@@ -23,13 +25,22 @@ const SendAssetScreen = ({ route }) => {
             })
           }
         >
-          <Box flexDirection="row" alignItems="center" mt="2">
-            <Image source={icon} size="10" alt="ethereum-icon" />
-            <Text variant="subtitle1">ETH</Text>
-            <Text variant="subtitle1" ml="auto">
-              {balance}
-            </Text>
-          </Box>
+          {({ isPressed }) => (
+            <Box
+              flexDirection="row"
+              alignItems="center"
+              mt="2"
+              opacity={isPressed ? 0.2 : 1}
+            >
+              <Image source={icon} size="10" alt="ethereum-icon" />
+              <Text variant="subtitle1" ml="3">
+                ETH
+              </Text>
+              <Text variant="subtitle1" ml="auto">
+                {balance}
+              </Text>
+            </Box>
+          )}
         </Pressable>
       </Box>
     </Box>

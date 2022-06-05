@@ -21,7 +21,9 @@ const SendAddressScreen = () => {
   return (
     <Box>
       <Box p="4">
-        <Text variant="subtitle1">Send</Text>
+        <Text variant="subtitle1" mb="3">
+          Send
+        </Text>
         <Input
           value={value}
           onChangeText={setValue}
@@ -35,7 +37,7 @@ const SendAddressScreen = () => {
             <Icon as={Ionicons} name="search-outline" ml="3" size="5" />
           }
         />
-        {value && isAddress(value) ? (
+        {isAddress(value) ? (
           <Pressable
             onPress={() => navigation.navigate("SendAsset", { address: value })}
           >
@@ -47,7 +49,7 @@ const SendAddressScreen = () => {
             </Box>
           </Pressable>
         ) : (
-          <Text>Invalid address</Text>
+          value && <Text mt="3">Invalid address</Text>
         )}
       </Box>
     </Box>
