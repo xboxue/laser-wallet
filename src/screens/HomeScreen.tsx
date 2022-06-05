@@ -106,7 +106,9 @@ const HomeScreen = () => {
               }}
             />
             <Pressable
-              onPress={() => Clipboard.setStringAsync(storedWalletAddress)}
+              onPress={() =>
+                Clipboard.setStringAsync(walletAddress || storedWalletAddress)
+              }
             >
               {({ isPressed }) => (
                 <Box
@@ -114,7 +116,9 @@ const HomeScreen = () => {
                   alignItems="center"
                   opacity={isPressed ? 0.2 : 1}
                 >
-                  <Text mr="1">{formatAddress(storedWalletAddress)}</Text>
+                  <Text mr="1">
+                    {formatAddress(walletAddress || storedWalletAddress)}
+                  </Text>
                   <Icon as={<Ionicons name="copy-outline" size={24} />} />
                 </Box>
               )}
