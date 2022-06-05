@@ -4,16 +4,19 @@ import { Box, Button, Text } from "native-base";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setOwnerAddress } from "../features/auth/authSlice";
 
 const GOOGLE_DRIVE_API_KEY = "AIzaSyCitBIU7-UU1QM6yslKIeVq2zgexDUL188";
 
 const SignUpBackUpScreen = () => {
-  const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const createWallet = async () => {
     const owner = ethers.Wallet.createRandom();
     await SecureStore.setItemAsync("ownerAddress", owner.address);
     await SecureStore.setItemAsync("ownerPrivateKey", owner.privateKey);
+    dispatch(setOwnerAddress(owner.address));
   };
 
   const createFolder = async (accessToken: string) => {

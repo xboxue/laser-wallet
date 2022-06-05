@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import * as SecureStore from "expo-secure-store";
-import { Laser } from "laser-sdk/src";
+import { Laser } from "laser-sdk";
 import { useEffect, useState } from "react";
 
 const useWalletContract = (functionName: keyof Laser) => {
