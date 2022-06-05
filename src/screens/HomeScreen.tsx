@@ -17,6 +17,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import {
+  selectCallRequest,
   selectConnector,
   selectPeerMeta,
   selectPending,
@@ -34,6 +35,7 @@ const HomeScreen = () => {
   const connector = useSelector(selectConnector);
   const peerMeta = useSelector(selectPeerMeta);
   const pending = useSelector(selectPending);
+  const callRequest = useSelector(selectCallRequest);
   const [deploying, setDeploying] = useState(false);
 
   const deploy = async () => {
@@ -48,8 +50,8 @@ const HomeScreen = () => {
         throw new Error();
 
       const relayer = new ethers.Wallet(ownerPrivateKey);
-      const signer = new ethers.Wallet(ownerPrivateKey);
-      const providerUrl = `https://eth-goerli.alchemyapi.io/v2/e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1`;
+      const providerUrl =
+        "wss://eth-goerli.alchemyapi.io/v2/e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1";
       const goerliChainId = 5;
 
       const factory = new LaserFactory(
@@ -122,6 +124,20 @@ const HomeScreen = () => {
                 Approve
               </Button>
               <Button onPress={() => connector.rejectSession()}>Reject</Button>
+            </Stack>
+          </Actionsheet.Content>
+        </Actionsheet>
+      )}
+      {callRequest && peerMeta && (
+        <Actionsheet isOpen onClose={() => {}}>
+          <Actionsheet.Content>
+            <Text>
+              {peerMeta.name}: {callRequest.method}
+            </Text>
+            <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
+            <Stack space="3" direction="row">
+              <Button onPress={() => {}}>Approve</Button>
+              <Button onPress={() => {}}>Reject</Button>
             </Stack>
           </Actionsheet.Content>
         </Actionsheet>

@@ -23,7 +23,6 @@ const Stack = createStackNavigator();
 const AppNavigator = () => {
   const ownerAddress = useSelector(selectOwnerAddress);
   const storedOwnerAddress = useSecureStore("ownerAddress");
-  console.log(storedOwnerAddress);
 
   return (
     <Stack.Navigator screenOptions={{ ...TransitionPresets.SlideFromRightIOS }}>

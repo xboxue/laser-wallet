@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import QRCodeScanner from "../components/QRCodeScanner/QRCodeScanner";
 import {
+  setCallRequest,
   setConnected,
   setConnector,
   setPeerMeta,
@@ -60,13 +61,9 @@ const QRCodeScanScreen = () => {
     });
 
     connector.on("call_request", async (error, payload) => {
-      // tslint:disable-next-line
-      console.log("EVENT", "call_request", "method", payload.method);
-      console.log("EVENT", "call_request", "params", payload.params);
+      if (error) throw error;
 
-      if (error) {
-        throw error;
-      }
+      dispatch(setCallRequest(payload));
     });
 
     connector.on("connect", (error, payload) => {
