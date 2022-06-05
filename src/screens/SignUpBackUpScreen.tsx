@@ -1,12 +1,11 @@
-import { useNavigation } from "@react-navigation/native";
-import { ethers } from "ethers";
-import { Box, Button, Text } from "native-base";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import * as SecureStore from "expo-secure-store";
 import axios from "axios";
+import Wallet from "ethereumjs-wallet";
+import * as SecureStore from "expo-secure-store";
+import { Box, Button, Text } from "native-base";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setOwnerAddress } from "../features/auth/authSlice";
-import { useState } from "react";
 
 const GOOGLE_DRIVE_API_KEY = "AIzaSyCitBIU7-UU1QM6yslKIeVq2zgexDUL188";
 
@@ -15,14 +14,17 @@ const SignUpBackUpScreen = () => {
   const [loading, setLoading] = useState(false);
 
   const createWallet = async () => {
-    const owner = ethers.Wallet.createRandom();
-    await SecureStore.setItemAsync("ownerAddress", owner.address);
-    await SecureStore.setItemAsync("ownerPrivateKey", owner.privateKey);
-    dispatch(setOwnerAddress(owner.address));
+    const owner = Wallet.generate();
+    await SecureStore.setItemAsync("ownerAddress", owner.getAddressString());
+    await SecureStore.setItemAsync(
+      "ownerPrivateKey",
+      owner.getPrivateKeyString()
+    );
+    dispatch(setOwnerAddress(owner.getAddressString()));
   };
 
   const createFolder = async (accessToken: string) => {
-    const recoveryWallet = ethers.Wallet.createRandom();
+    const recoveryWallet = Wallet.generate();
     try {
       const { data: folder } = await axios.post(
         `https://www.googleapis.com/drive/v3/files?key=${GOOGLE_DRIVE_API_KEY}`,
@@ -33,12 +35,15 @@ const SignUpBackUpScreen = () => {
       // TODO: Fix this
       const { data } = await axios.post(
         `https://www.googleapis.com/drive/v3/files?key=${GOOGLE_DRIVE_API_KEY}`,
-        { parents: [folder.id], name: `${recoveryWallet.privateKey}` },
+        {
+          parents: [folder.id],
+          name: `${recoveryWallet.getPrivateKeyString()}`,
+        },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       await SecureStore.setItemAsync(
         "recoveryWalletAddress",
-        recoveryWallet.address
+        recoveryWallet.getAddressString()
       );
     } catch (error) {
       console.log(JSON.stringify(error));
