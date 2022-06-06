@@ -1,4 +1,4 @@
-import { BarCodeScanner, PermissionStatus } from "expo-barcode-scanner";
+import { Camera, PermissionStatus } from "expo-camera";
 import { Box, Spinner } from "native-base";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -13,7 +13,7 @@ const QRCodeScanner = ({ onScan, connecting = false }: Props) => {
 
   useEffect(() => {
     (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === PermissionStatus.GRANTED);
     })();
   }, []);
@@ -30,8 +30,10 @@ const QRCodeScanner = ({ onScan, connecting = false }: Props) => {
           zIndex="1"
         />
       )}
-      <BarCodeScanner
-        barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
+      <Camera
+        barCodeScannerSettings={{
+          barCodeTypes: ["qr"],
+        }}
         style={StyleSheet.absoluteFill}
         onBarCodeScanned={({ data }) => onScan(data)}
       />
