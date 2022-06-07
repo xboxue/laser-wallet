@@ -1,16 +1,23 @@
 import { Skeleton, Text } from "native-base";
-import useWalletContract from "../../hooks/useWalletContract";
+import { useBalance } from "wagmi";
 
-const WalletBalance = () => {
+interface Props {
+  walletAddress: string;
+}
+
+const WalletBalance = ({ walletAddress }: Props) => {
   const {
     data: balance,
-    loading,
+    isLoading,
     error,
-  } = useWalletContract("getBalanceInEth");
+  } = useBalance({
+    addressOrName: walletAddress,
+    chainId: 5,
+  });
 
-  if (loading) return <Skeleton />;
+  if (isLoading) return <Skeleton />;
 
-  return <Text variant="h4">{balance} ETH</Text>;
+  return <Text variant="h4">{balance?.formatted} ETH</Text>;
 };
 
 export default WalletBalance;

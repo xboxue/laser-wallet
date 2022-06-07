@@ -124,7 +124,9 @@ const HomeScreen = () => {
               )}
             </Pressable>
 
-            <WalletBalance />
+            <WalletBalance
+              walletAddress={walletAddress || storedWalletAddress}
+            />
             <Button
               mt="4"
               mb="5"
