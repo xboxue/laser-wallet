@@ -15,7 +15,26 @@ import AppNavigator from "./src/navigators/AppNavigator";
 import { store } from "./src/store";
 import theme from "./src/styles/theme";
 import AppLoading from "expo-app-loading";
+import { createClient, createStorage, WagmiConfig } from "wagmi";
+import { MMKV } from "react-native-mmkv";
+import { providers } from "ethers";
 
+const storage = new MMKV();
+
+const wagmiClient = createClient({
+  provider: (config) =>
+    new providers.AlchemyProvider(
+      config.chainId,
+      "rBmWMQHNuRP21-OrNfBlyRuMS4kXvKSd"
+    ),
+  storage: createStorage({
+    storage: {
+      setItem: (key, value) => storage.set(key, value),
+      getItem: (key) => storage.getString(key) || null,
+      removeItem: (key) => storage.delete(key),
+    },
+  }),
+});
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -30,13 +49,15 @@ const App = () => {
 
   return (
     <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <NativeBaseProvider theme={theme}>
-          <NavigationContainer theme={{ colors: { background: "white" } }}>
-            <AppNavigator />
-          </NavigationContainer>
-        </NativeBaseProvider>
-      </QueryClientProvider>
+      <WagmiConfig client={wagmiClient}>
+        <QueryClientProvider client={queryClient}>
+          <NativeBaseProvider theme={theme}>
+            <NavigationContainer theme={{ colors: { background: "white" } }}>
+              <AppNavigator />
+            </NavigationContainer>
+          </NativeBaseProvider>
+        </QueryClientProvider>
+      </WagmiConfig>
     </Provider>
   );
 };

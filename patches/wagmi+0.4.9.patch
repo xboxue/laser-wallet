@@ -1,0 +1,39 @@
+diff --git a/node_modules/wagmi/dist/wagmi.cjs.dev.js b/node_modules/wagmi/dist/wagmi.cjs.dev.js
+index 873b16a..dd89bd9 100644
+--- a/node_modules/wagmi/dist/wagmi.cjs.dev.js
++++ b/node_modules/wagmi/dist/wagmi.cjs.dev.js
+@@ -8,7 +8,7 @@ var reactQuery = require('react-query');
+ var persistQueryClient = require('react-query/persistQueryClient');
+ var createWebStoragePersister = require('react-query/createWebStoragePersister');
+ var ethers = require('ethers/lib/ethers');
+-var index_js = require('use-sync-external-store/shim/index.js');
++var index_js = require('use-sync-external-store/shim');
+ 
+ function _interopNamespace(e) {
+   if (e && e.__esModule) return e;
+diff --git a/node_modules/wagmi/dist/wagmi.cjs.prod.js b/node_modules/wagmi/dist/wagmi.cjs.prod.js
+index 873b16a..dd89bd9 100644
+--- a/node_modules/wagmi/dist/wagmi.cjs.prod.js
++++ b/node_modules/wagmi/dist/wagmi.cjs.prod.js
+@@ -8,7 +8,7 @@ var reactQuery = require('react-query');
+ var persistQueryClient = require('react-query/persistQueryClient');
+ var createWebStoragePersister = require('react-query/createWebStoragePersister');
+ var ethers = require('ethers/lib/ethers');
+-var index_js = require('use-sync-external-store/shim/index.js');
++var index_js = require('use-sync-external-store/shim');
+ 
+ function _interopNamespace(e) {
+   if (e && e.__esModule) return e;
+diff --git a/node_modules/wagmi/dist/wagmi.esm.js b/node_modules/wagmi/dist/wagmi.esm.js
+index 23002ad..2912c15 100644
+--- a/node_modules/wagmi/dist/wagmi.esm.js
++++ b/node_modules/wagmi/dist/wagmi.esm.js
+@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider, useQueryClient, useIsRestoring, useQu
+ import { persistQueryClient } from 'react-query/persistQueryClient';
+ import { createWebStoragePersister } from 'react-query/createWebStoragePersister';
+ import { BigNumber } from 'ethers/lib/ethers';
+-import { useSyncExternalStore } from 'use-sync-external-store/shim/index.js';
++import { useSyncExternalStore } from 'use-sync-external-store/shim';
+ 
+ const findAndReplace = (cacheRef, _ref) => {
+   let {
