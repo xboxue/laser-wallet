@@ -7294,10 +7294,9 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-laser-sdk@^0.0.1:
+"laser-sdk@https://github.com/laser-wallet/laser-sdk.git":
   version "0.0.1"
-  resolved "https://registry.yarnpkg.com/laser-sdk/-/laser-sdk-0.0.1.tgz#c3914d8ccb28d05e13fe4eaeb63356920f883962"
-  integrity sha512-/T09WxKv+uc5cLdsX0y5KwCusLT0BcfemShNkvFENU6k20O9K4Nc7dGKQ3nxr6Hf1f+YOpDKzHJLnOEckNkyoQ==
+  resolved "https://github.com/laser-wallet/laser-sdk.git#2c1189da5b8f319d30498b7f687949b79ce17272"
   dependencies:
     ethers "^5.6.8"
 

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import * as SecureStore from "expo-secure-store";
-import { Laser } from "laser-sdk";
+import { Laser } from "laser-sdk/src";
 import { useEffect, useState } from "react";
 
 const useWalletContract = (functionName: keyof Laser) => {
@@ -21,7 +21,7 @@ const useWalletContract = (functionName: keyof Laser) => {
         const signer = new ethers.Wallet(ownerPrivateKey);
         const providerUrl = `https://eth-goerli.alchemyapi.io/v2/e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1`;
 
-        const laser = new Laser(providerUrl, signer, walletAddress, "");
+        const laser = new Laser(providerUrl, signer, walletAddress);
         const data = await (laser[functionName] as Function)();
 
         setData(data);

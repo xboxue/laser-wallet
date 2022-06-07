@@ -33,7 +33,7 @@
     "expo-secure-store": "~11.2.0",
     "expo-splash-screen": "~0.15.1",
     "expo-status-bar": "~1.3.0",
-    "laser-sdk": "^0.0.1",
+    "laser-sdk": "https://github.com/laser-wallet/laser-sdk.git",
     "lodash": "^4.17.21",
     "native-base": "^3.4.5",
     "node-libs-react-native": "^1.2.1",

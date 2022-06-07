@@ -1,5 +1,6 @@
 import "./src/global";
 import "react-native-get-random-values";
+import "@ethersproject/shims";
 import {
   Inter_400Regular,
   Inter_500Medium,

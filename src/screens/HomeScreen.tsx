@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
-import { ethers } from "ethers";
+import { ethers, providers } from "ethers";
 import * as SecureStore from "expo-secure-store";
-import { LaserFactory } from "laser-sdk";
+import { LaserFactory } from "laser-sdk/src";
 import {
   Actionsheet,
   Box,
@@ -60,13 +60,12 @@ const HomeScreen = () => {
         throw new Error();
 
       const relayer = new ethers.Wallet(ownerPrivateKey);
-      const providerUrl =
-        "wss://eth-goerli.alchemyapi.io/v2/e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1";
-      const goerliChainId = 5;
 
       const factory = new LaserFactory(
-        providerUrl,
-        goerliChainId,
+        new providers.AlchemyProvider(
+          "goerli",
+          "e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1"
+        ),
         relayer,
         FACTORY_GOERLI
       );
