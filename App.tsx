@@ -26,7 +26,7 @@ const wagmiClient = createClient({
   provider: (config) =>
     new providers.AlchemyProvider(
       config.chainId,
-      "rBmWMQHNuRP21-OrNfBlyRuMS4kXvKSd"
+      "e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1"
     ),
   storage: createStorage({
     storage: {
