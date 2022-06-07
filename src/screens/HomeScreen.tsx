@@ -30,6 +30,7 @@ import {
 } from "../features/auth/authSlice";
 import formatAddress from "../utils/formatAddress";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import TokenBalances from "../components/TokenBalances/TokenBalances";
 
 const ENTRY_POINT_GOERLI = "0x90f3E1105E63C877bF9587DE5388C23Cdb702c6B";
 const FACTORY_GOERLI = "0x7c08F8821f00Be8A4d766bDF10d4E9cffAe04d13";
@@ -124,9 +125,16 @@ const HomeScreen = () => {
             </Pressable>
 
             <WalletBalance />
-            <Button mt="4" onPress={() => navigation.navigate("SendAddress")}>
+            <Button
+              mt="4"
+              mb="5"
+              onPress={() => navigation.navigate("SendAddress")}
+            >
               Send
             </Button>
+            <TokenBalances
+              walletAddress={walletAddress || storedWalletAddress}
+            />
           </>
         ) : (
           <>
