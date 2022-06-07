@@ -2,6 +2,7 @@ import { Camera, PermissionStatus } from "expo-camera";
 import { Box, Spinner } from "native-base";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
+import { BarCodeScanner } from "expo-barcode-scanner";
 
 interface Props {
   onScan: (data: string) => void;
@@ -32,7 +33,7 @@ const QRCodeScanner = ({ onScan, connecting = false }: Props) => {
       )}
       <Camera
         barCodeScannerSettings={{
-          barCodeTypes: ["qr"],
+          barCodeTypes: [BarCodeScanner.Constants.BarCodeType.qr],
         }}
         style={StyleSheet.absoluteFill}
         onBarCodeScanned={({ data }) => onScan(data)}

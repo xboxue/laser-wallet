@@ -7,7 +7,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@ethersproject/shims": "^5.6.0",
@@ -26,6 +27,7 @@
     "ethers": "^5.6.8",
     "expo": "~45.0.0",
     "expo-app-loading": "~2.0.0",
+    "expo-barcode-scanner": "~11.3.0",
     "expo-camera": "~12.2.0",
     "expo-clipboard": "~3.0.1",
     "expo-font": "~10.1.0",
