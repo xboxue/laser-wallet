@@ -8,7 +8,9 @@ import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
 import { erc20ABI, useBalance, useFeeData, useProvider } from "wagmi";
 import { entryPointAbi } from "../abis/TestEntryPoint.json";
+import tokens from "../constants/tokens";
 import useSecureStore from "../hooks/useSecureStore";
+import useTokenBalances from "../hooks/useTokenBalances";
 import formatAddress from "../utils/formatAddress";
 
 const WETH_ADDRESS = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
@@ -21,6 +23,10 @@ const SendConfirmScreen = ({ route }) => {
     addressOrName: walletAddress,
     chainId: 5,
   });
+  const { refetch: refetchTokenBalances } = useTokenBalances(
+    [walletAddress],
+    tokens.map((token) => token.address)
+  );
 
   const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
 
@@ -69,6 +75,7 @@ const SendConfirmScreen = ({ route }) => {
       );
       await transaction.wait();
       await refetchBalance();
+      await refetchTokenBalances();
       navigation.navigate("Home");
     } catch (error) {
       console.log(error);
@@ -112,6 +119,7 @@ const SendConfirmScreen = ({ route }) => {
       );
       await transaction.wait();
       await refetchBalance();
+      await refetchTokenBalances();
       navigation.navigate("Home");
     } catch (error) {
       console.log(error);

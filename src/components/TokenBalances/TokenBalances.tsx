@@ -1,24 +1,8 @@
-import ethIcon from "crypto-icons-plus-128/src/ethereum.png";
 import { formatEther } from "ethers/lib/utils";
 import { zip } from "lodash";
 import { Box, Image, Pressable, Skeleton, Stack, Text } from "native-base";
-import { useContractRead } from "wagmi";
-import abi from "../../abis/BalanceChecker.abi.json";
-
-const tokens = [
-  {
-    symbol: "ETH",
-    name: "Ethereum",
-    address: "0x0000000000000000000000000000000000000000",
-    icon: ethIcon,
-  },
-  {
-    symbol: "WETH",
-    name: "Wrapped Ethereum",
-    address: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
-    icon: ethIcon,
-  },
-];
+import tokens from "../../constants/tokens";
+import useTokenBalances from "../../hooks/useTokenBalances";
 
 interface Props {
   walletAddress: string;
@@ -29,18 +13,10 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   const {
     data: balances,
     isLoading,
-    error,
-  } = useContractRead(
-    {
-      addressOrName: "0x9788C4E93f9002a7ad8e72633b11E8d1ecd51f9b",
-      contractInterface: abi,
-    },
-    "balances",
-    {
-      args: [[walletAddress], tokens.map((token) => token.address)],
-      chainId: 5,
-      watch: true,
-    }
+    isError,
+  } = useTokenBalances(
+    [walletAddress],
+    tokens.map((token) => token.address)
   );
 
   if (isLoading) return <Skeleton />;
