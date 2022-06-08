@@ -13,12 +13,13 @@ import { NativeBaseProvider } from "native-base";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Provider } from "react-redux";
 import AppNavigator from "./src/navigators/AppNavigator";
-import { store } from "./src/store";
+import { persistor, store } from "./src/store";
 import theme from "./src/styles/theme";
 import AppLoading from "expo-app-loading";
 import { createClient, createStorage, WagmiConfig } from "wagmi";
 import { MMKV } from "react-native-mmkv";
 import { providers } from "ethers";
+import { PersistGate } from "redux-persist/integration/react";
 
 const storage = new MMKV();
 
@@ -50,15 +51,17 @@ const App = () => {
 
   return (
     <Provider store={store}>
-      <WagmiConfig client={wagmiClient}>
-        <QueryClientProvider client={queryClient}>
-          <NativeBaseProvider theme={theme}>
-            <NavigationContainer theme={{ colors: { background: "white" } }}>
-              <AppNavigator />
-            </NavigationContainer>
-          </NativeBaseProvider>
-        </QueryClientProvider>
-      </WagmiConfig>
+      <PersistGate loading={null} persistor={persistor}>
+        <WagmiConfig client={wagmiClient}>
+          <QueryClientProvider client={queryClient}>
+            <NativeBaseProvider theme={theme}>
+              <NavigationContainer theme={{ colors: { background: "white" } }}>
+                <AppNavigator />
+              </NavigationContainer>
+            </NativeBaseProvider>
+          </QueryClientProvider>
+        </WagmiConfig>
+      </PersistGate>
     </Provider>
   );
 };

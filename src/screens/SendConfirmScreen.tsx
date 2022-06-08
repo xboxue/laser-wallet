@@ -6,10 +6,14 @@ import { Laser } from "laser-sdk/src";
 import { ENTRY_POINT_GOERLI } from "laser-sdk/src/constants";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { erc20ABI, useBalance, useFeeData, useProvider } from "wagmi";
 import { entryPointAbi } from "../abis/TestEntryPoint.json";
 import tokens from "../constants/tokens";
-import useSecureStore from "../hooks/useSecureStore";
+import {
+  selectOwnerPrivateKey,
+  selectWalletAddress,
+} from "../features/auth/authSlice";
 import useTokenBalances from "../hooks/useTokenBalances";
 import formatAddress from "../utils/formatAddress";
 
@@ -17,7 +21,9 @@ const WETH_ADDRESS = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
 
 const SendConfirmScreen = ({ route }) => {
   const provider = useProvider({ chainId: 5 });
-  const walletAddress = useSecureStore("walletAddress");
+  const walletAddress = useSelector(selectWalletAddress);
+  const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
+
   const [sending, setSending] = useState(false);
   const { refetch: refetchBalance } = useBalance({
     addressOrName: walletAddress,
@@ -31,12 +37,11 @@ const SendConfirmScreen = ({ route }) => {
   const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
 
   const transferTokens = async () => {
+    if (!walletAddress || !ownerPrivateKey) throw new Error();
+
     try {
       setSending(true);
-      const walletAddress = await SecureStore.getItemAsync("walletAddress");
-      const ownerPrivateKey = await SecureStore.getItemAsync("ownerPrivateKey");
       const { amount, address: to } = route.params;
-      if (!walletAddress || !ownerPrivateKey) throw new Error();
 
       const providerUrl =
         "https://eth-goerli.alchemyapi.io/v2/e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1";
@@ -84,12 +89,11 @@ const SendConfirmScreen = ({ route }) => {
   };
 
   const sendEth = async () => {
+    if (!walletAddress || !ownerPrivateKey) throw new Error();
+
     try {
       setSending(true);
-      const walletAddress = await SecureStore.getItemAsync("walletAddress");
-      const ownerPrivateKey = await SecureStore.getItemAsync("ownerPrivateKey");
       const { amount, address: to } = route.params;
-      if (!walletAddress || !ownerPrivateKey) throw new Error();
 
       const providerUrl =
         "https://eth-goerli.alchemyapi.io/v2/e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1";
@@ -148,7 +152,9 @@ const SendConfirmScreen = ({ route }) => {
           </Box>
           <Box flexDirection="row" justifyContent="space-between">
             <Text variant="subtitle2">Gas (estimate)</Text>
-            {!loadingFeeData && feeData ? (
+            {!loadingFeeData &&
+            feeData?.maxFeePerGas &&
+            feeData?.maxPriorityFeePerGas ? (
               <Text variant="subtitle2">
                 {formatUnits(
                   feeData.maxFeePerGas

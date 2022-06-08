@@ -1,13 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
-import icon from "crypto-icons-plus-128/src/ethereum.png";
-import { Box, Image, Pressable, Text } from "native-base";
+import { Box, Text } from "native-base";
+import { useSelector } from "react-redux";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
-import useSecureStore from "../hooks/useSecureStore";
-import useWalletContract from "../hooks/useWalletContract";
+import { selectWalletAddress } from "../features/auth/authSlice";
 
 const SendAssetScreen = ({ route }) => {
   const navigation = useNavigation();
-  const walletAddress = useSecureStore("walletAddress");
+  const walletAddress = useSelector(selectWalletAddress);
 
   return (
     <Box>

@@ -22,9 +22,11 @@ import {
   selectPeerMeta,
   selectPending,
 } from "../features/walletConnect/walletConnectSlice";
-import useSecureStore from "../hooks/useSecureStore";
 import * as Clipboard from "expo-clipboard";
 import {
+  selectOwnerAddress,
+  selectOwnerPrivateKey,
+  selectRecoveryWalletAddress,
   selectWalletAddress,
   setWalletAddress,
 } from "../features/auth/authSlice";
@@ -39,24 +41,23 @@ const LASER_GUARDIAN_ADDRESS = "0x0D073B061819d7B7E648d1bb34593c701FFaE666";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const storedWalletAddress = useSecureStore("walletAddress");
+  const dispatch = useDispatch();
+
   const walletAddress = useSelector(selectWalletAddress);
+  const recoveryWalletAddress = useSelector(selectRecoveryWalletAddress);
+  const ownerAddress = useSelector(selectOwnerAddress);
+  const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
+
   const connector = useSelector(selectConnector);
   const peerMeta = useSelector(selectPeerMeta);
   const pending = useSelector(selectPending);
   const callRequest = useSelector(selectCallRequest);
+
   const [deploying, setDeploying] = useState(false);
-  const ownerAddress = useSecureStore("ownerAddress");
-  const dispatch = useDispatch();
 
   const deploy = async () => {
     try {
       setDeploying(true);
-      const recoveryWalletAddress = await SecureStore.getItemAsync(
-        "recoveryWalletAddress"
-      );
-      const ownerAddress = await SecureStore.getItemAsync("ownerAddress");
-      const ownerPrivateKey = await SecureStore.getItemAsync("ownerPrivateKey");
       if (!ownerAddress || !ownerPrivateKey || !recoveryWalletAddress)
         throw new Error();
 
@@ -86,7 +87,6 @@ const HomeScreen = () => {
         [LASER_GUARDIAN_ADDRESS],
         ENTRY_POINT_GOERLI
       );
-      await SecureStore.setItemAsync("walletAddress", walletAddress);
       dispatch(setWalletAddress(walletAddress));
     } catch (error) {
       console.log(error);
@@ -97,7 +97,7 @@ const HomeScreen = () => {
   return (
     <Box>
       <Box p="4">
-        {walletAddress || storedWalletAddress ? (
+        {walletAddress ? (
           <>
             <IconButton
               icon={<Icon as={Ionicons} name="qr-code-outline" />}
@@ -105,28 +105,20 @@ const HomeScreen = () => {
                 navigation.navigate("QRCodeScan");
               }}
             />
-            <Pressable
-              onPress={() =>
-                Clipboard.setStringAsync(walletAddress || storedWalletAddress)
-              }
-            >
+            <Pressable onPress={() => Clipboard.setStringAsync(walletAddress)}>
               {({ isPressed }) => (
                 <Box
                   flexDirection="row"
                   alignItems="center"
                   opacity={isPressed ? 0.2 : 1}
                 >
-                  <Text mr="1">
-                    {formatAddress(walletAddress || storedWalletAddress)}
-                  </Text>
+                  <Text mr="1">{formatAddress(walletAddress)}</Text>
                   <Icon as={<Ionicons name="copy-outline" size={24} />} />
                 </Box>
               )}
             </Pressable>
 
-            <WalletBalance
-              walletAddress={walletAddress || storedWalletAddress}
-            />
+            <WalletBalance walletAddress={walletAddress} />
             <Button
               mt="4"
               mb="5"
@@ -134,10 +126,7 @@ const HomeScreen = () => {
             >
               Send
             </Button>
-            <TokenBalances
-              walletAddress={walletAddress || storedWalletAddress}
-              onPress={() => {}}
-            />
+            <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
           </>
         ) : (
           <>
@@ -157,7 +146,7 @@ const HomeScreen = () => {
           </>
         )}
       </Box>
-      {peerMeta && connector && pending && storedWalletAddress && (
+      {peerMeta && connector && pending && walletAddress && (
         <Actionsheet isOpen onClose={() => connector.rejectSession()}>
           <Actionsheet.Content>
             <Text>{peerMeta.name} wants to connect</Text>
@@ -167,7 +156,7 @@ const HomeScreen = () => {
               <Button
                 onPress={() =>
                   connector.approveSession({
-                    accounts: [storedWalletAddress],
+                    accounts: [walletAddress],
                     chainId: 5,
                   })
                 }

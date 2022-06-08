@@ -16,13 +16,11 @@ import SignUpPasscodeScreen from "../screens/SignUpPasscodeScreen";
 import StartScreen from "../screens/StartScreen";
 import { useSelector } from "react-redux";
 import { selectOwnerAddress } from "../features/auth/authSlice";
-import useSecureStore from "../hooks/useSecureStore";
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
   const ownerAddress = useSelector(selectOwnerAddress);
-  const storedOwnerAddress = useSecureStore("ownerAddress");
 
   return (
     <Stack.Navigator
@@ -31,7 +29,7 @@ const AppNavigator = () => {
         headerTitleStyle: { display: "none" },
       }}
     >
-      {ownerAddress || storedOwnerAddress ? (
+      {ownerAddress ? (
         <>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="SendAddress" component={SendAddressScreen} />

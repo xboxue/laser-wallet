@@ -5,7 +5,11 @@ import * as SecureStore from "expo-secure-store";
 import { Box, Button, Text } from "native-base";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setOwnerAddress } from "../features/auth/authSlice";
+import {
+  setOwnerAddress,
+  setOwnerPrivateKey,
+  setRecoveryWalletAddress,
+} from "../features/auth/authSlice";
 
 const GOOGLE_DRIVE_API_KEY = "AIzaSyCitBIU7-UU1QM6yslKIeVq2zgexDUL188";
 
@@ -15,12 +19,8 @@ const SignUpBackUpScreen = () => {
 
   const createWallet = async () => {
     const owner = Wallet.generate();
-    await SecureStore.setItemAsync("ownerAddress", owner.getAddressString());
-    await SecureStore.setItemAsync(
-      "ownerPrivateKey",
-      owner.getPrivateKeyString()
-    );
     dispatch(setOwnerAddress(owner.getAddressString()));
+    dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
   };
 
   const createFolder = async (accessToken: string) => {
@@ -41,12 +41,9 @@ const SignUpBackUpScreen = () => {
         },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-      await SecureStore.setItemAsync(
-        "recoveryWalletAddress",
-        recoveryWallet.getAddressString()
-      );
+      dispatch(setRecoveryWalletAddress(recoveryWallet.getAddressString()));
     } catch (error) {
-      console.log(JSON.stringify(error));
+      console.log(error);
     }
   };
 
