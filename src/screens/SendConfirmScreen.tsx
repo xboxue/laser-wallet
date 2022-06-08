@@ -1,12 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
 import { ContractTransaction, ethers } from "ethers";
-import { parseEther } from "ethers/lib/utils";
+import { formatUnits, parseEther } from "ethers/lib/utils";
 import * as SecureStore from "expo-secure-store";
 import { Laser } from "laser-sdk/src";
 import { ENTRY_POINT_GOERLI } from "laser-sdk/src/constants";
-import { Box, Button, Stack, Text } from "native-base";
+import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
-import { useBalance, useProvider } from "wagmi";
+import { useBalance, useFeeData, useProvider } from "wagmi";
 import { entryPointAbi } from "../abis/TestEntryPoint.json";
 import useSecureStore from "../hooks/useSecureStore";
 import formatAddress from "../utils/formatAddress";
@@ -19,6 +19,8 @@ const SendConfirmScreen = ({ route }) => {
     addressOrName: walletAddress,
     chainId: 5,
   });
+
+  const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
 
   const send = async () => {
     try {
@@ -84,7 +86,17 @@ const SendConfirmScreen = ({ route }) => {
           </Box>
           <Box flexDirection="row" justifyContent="space-between">
             <Text variant="subtitle2">Gas (estimate)</Text>
-            {/* <Text variant="subtitle2">{isLoading && <Skeleton />}</Text> */}
+            <Text variant="subtitle2">
+              {!loadingFeeData && feeData ? (
+                formatUnits(
+                  feeData.maxFeePerGas
+                    .add(feeData.maxPriorityFeePerGas)
+                    .mul(21000)
+                )
+              ) : (
+                <Skeleton />
+              )}
+            </Text>
           </Box>
           <Button onPress={send} isLoading={sending}>
             Confirm
