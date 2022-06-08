@@ -18,6 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
+      "buildNumber": "2",
       "bundleIdentifier": "com.xboxue.walletapp"
     },
     "android": {
