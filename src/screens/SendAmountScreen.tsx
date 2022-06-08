@@ -1,18 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
-import { StackScreenProps } from "@react-navigation/stack";
 import { Box, Button, Text } from "native-base";
 import { useState } from "react";
 import NumberPad from "../components/NumberPad/NumberPad";
-import useWalletContract from "../hooks/useWalletContract";
 
 const SendAmountScreen = ({ route }) => {
   const navigation = useNavigation();
-  const {
-    data: balance,
-    loading,
-    error,
-  } = useWalletContract("getBalanceInEth");
   const [amount, setAmount] = useState("");
+  const { token } = route.params;
 
   return (
     <Box flex="1">
@@ -21,7 +15,9 @@ const SendAmountScreen = ({ route }) => {
         <Text variant="h4" mt="2">
           {amount || "0"}
         </Text>
-        <Text>ETH balance: {balance}</Text>
+        <Text>
+          {token.symbol} balance: {token.balance}
+        </Text>
         <Button
           mt="5"
           onPress={() =>

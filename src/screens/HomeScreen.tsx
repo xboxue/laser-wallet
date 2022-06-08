@@ -136,6 +136,7 @@ const HomeScreen = () => {
             </Button>
             <TokenBalances
               walletAddress={walletAddress || storedWalletAddress}
+              onPress={() => {}}
             />
           </>
         ) : (

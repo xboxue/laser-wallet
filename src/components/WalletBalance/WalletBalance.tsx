@@ -17,7 +17,7 @@ const WalletBalance = ({ walletAddress }: Props) => {
 
   if (isLoading) return <Skeleton />;
 
-  return <Text variant="h4">{balance?.formatted} ETH</Text>;
+  return <Text variant="h4">{balance?.formatted.slice(0, 6)} ETH</Text>;
 };
 
 export default WalletBalance;
