@@ -7337,7 +7337,7 @@ kleur@^3.0.3:
 
 "laser-sdk@https://github.com/laser-wallet/laser-sdk.git":
   version "0.0.1"
-  resolved "https://github.com/laser-wallet/laser-sdk.git#2c1189da5b8f319d30498b7f687949b79ce17272"
+  resolved "https://github.com/laser-wallet/laser-sdk.git#a3bf7dff839fa040037e7110e0418644146cdc7a"
   dependencies:
     ethers "^5.6.8"
 
