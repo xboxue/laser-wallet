@@ -13,6 +13,7 @@ const WalletBalance = ({ walletAddress }: Props) => {
   } = useBalance({
     addressOrName: walletAddress,
     chainId: 5,
+    watch: true,
   });
 
   if (isLoading) return <Skeleton />;

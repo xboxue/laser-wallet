@@ -24,7 +24,7 @@ const storage = new MMKV();
 
 const wagmiClient = createClient({
   provider: (config) =>
-    new providers.AlchemyProvider(
+    new providers.AlchemyWebSocketProvider(
       config.chainId,
       "e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1"
     ),

@@ -39,6 +39,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
     {
       args: [[walletAddress], tokens.map((token) => token.address)],
       chainId: 5,
+      watch: true,
     }
   );
 

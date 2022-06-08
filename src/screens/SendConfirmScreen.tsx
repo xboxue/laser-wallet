@@ -1,18 +1,24 @@
 import { useNavigation } from "@react-navigation/native";
-import { ethers } from "ethers";
+import { ContractTransaction, ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import * as SecureStore from "expo-secure-store";
 import { Laser } from "laser-sdk/src";
 import { ENTRY_POINT_GOERLI } from "laser-sdk/src/constants";
 import { Box, Button, Stack, Text } from "native-base";
 import { useState } from "react";
-import { useProvider } from "wagmi";
+import { useBalance, useProvider } from "wagmi";
 import { entryPointAbi } from "../abis/TestEntryPoint.json";
+import useSecureStore from "../hooks/useSecureStore";
 import formatAddress from "../utils/formatAddress";
 
 const SendConfirmScreen = ({ route }) => {
   const provider = useProvider({ chainId: 5 });
+  const walletAddress = useSecureStore("walletAddress");
   const [sending, setSending] = useState(false);
+  const { refetch: refetchBalance } = useBalance({
+    addressOrName: walletAddress,
+    chainId: 5,
+  });
 
   const send = async () => {
     try {
@@ -44,7 +50,12 @@ const SendConfirmScreen = ({ route }) => {
         owner.connect(provider)
       );
 
-      await entryPoint.handleOps([userOp], owner.address);
+      const transaction: ContractTransaction = await entryPoint.handleOps(
+        [userOp],
+        owner.address
+      );
+      await transaction.wait();
+      await refetchBalance();
       navigation.navigate("Home");
     } catch (error) {
       console.log(error);
