@@ -1,25 +1,58 @@
 import { useNavigation } from "@react-navigation/native";
-import { formatUnits } from "ethers/lib/utils";
-import { Box, Button, Skeleton, Stack, Text } from "native-base";
-import { useQuery } from "react-query";
-import useWalletContract from "../hooks/useWalletContract";
+import { ethers } from "ethers";
+import { parseEther } from "ethers/lib/utils";
+import * as SecureStore from "expo-secure-store";
+import { Laser } from "laser-sdk/src";
+import { ENTRY_POINT_GOERLI } from "laser-sdk/src/constants";
+import { Box, Button, Stack, Text } from "native-base";
+import { useState } from "react";
+import { useProvider } from "wagmi";
+import { entryPointAbi } from "../abis/TestEntryPoint.json";
 import formatAddress from "../utils/formatAddress";
 
 const SendConfirmScreen = ({ route }) => {
-  const { data, isLoading, isError } = useQuery("gasPrices", () =>
-    fetch("https://api.blocknative.com/gasprices/blockprices", {
-      headers: {
-        Authorization: "65cfb3b8-8462-4037-9679-aac28a42be1b",
-      },
-    }).then((res) => res.json())
-  );
+  const provider = useProvider({ chainId: 5 });
+  const [sending, setSending] = useState(false);
+
+  const send = async () => {
+    try {
+      setSending(true);
+      const walletAddress = await SecureStore.getItemAsync("walletAddress");
+      const ownerPrivateKey = await SecureStore.getItemAsync("ownerPrivateKey");
+      const { amount, address: to } = route.params;
+      if (!walletAddress || !ownerPrivateKey) throw new Error("what");
+
+      const providerUrl =
+        "https://eth-goerli.alchemyapi.io/v2/e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1";
+
+      const owner = new ethers.Wallet(ownerPrivateKey);
+
+      const laser = new Laser(providerUrl, owner, walletAddress);
+      const gas = await provider.estimateGas({ to, value: parseEther(amount) });
+      const feeData = await provider.getFeeData();
+
+      // TODO: amount should be BigNumber
+      const userOp = await laser.sendEth(route.params.address, amount, {
+        callGas: gas.add(10000),
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+      });
+
+      const entryPoint = new ethers.Contract(
+        ENTRY_POINT_GOERLI,
+        entryPointAbi,
+        owner.connect(provider)
+      );
+
+      await entryPoint.handleOps([userOp], owner.address);
+      navigation.navigate("Home");
+    } catch (error) {
+      console.log(error);
+    }
+    setSending(false);
+  };
 
   const navigation = useNavigation();
-  const {
-    data: balance,
-    loading,
-    error,
-  } = useWalletContract("getBalanceInEth");
 
   return (
     <Box flex="1">
@@ -29,7 +62,7 @@ const SendConfirmScreen = ({ route }) => {
           <Box flexDirection="row" justifyContent="space-between">
             <Text variant="subtitle2">Amount</Text>
             <Text variant="subtitle2">
-              {route.params.amount} {route.params.asset}
+              {route.params.amount} {route.params.token.symbol}
             </Text>
           </Box>
           <Box flexDirection="row" justifyContent="space-between">
@@ -40,21 +73,11 @@ const SendConfirmScreen = ({ route }) => {
           </Box>
           <Box flexDirection="row" justifyContent="space-between">
             <Text variant="subtitle2">Gas (estimate)</Text>
-            <Text variant="subtitle2">
-              {isLoading ? (
-                <Skeleton />
-              ) : (
-                formatUnits(
-                  (data.blockPrices[0].estimatedPrices[2].maxFeePerGas +
-                    data.blockPrices[0].estimatedPrices[2]
-                      .maxPriorityFeePerGas) *
-                    21000,
-                  "gwei"
-                )
-              )}
-            </Text>
+            {/* <Text variant="subtitle2">{isLoading && <Skeleton />}</Text> */}
           </Box>
-          <Button>Confirm</Button>
+          <Button onPress={send} isLoading={sending}>
+            Confirm
+          </Button>
         </Stack>
       </Box>
     </Box>
