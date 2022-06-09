@@ -25,6 +25,7 @@ const SignUpBackUpScreen = () => {
 
   const createFolder = async (accessToken: string) => {
     const recoveryWallet = Wallet.generate();
+    dispatch(setRecoveryWalletAddress(recoveryWallet.getAddressString()));
     try {
       const { data: folder } = await axios.post(
         `https://www.googleapis.com/drive/v3/files?key=${GOOGLE_DRIVE_API_KEY}`,
@@ -41,7 +42,6 @@ const SignUpBackUpScreen = () => {
         },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-      dispatch(setRecoveryWalletAddress(recoveryWallet.getAddressString()));
     } catch (error) {
       console.log(error);
     }
