@@ -54,12 +54,13 @@ const HomeScreen = () => {
   const callRequest = useSelector(selectCallRequest);
 
   const [deploying, setDeploying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const deploy = async () => {
     try {
       setDeploying(true);
       if (!ownerAddress || !ownerPrivateKey || !recoveryWalletAddress)
-        throw new Error();
+        return setError("Missing data");
 
       const relayer = new ethers.Wallet(ownerPrivateKey);
 
@@ -76,7 +77,7 @@ const HomeScreen = () => {
 
       // We check that the signer has enough eth (at least 0.1).
       if (Number(ethers.utils.formatEther(balance)) < 0.01) {
-        throw new Error(
+        return setError(
           `Not enough balance: ${ethers.utils.formatEther(balance)} ETH`
         );
       }
@@ -89,7 +90,7 @@ const HomeScreen = () => {
       );
       dispatch(setWalletAddress(walletAddress));
     } catch (error) {
-      console.log(error);
+      setError(JSON.stringify(error));
     }
     setDeploying(false);
   };
@@ -143,6 +144,7 @@ const HomeScreen = () => {
             <Button mt="4" onPress={deploy} isLoading={deploying}>
               Deploy smart contract
             </Button>
+            {error && <Text>{error}</Text>}
           </>
         )}
       </Box>
