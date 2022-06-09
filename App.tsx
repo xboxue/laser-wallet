@@ -13,7 +13,7 @@ import { NativeBaseProvider } from "native-base";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Provider } from "react-redux";
 import AppNavigator from "./src/navigators/AppNavigator";
-import { persistor, store } from "./src/store";
+import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
 import AppLoading from "expo-app-loading";
 import { createClient, createStorage, WagmiConfig } from "wagmi";
@@ -54,7 +54,7 @@ const App = () => {
     const reset = async () => {
       const isStoreReset = await AsyncStorage.getItem("isStoreReset");
       if (!isStoreReset) {
-        await SecureStore.deleteItemAsync("persist:root");
+        await SecureStore.deleteItemAsync("persist_auth");
         AsyncStorage.setItem("isStoreReset", "true");
       }
     };
@@ -66,7 +66,7 @@ const App = () => {
 
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
+      <PersistGate loading={null} persistor={getPersistor()}>
         <WagmiConfig client={wagmiClient}>
           <QueryClientProvider client={queryClient}>
             <NativeBaseProvider theme={theme}>
