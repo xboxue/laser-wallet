@@ -20,6 +20,9 @@ import { createClient, createStorage, WagmiConfig } from "wagmi";
 import { MMKV } from "react-native-mmkv";
 import { providers } from "ethers";
 import { PersistGate } from "redux-persist/integration/react";
+import { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 const storage = new MMKV();
 
@@ -46,6 +49,18 @@ const App = () => {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+
+  useEffect(() => {
+    const reset = async () => {
+      const isStoreReset = await AsyncStorage.getItem("isStoreReset");
+      if (!isStoreReset) {
+        await SecureStore.deleteItemAsync("persist:root");
+        AsyncStorage.setItem("isStoreReset", "true");
+      }
+    };
+
+    reset();
+  }, []);
 
   if (!loaded) return <AppLoading />;
 
