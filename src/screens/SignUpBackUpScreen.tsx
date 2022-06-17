@@ -1,50 +1,62 @@
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import axios from "axios";
 import Wallet from "ethereumjs-wallet";
-import * as SecureStore from "expo-secure-store";
+import Constants from "expo-constants";
 import { Box, Button, Text } from "native-base";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setOwnerAddress,
   setOwnerPrivateKey,
-  setRecoveryWalletAddress,
+  setRecoveryOwnerAddress,
+  setWalletAddress,
 } from "../features/auth/authSlice";
-
-const GOOGLE_DRIVE_API_KEY = "AIzaSyCitBIU7-UU1QM6yslKIeVq2zgexDUL188";
+import { selectGuardians } from "../features/guardians/guardiansSlice";
 
 const SignUpBackUpScreen = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const guardians = useSelector(selectGuardians);
 
   const createWallet = async () => {
     const owner = Wallet.generate();
+    const recoveryOwner = Wallet.generate();
+
+    const { data } = await axios.post(
+      `${Constants.manifest?.extra?.relayerUrl}/wallets`,
+      {
+        owner: owner.getAddressString(),
+        recoveryOwner: recoveryOwner.getAddressString(),
+        guardians: guardians.map((guardian) => guardian.address),
+      }
+    );
+
+    if (!data.walletAddress) throw new Error("Wallet creation failed");
+
     dispatch(setOwnerAddress(owner.getAddressString()));
     dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
+    dispatch(setRecoveryOwnerAddress(recoveryOwner.getAddressString()));
+    dispatch(setWalletAddress(data.walletAddress));
+
+    return { owner, recoveryOwner, walletAddress: data.walletAddress };
   };
 
-  const createFolder = async (accessToken: string) => {
-    const recoveryWallet = Wallet.generate();
-    dispatch(setRecoveryWalletAddress(recoveryWallet.getAddressString()));
-    try {
-      const { data: folder } = await axios.post(
-        `https://www.googleapis.com/drive/v3/files?key=${GOOGLE_DRIVE_API_KEY}`,
-        { name: "Laser", mimeType: "application/vnd.google-apps.folder" },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
+  const createBackup = async (accessToken: string, privateKey: string) => {
+    const { data: folder } = await axios.post(
+      `https://www.googleapis.com/drive/v3/files?key=${Constants.manifest?.extra?.googleDriveApiKey}`,
+      { name: "Laser", mimeType: "application/vnd.google-apps.folder" },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
 
-      // TODO: Fix this
-      const { data } = await axios.post(
-        `https://www.googleapis.com/drive/v3/files?key=${GOOGLE_DRIVE_API_KEY}`,
-        {
-          parents: [folder.id],
-          name: `${recoveryWallet.getPrivateKeyString()}`,
-        },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-    } catch (error) {
-      console.log(error);
-    }
+    // TODO: Fix this
+    const { data } = await axios.post(
+      `https://www.googleapis.com/drive/v3/files?key=${Constants.manifest?.extra?.googleDriveApiKey}`,
+      {
+        parents: [folder.id],
+        name: `${privateKey}`,
+      },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
   };
 
   return (
@@ -68,8 +80,11 @@ const SignUpBackUpScreen = () => {
               await GoogleSignin.signIn();
               const { accessToken } = await GoogleSignin.getTokens();
               setLoading(true);
-              await createFolder(accessToken);
-              await createWallet();
+              const { recoveryOwner } = await createWallet();
+              await createBackup(
+                accessToken,
+                recoveryOwner.getPrivateKeyString()
+              );
             } catch (error) {
               console.log(error);
             }

@@ -5,14 +5,14 @@ interface AuthState {
   ownerAddress: string | null;
   ownerPrivateKey: string | null;
   walletAddress: string | null;
-  recoveryWalletAddress: string | null;
+  recoveryOwnerAddress: string | null;
 }
 
 const initialState: AuthState = {
   ownerAddress: null,
   ownerPrivateKey: null,
   walletAddress: null,
-  recoveryWalletAddress: null,
+  recoveryOwnerAddress: null,
 };
 
 const authSlice = createSlice({
@@ -28,8 +28,8 @@ const authSlice = createSlice({
     setWalletAddress: (state, action: PayloadAction<string | null>) => {
       state.walletAddress = action.payload;
     },
-    setRecoveryWalletAddress: (state, action: PayloadAction<string | null>) => {
-      state.recoveryWalletAddress = action.payload;
+    setRecoveryOwnerAddress: (state, action: PayloadAction<string | null>) => {
+      state.recoveryOwnerAddress = action.payload;
     },
   },
 });
@@ -39,14 +39,14 @@ export const selectOwnerPrivateKey = (state: RootState) =>
   state.auth.ownerPrivateKey;
 export const selectWalletAddress = (state: RootState) =>
   state.auth.walletAddress;
-export const selectRecoveryWalletAddress = (state: RootState) =>
-  state.auth.recoveryWalletAddress;
+export const selectRecoveryOwnerAddress = (state: RootState) =>
+  state.auth.recoveryOwnerAddress;
 
 export const {
   setOwnerAddress,
   setOwnerPrivateKey,
   setWalletAddress,
-  setRecoveryWalletAddress,
+  setRecoveryOwnerAddress,
 } = authSlice.actions;
 
 export default authSlice.reducer;
