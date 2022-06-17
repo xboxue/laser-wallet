@@ -1,14 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
-import { ContractTransaction, ethers } from "ethers";
-import { formatUnits, parseEther, parseUnits } from "ethers/lib/utils";
-import * as SecureStore from "expo-secure-store";
+import axios from "axios";
+import { ethers } from "ethers";
+import { formatUnits, parseUnits } from "ethers/lib/utils";
+import Constants from "expo-constants";
 import { Laser } from "laser-sdk/src";
-import { ENTRY_POINT_GOERLI } from "laser-sdk/src/constants";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { erc20ABI, useBalance, useFeeData, useProvider } from "wagmi";
-import { entryPointAbi } from "../abis/TestEntryPoint.json";
+import { useBalance, useFeeData, useProvider } from "wagmi";
 import tokens from "../constants/tokens";
 import {
   selectOwnerPrivateKey,
@@ -43,17 +42,9 @@ const SendConfirmScreen = ({ route }) => {
       setSending(true);
       const { amount, address: to } = route.params;
 
-      const providerUrl =
-        "https://eth-goerli.alchemyapi.io/v2/e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1";
-
       const owner = new ethers.Wallet(ownerPrivateKey);
+      const laser = new Laser(provider, owner, walletAddress);
 
-      const laser = new Laser(providerUrl, owner, walletAddress);
-
-      const erc20 = new ethers.Contract(WETH_ADDRESS, erc20ABI, provider);
-      const gas = await erc20
-        .connect(walletAddress)
-        .estimateGas.transfer(to, parseUnits(amount));
       const feeData = await provider.getFeeData();
 
       const userOp = await laser.transferERC20(
@@ -61,26 +52,17 @@ const SendConfirmScreen = ({ route }) => {
         to,
         parseUnits(amount),
         {
-          callGas: gas.add(10000),
           maxFeePerGas: feeData.maxFeePerGas,
           maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
         }
       );
 
-      const entryPoint = new ethers.Contract(
-        ENTRY_POINT_GOERLI,
-        entryPointAbi,
-        owner.connect(provider)
+      await axios.post(
+        `${Constants.manifest?.extra?.relayerUrl}/user-operations`,
+        userOp
       );
-
-      const transaction: ContractTransaction = await entryPoint.handleOps(
-        [userOp],
-        owner.address,
-        { gasLimit: 250000 }
-      );
-      await transaction.wait();
-      await refetchBalance();
-      await refetchTokenBalances();
+      refetchBalance();
+      refetchTokenBalances();
       navigation.navigate("Home");
     } catch (error) {
       console.log(error);
@@ -95,35 +77,21 @@ const SendConfirmScreen = ({ route }) => {
       setSending(true);
       const { amount, address: to } = route.params;
 
-      const providerUrl =
-        "https://eth-goerli.alchemyapi.io/v2/e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1";
-
       const owner = new ethers.Wallet(ownerPrivateKey);
-
-      const laser = new Laser(providerUrl, owner, walletAddress);
-      const gas = await provider.estimateGas({ to, value: parseEther(amount) });
+      const laser = new Laser(provider, owner, walletAddress);
       const feeData = await provider.getFeeData();
 
-      // TODO: amount should be BigNumber
-      const userOp = await laser.sendEth(route.params.address, amount, {
-        callGas: gas.add(10000),
+      const userOp = await laser.sendEth(to, amount, {
         maxFeePerGas: feeData.maxFeePerGas,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
       });
 
-      const entryPoint = new ethers.Contract(
-        ENTRY_POINT_GOERLI,
-        entryPointAbi,
-        owner.connect(provider)
+      await axios.post(
+        `${Constants.manifest?.extra?.relayerUrl}/user-operations`,
+        userOp
       );
-
-      const transaction: ContractTransaction = await entryPoint.handleOps(
-        [userOp],
-        owner.address
-      );
-      await transaction.wait();
-      await refetchBalance();
-      await refetchTokenBalances();
+      refetchBalance();
+      refetchTokenBalances();
       navigation.navigate("Home");
     } catch (error) {
       console.log(error);
