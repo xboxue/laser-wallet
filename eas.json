@@ -10,10 +10,18 @@
       },
       "ios": {
         "buildConfiguration": "Debug"
+      },
+      "env": {
+        "RELAYER_URL": "https://laser-relayer.herokuapp.com",
+        "LASER_GUARDIAN_ADDRESS": "0xcC9d02aBe5487dd64A890bBfFd0b05cF7901043c"
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "RELAYER_URL": "https://laser-relayer.herokuapp.com",
+        "LASER_GUARDIAN_ADDRESS": "0xcC9d02aBe5487dd64A890bBfFd0b05cF7901043c"
+      }
     },
     "production": {}
   },
