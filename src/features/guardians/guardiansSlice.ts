@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
-
+import Constants from "expo-constants";
 interface Guardian {
   name: string;
   address: string;
@@ -11,7 +11,12 @@ interface GuardiansState {
 }
 
 const initialState: GuardiansState = {
-  guardians: [],
+  guardians: [
+    {
+      name: "Laser Guardian",
+      address: Constants.manifest?.extra?.laserGuardianAddress,
+    },
+  ],
 };
 
 const guardiansSlice = createSlice({
