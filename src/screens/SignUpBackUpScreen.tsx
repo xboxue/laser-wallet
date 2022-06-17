@@ -33,11 +33,6 @@ const SignUpBackUpScreen = () => {
 
     if (!data.walletAddress) throw new Error("Wallet creation failed");
 
-    dispatch(setOwnerAddress(owner.getAddressString()));
-    dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
-    dispatch(setRecoveryOwnerAddress(recoveryOwner.getAddressString()));
-    dispatch(setWalletAddress(data.walletAddress));
-
     return { owner, recoveryOwner, walletAddress: data.walletAddress };
   };
 
@@ -80,11 +75,24 @@ const SignUpBackUpScreen = () => {
               await GoogleSignin.signIn();
               const { accessToken } = await GoogleSignin.getTokens();
               setLoading(true);
-              const { recoveryOwner } = await createWallet();
-              await createBackup(
-                accessToken,
-                recoveryOwner.getPrivateKeyString()
+              const { owner, recoveryOwner, walletAddress } =
+                await createWallet();
+
+              try {
+                await createBackup(
+                  accessToken,
+                  recoveryOwner.getPrivateKeyString()
+                );
+              } catch (error) {
+                console.log(error);
+              }
+
+              dispatch(setOwnerAddress(owner.getAddressString()));
+              dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
+              dispatch(
+                setRecoveryOwnerAddress(recoveryOwner.getAddressString())
               );
+              dispatch(setWalletAddress(walletAddress));
             } catch (error) {
               console.log(error);
             }
