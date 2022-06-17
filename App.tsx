@@ -23,6 +23,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
+import Constants from "expo-constants";
 
 const storage = new MMKV();
 
@@ -30,7 +31,7 @@ const wagmiClient = createClient({
   provider: (config) =>
     new providers.AlchemyWebSocketProvider(
       config.chainId,
-      "e_-Jn9f06JUc7TXmtPdwzkI2TNdvjri1"
+      Constants.manifest?.extra?.alchemyApiKey
     ),
   storage: createStorage({
     storage: {
