@@ -14,6 +14,7 @@ import {
 } from "native-base";
 import { useSelector } from "react-redux";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
+import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import { selectWalletAddress } from "../features/auth/authSlice";
 import {
@@ -66,6 +67,7 @@ const HomeScreen = () => {
           Send
         </Button>
         <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
+        <TransactionHistory walletAddress={walletAddress} />
       </Box>
       {peerMeta && connector && pending && walletAddress && (
         <Actionsheet isOpen onClose={() => connector.rejectSession()}>
