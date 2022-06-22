@@ -7,6 +7,7 @@ import { orderBy } from "lodash";
 import { Box, Pressable, Text } from "native-base";
 import { useEffect, useState } from "react";
 import formatAddress from "../../utils/formatAddress";
+import Constants from "expo-constants";
 
 interface Props {
   walletAddress: string;
@@ -28,7 +29,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
           startblock: 0,
           endblock: 99999999,
           sort: "asc",
-          apikey: "ESSIJPKTZZ8GIAQNKEWHK77NTZWSN88WDI",
+          apikey: Constants.manifest?.extra?.etherscanApiKey,
         };
         const [{ data: internalTransactionData }, { data: transactionData }] =
           await Promise.all([
@@ -69,7 +70,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   return (
     <>
       {history?.map((transaction) => (
-        <Pressable key={transaction.timestamp}>
+        <Pressable key={transaction.timeStamp}>
           <Box flexDirection="row" alignItems="center">
             {/* <Image source={token.icon} size="9" alt="ethereum-icon" /> */}
             <Box>
