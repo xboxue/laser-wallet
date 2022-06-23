@@ -36,6 +36,7 @@ export default {
   extra: {
     relayerUrl: process.env.RELAYER_URL,
     alchemyApiKey: process.env.ALCHEMY_API_KEY,
+    etherscanApiKey: process.env.ETHERSCAN_API_KEY,
     googleDriveApiKey: process.env.GOOGLE_DRIVE_API_KEY,
     laserGuardianAddress: process.env.LASER_GUARDIAN_ADDRESS,
   },
