@@ -91,7 +91,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
               </Text>
             </Box>
             <Text variant="subtitle1" ml="auto">
-              {formatEther(transaction.value)}
+              {formatEther(transaction.value)} ETH
             </Text>
           </Box>
         </Pressable>

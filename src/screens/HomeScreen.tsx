@@ -12,6 +12,9 @@ import {
   Stack,
   Text,
 } from "native-base";
+import { useState } from "react";
+import { useWindowDimensions } from "react-native";
+import { NavigationState, Route, TabView } from "react-native-tab-view";
 import { useSelector } from "react-redux";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
 import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
@@ -25,6 +28,11 @@ import {
 } from "../features/walletConnect/walletConnectSlice";
 import formatAddress from "../utils/formatAddress";
 
+const routes = [
+  { key: "first", title: "Tokens" },
+  { key: "second", title: "Activity" },
+];
+
 const HomeScreen = () => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
@@ -34,10 +42,51 @@ const HomeScreen = () => {
   const pending = useSelector(selectPending);
   const callRequest = useSelector(selectCallRequest);
 
+  const [tab, setTab] = useState(0);
+  const window = useWindowDimensions();
+
   if (!walletAddress) return <Text>Error</Text>;
 
+  const renderTabBar = ({
+    navigationState,
+  }: {
+    navigationState: NavigationState<Route>;
+  }) => {
+    return (
+      <Box flexDir="row">
+        {navigationState.routes.map((route, index) => (
+          <Pressable flex={1} onPress={() => setTab(index)} key={route.key}>
+            <Box
+              borderColor={tab === index ? "gray.500" : "gray.100"}
+              borderBottomWidth="3"
+              alignItems="center"
+              p="3"
+            >
+              <Text>{route.title}</Text>
+            </Box>
+          </Pressable>
+        ))}
+      </Box>
+    );
+  };
+
+  const renderScene = ({ route }: { route: Route }) => {
+    if (route.key === "first")
+      return (
+        <Box p="3">
+          <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
+        </Box>
+      );
+    if (route.key === "second")
+      return (
+        <Box p="3">
+          <TransactionHistory walletAddress={walletAddress} />
+        </Box>
+      );
+  };
+
   return (
-    <Box>
+    <Box flex={1}>
       <Box p="4">
         <IconButton
           icon={<Icon as={Ionicons} name="qr-code-outline" />}
@@ -66,9 +115,14 @@ const HomeScreen = () => {
         >
           Send
         </Button>
-        <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
-        <TransactionHistory walletAddress={walletAddress} />
       </Box>
+      <TabView
+        navigationState={{ index: tab, routes }}
+        renderScene={renderScene}
+        renderTabBar={renderTabBar}
+        onIndexChange={setTab}
+        initialLayout={{ width: window.width }}
+      />
       {peerMeta && connector && pending && walletAddress && (
         <Actionsheet isOpen onClose={() => connector.rejectSession()}>
           <Actionsheet.Content>
