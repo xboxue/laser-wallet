@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { ethers, utils } from "ethers";
 import { Actionsheet, Button, Image, Stack, Text } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { selectOwnerPrivateKey } from "../../features/auth/authSlice";
@@ -8,6 +8,7 @@ import {
   selectPending,
   setCallRequest,
 } from "../../features/walletConnect/walletConnectSlice";
+import hexToAscii from "../../utils/hexToAscii";
 
 interface Props {
   walletAddress: string;
@@ -19,6 +20,8 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const callRequest = useSelector(selectCallRequest);
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
   const dispatch = useDispatch();
+
+  if (!ownerPrivateKey) return null;
 
   return (
     <>
@@ -57,26 +60,43 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
                   null,
                   2
                 )}
+              {callRequest.method === "personal_sign" &&
+                hexToAscii(callRequest.params[0])}
             </Text>
             <Image source={{ uri: connector.peerMeta.icons[0] }} alt="logo" />
             <Stack space="3" direction="row">
               <Button
                 onPress={async () => {
                   const owner = new ethers.Wallet(ownerPrivateKey);
-                  const { types, domain, message } = JSON.parse(
-                    callRequest.params[1]
-                  );
-                  const result = await owner._signTypedData(
-                    domain,
-                    types,
-                    message
-                  );
 
-                  connector.approveRequest({
-                    id: callRequest.id,
-                    result,
-                  });
-                  dispatch(setCallRequest(null));
+                  if (callRequest.method === "eth_signTypedData") {
+                    const { types, domain, message } = JSON.parse(
+                      callRequest.params[1]
+                    );
+                    const result = await owner._signTypedData(
+                      domain,
+                      types,
+                      message
+                    );
+
+                    connector.approveRequest({
+                      id: callRequest.id,
+                      result,
+                    });
+                    dispatch(setCallRequest(null));
+                  }
+
+                  if (callRequest.method === "personal_sign") {
+                    const result = await owner.signMessage(
+                      utils.arrayify(callRequest.params[0])
+                    );
+
+                    connector.approveRequest({
+                      id: callRequest.id,
+                      result,
+                    });
+                    dispatch(setCallRequest(null));
+                  }
                 }}
               >
                 Approve
