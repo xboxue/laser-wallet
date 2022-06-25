@@ -1,6 +1,9 @@
+import axios from "axios";
 import { ethers, utils } from "ethers";
+import { Laser } from "laser-sdk";
 import { Actionsheet, Button, Image, Stack, Text } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
+import { useProvider } from "wagmi";
 import { selectOwnerPrivateKey } from "../../features/auth/authSlice";
 import {
   selectCallRequest,
@@ -9,6 +12,7 @@ import {
   setCallRequest,
 } from "../../features/walletConnect/walletConnectSlice";
 import hexToAscii from "../../utils/hexToAscii";
+import Constants from "expo-constants";
 
 interface Props {
   walletAddress: string;
@@ -19,6 +23,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const pending = useSelector(selectPending);
   const callRequest = useSelector(selectCallRequest);
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
+  const provider = useProvider({ chainId: 5 });
   const dispatch = useDispatch();
 
   if (!ownerPrivateKey) return null;
@@ -96,6 +101,35 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
                       result,
                     });
                     dispatch(setCallRequest(null));
+                  }
+
+                  if (callRequest.method === "eth_sendTransaction") {
+                    const laser = new Laser(provider, owner, walletAddress);
+                    const { to, value = 0, data } = callRequest.params[0];
+
+                    const feeData = await provider.getFeeData();
+                    try {
+                      const userOp = await laser.sendTransaction(
+                        to,
+                        data,
+                        value,
+                        {
+                          maxFeePerGas: feeData.maxFeePerGas,
+                          maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+                        }
+                      );
+                      const { data: txData } = await axios.post(
+                        `${Constants.manifest?.extra?.relayerUrl}/user-operations`,
+                        userOp
+                      );
+                      connector.approveRequest({
+                        id: callRequest.id,
+                        result: txData.hash,
+                      });
+                      dispatch(setCallRequest(null));
+                    } catch (error) {
+                      console.log(error);
+                    }
                   }
                 }}
               >

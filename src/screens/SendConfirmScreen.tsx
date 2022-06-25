@@ -3,7 +3,7 @@ import axios from "axios";
 import { ethers } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import Constants from "expo-constants";
-import { Laser } from "laser-sdk/src";
+import { Laser } from "laser-sdk";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
 import { useSelector } from "react-redux";
