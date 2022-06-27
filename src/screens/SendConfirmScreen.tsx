@@ -60,10 +60,9 @@ const SendConfirmScreen = ({ route }) => {
       refetchBalance();
       refetchTokenBalances();
       navigation.navigate("Home");
-    } catch (error) {
-      console.log(error);
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   };
 
   const sendEth = async () => {
@@ -90,10 +89,9 @@ const SendConfirmScreen = ({ route }) => {
       refetchBalance();
       refetchTokenBalances();
       navigation.navigate("Home");
-    } catch (error) {
-      console.log(error);
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   };
 
   const navigation = useNavigation();

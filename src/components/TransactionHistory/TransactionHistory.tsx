@@ -61,10 +61,9 @@ const TransactionHistory = ({ walletAddress }: Props) => {
       setHistory(
         orderBy([...internalTransactions, ...transactions], "timeStamp", "desc")
       );
-    } catch (error) {
-      console.log(error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
