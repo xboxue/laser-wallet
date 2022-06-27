@@ -1,17 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import * as Clipboard from "expo-clipboard";
-import {
-  Actionsheet,
-  Box,
-  Button,
-  Icon,
-  IconButton,
-  Image,
-  Pressable,
-  Stack,
-  Text,
-} from "native-base";
+import { Box, Button, Icon, IconButton, Pressable, Text } from "native-base";
 import { useState } from "react";
 import { useWindowDimensions } from "react-native";
 import { NavigationState, Route, TabView } from "react-native-tab-view";
@@ -19,13 +9,8 @@ import { useSelector } from "react-redux";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
 import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
+import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
 import { selectWalletAddress } from "../features/auth/authSlice";
-import {
-  selectCallRequest,
-  selectConnector,
-  selectPeerMeta,
-  selectPending,
-} from "../features/walletConnect/walletConnectSlice";
 import formatAddress from "../utils/formatAddress";
 
 const routes = [
@@ -36,11 +21,6 @@ const routes = [
 const HomeScreen = () => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
-
-  const connector = useSelector(selectConnector);
-  const peerMeta = useSelector(selectPeerMeta);
-  const pending = useSelector(selectPending);
-  const callRequest = useSelector(selectCallRequest);
 
   const [tab, setTab] = useState(0);
   const window = useWindowDimensions();
@@ -72,17 +52,9 @@ const HomeScreen = () => {
 
   const renderScene = ({ route }: { route: Route }) => {
     if (route.key === "first")
-      return (
-        <Box p="3">
-          <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
-        </Box>
-      );
+      return <TokenBalances walletAddress={walletAddress} onPress={() => {}} />;
     if (route.key === "second")
-      return (
-        <Box p="3">
-          <TransactionHistory walletAddress={walletAddress} />
-        </Box>
-      );
+      return <TransactionHistory walletAddress={walletAddress} />;
   };
 
   return (
@@ -123,42 +95,7 @@ const HomeScreen = () => {
         onIndexChange={setTab}
         initialLayout={{ width: window.width }}
       />
-      {peerMeta && connector && pending && walletAddress && (
-        <Actionsheet isOpen onClose={() => connector.rejectSession()}>
-          <Actionsheet.Content>
-            <Text>{peerMeta.name} wants to connect</Text>
-            <Text>{peerMeta.url}</Text>
-            <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
-            <Stack space="3" direction="row" mt="4">
-              <Button
-                onPress={() =>
-                  connector.approveSession({
-                    accounts: [walletAddress],
-                    chainId: 5,
-                  })
-                }
-              >
-                Approve
-              </Button>
-              <Button onPress={() => connector.rejectSession()}>Reject</Button>
-            </Stack>
-          </Actionsheet.Content>
-        </Actionsheet>
-      )}
-      {callRequest && peerMeta && (
-        <Actionsheet isOpen onClose={() => {}}>
-          <Actionsheet.Content>
-            <Text>
-              {peerMeta.name}: {callRequest.method}
-            </Text>
-            <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
-            <Stack space="3" direction="row">
-              <Button onPress={() => {}}>Approve</Button>
-              <Button onPress={() => {}}>Reject</Button>
-            </Stack>
-          </Actionsheet.Content>
-        </Actionsheet>
-      )}
+      <WalletConnectPrompt walletAddress={walletAddress} />
     </Box>
   );
 };
