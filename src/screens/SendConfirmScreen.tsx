@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import { ethers } from "ethers";
-import { formatUnits, parseUnits } from "ethers/lib/utils";
+import { ethers, providers } from "ethers";
+import { formatUnits } from "ethers/lib/utils";
 import Constants from "expo-constants";
 import { Laser } from "laser-sdk";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
@@ -47,19 +47,15 @@ const SendConfirmScreen = ({ route }) => {
 
       const feeData = await provider.getFeeData();
 
-      const userOp = await laser.transferERC20(
-        WETH_ADDRESS,
-        to,
-        parseUnits(amount),
-        {
-          maxFeePerGas: feeData.maxFeePerGas,
-          maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-        }
-      );
+      const transaction = await laser.transferERC20(WETH_ADDRESS, to, amount, {
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+        gasTip: 30000,
+      });
 
       await axios.post(
-        `${Constants.manifest?.extra?.relayerUrl}/user-operations`,
-        userOp
+        `${Constants.manifest?.extra?.relayerUrl}/transactions`,
+        transaction
       );
       refetchBalance();
       refetchTokenBalances();
@@ -81,15 +77,18 @@ const SendConfirmScreen = ({ route }) => {
       const laser = new Laser(provider, owner, walletAddress);
       const feeData = await provider.getFeeData();
 
-      const userOp = await laser.sendEth(to, amount, {
+      const transaction = await laser.sendEth(to, amount, {
         maxFeePerGas: feeData.maxFeePerGas,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+        gasTip: 30000,
       });
 
-      await axios.post(
-        `${Constants.manifest?.extra?.relayerUrl}/user-operations`,
-        userOp
+      const { data: txData } = await axios.post<providers.TransactionResponse>(
+        `${Constants.manifest?.extra?.relayerUrl}/transactions`,
+        { sender: walletAddress, transaction }
       );
+      await provider.waitForTransaction(txData.hash);
+
       refetchBalance();
       refetchTokenBalances();
       navigation.navigate("Home");

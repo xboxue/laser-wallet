@@ -109,18 +109,19 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
 
                     const feeData = await provider.getFeeData();
                     try {
-                      const userOp = await laser.sendTransaction(
+                      const transaction = await laser.sendTransaction(
                         to,
                         data,
                         value,
                         {
                           maxFeePerGas: feeData.maxFeePerGas,
                           maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+                          gasTip: 30000,
                         }
                       );
                       const { data: txData } = await axios.post(
-                        `${Constants.manifest?.extra?.relayerUrl}/user-operations`,
-                        userOp
+                        `${Constants.manifest?.extra?.relayerUrl}/transactions`,
+                        { transaction, sender: walletAddress }
                       );
                       connector.approveRequest({
                         id: callRequest.id,
