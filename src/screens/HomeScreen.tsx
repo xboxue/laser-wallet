@@ -52,17 +52,9 @@ const HomeScreen = () => {
 
   const renderScene = ({ route }: { route: Route }) => {
     if (route.key === "first")
-      return (
-        <Box p="3">
-          <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
-        </Box>
-      );
+      return <TokenBalances walletAddress={walletAddress} onPress={() => {}} />;
     if (route.key === "second")
-      return (
-        <Box p="3">
-          <TransactionHistory walletAddress={walletAddress} />
-        </Box>
-      );
+      return <TransactionHistory walletAddress={walletAddress} />;
   };
 
   return (
