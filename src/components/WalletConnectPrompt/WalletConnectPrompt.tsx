@@ -13,6 +13,8 @@ import {
 } from "../../features/walletConnect/walletConnectSlice";
 import hexToAscii from "../../utils/hexToAscii";
 import Constants from "expo-constants";
+import { useState } from "react";
+import { reject } from "lodash";
 
 interface Props {
   walletAddress: string;
@@ -25,8 +27,72 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
   const provider = useProvider({ chainId: 5 });
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
 
-  if (!ownerPrivateKey) return null;
+  const approveRequest = async () => {
+    if (!ownerPrivateKey || !callRequest || !connector) return;
+
+    const owner = new ethers.Wallet(ownerPrivateKey);
+
+    if (callRequest.method === "eth_signTypedData") {
+      const { types, domain, message } = JSON.parse(callRequest.params[1]);
+      const result = await owner._signTypedData(domain, types, message);
+
+      connector.approveRequest({
+        id: callRequest.id,
+        result,
+      });
+      dispatch(setCallRequest(null));
+    }
+
+    if (callRequest.method === "personal_sign") {
+      const result = await owner.signMessage(
+        utils.arrayify(callRequest.params[0])
+      );
+
+      connector.approveRequest({
+        id: callRequest.id,
+        result,
+      });
+      dispatch(setCallRequest(null));
+    }
+
+    if (callRequest.method === "eth_sendTransaction") {
+      setLoading(true);
+      const laser = new Laser(provider, owner, walletAddress);
+      const { to, value = 0, data } = callRequest.params[0];
+
+      const feeData = await provider.getFeeData();
+      try {
+        const transaction = await laser.sendTransaction(to, data, value, {
+          maxFeePerGas: feeData.maxFeePerGas,
+          maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+          gasTip: 30000,
+        });
+        const { data: txData } = await axios.post(
+          `${Constants.manifest?.extra?.relayerUrl}/transactions`,
+          { transaction, sender: walletAddress }
+        );
+        connector.approveRequest({
+          id: callRequest.id,
+          result: txData.hash,
+        });
+        dispatch(setCallRequest(null));
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const rejectRequest = () => {
+    if (!callRequest || !connector) return;
+
+    connector.rejectRequest({
+      id: callRequest.id,
+      error: { message: "User rejected" },
+    });
+    dispatch(setCallRequest(null));
+  };
 
   return (
     <>
@@ -70,83 +136,10 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
             </Text>
             <Image source={{ uri: connector.peerMeta.icons[0] }} alt="logo" />
             <Stack space="3" direction="row">
-              <Button
-                onPress={async () => {
-                  const owner = new ethers.Wallet(ownerPrivateKey);
-
-                  if (callRequest.method === "eth_signTypedData") {
-                    const { types, domain, message } = JSON.parse(
-                      callRequest.params[1]
-                    );
-                    const result = await owner._signTypedData(
-                      domain,
-                      types,
-                      message
-                    );
-
-                    connector.approveRequest({
-                      id: callRequest.id,
-                      result,
-                    });
-                    dispatch(setCallRequest(null));
-                  }
-
-                  if (callRequest.method === "personal_sign") {
-                    const result = await owner.signMessage(
-                      utils.arrayify(callRequest.params[0])
-                    );
-
-                    connector.approveRequest({
-                      id: callRequest.id,
-                      result,
-                    });
-                    dispatch(setCallRequest(null));
-                  }
-
-                  if (callRequest.method === "eth_sendTransaction") {
-                    const laser = new Laser(provider, owner, walletAddress);
-                    const { to, value = 0, data } = callRequest.params[0];
-
-                    const feeData = await provider.getFeeData();
-                    try {
-                      const transaction = await laser.sendTransaction(
-                        to,
-                        data,
-                        value,
-                        {
-                          maxFeePerGas: feeData.maxFeePerGas,
-                          maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-                          gasTip: 30000,
-                        }
-                      );
-                      const { data: txData } = await axios.post(
-                        `${Constants.manifest?.extra?.relayerUrl}/transactions`,
-                        { transaction, sender: walletAddress }
-                      );
-                      connector.approveRequest({
-                        id: callRequest.id,
-                        result: txData.hash,
-                      });
-                      dispatch(setCallRequest(null));
-                    } catch (error) {
-                      console.log(error);
-                    }
-                  }
-                }}
-              >
+              <Button isLoading={loading} onPress={approveRequest}>
                 Approve
               </Button>
-              <Button
-                onPress={() => {
-                  connector.rejectRequest({
-                    id: callRequest.id,
-                    error: { message: "User rejected" },
-                  });
-                  dispatch(setCallRequest(null));
-                }}
-              >
-                Reject
-              </Button>
+              <Button onPress={rejectRequest}>Reject</Button>
             </Stack>
           </Actionsheet.Content>
         </Actionsheet>

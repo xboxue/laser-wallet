@@ -78,14 +78,10 @@ const SignUpBackUpScreen = () => {
               const { owner, recoveryOwner, walletAddress } =
                 await createWallet();
 
-              try {
-                await createBackup(
-                  accessToken,
-                  recoveryOwner.getPrivateKeyString()
-                );
-              } catch (error) {
-                console.log(error);
-              }
+              await createBackup(
+                accessToken,
+                recoveryOwner.getPrivateKeyString()
+              );
 
               dispatch(setOwnerAddress(owner.getAddressString()));
               dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
@@ -93,10 +89,9 @@ const SignUpBackUpScreen = () => {
                 setRecoveryOwnerAddress(recoveryOwner.getAddressString())
               );
               dispatch(setWalletAddress(walletAddress));
-            } catch (error) {
-              console.log(error);
+            } finally {
+              setLoading(false);
             }
-            setLoading(false);
           }}
         >
           Back up on Google Drive
