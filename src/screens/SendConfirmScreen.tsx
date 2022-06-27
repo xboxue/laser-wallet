@@ -16,8 +16,6 @@ import {
 import useTokenBalances from "../hooks/useTokenBalances";
 import formatAddress from "../utils/formatAddress";
 
-const WETH_ADDRESS = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
-
 const SendConfirmScreen = ({ route }) => {
   const provider = useProvider({ chainId: 5 });
   const walletAddress = useSelector(selectWalletAddress);
@@ -35,28 +33,30 @@ const SendConfirmScreen = ({ route }) => {
 
   const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
 
-  const transferTokens = async () => {
-    if (!walletAddress || !ownerPrivateKey) throw new Error();
+  if (!walletAddress || !ownerPrivateKey) return null;
 
+  const transferTokens = async () => {
     try {
       setSending(true);
-      const { amount, address: to } = route.params;
+      const { amount, address: to, token } = route.params;
 
       const owner = new ethers.Wallet(ownerPrivateKey);
       const laser = new Laser(provider, owner, walletAddress);
 
       const feeData = await provider.getFeeData();
 
-      const transaction = await laser.transferERC20(WETH_ADDRESS, to, amount, {
+      const transaction = await laser.transferERC20(token.address, to, amount, {
         maxFeePerGas: feeData.maxFeePerGas,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
         gasTip: 30000,
       });
 
-      await axios.post(
+      const { data: txData } = await axios.post(
         `${Constants.manifest?.extra?.relayerUrl}/transactions`,
-        transaction
+        { transaction, sender: walletAddress }
       );
+      await provider.waitForTransaction(txData.hash);
+
       refetchBalance();
       refetchTokenBalances();
       navigation.navigate("Home");
@@ -67,8 +67,6 @@ const SendConfirmScreen = ({ route }) => {
   };
 
   const sendEth = async () => {
-    if (!walletAddress || !ownerPrivateKey) throw new Error();
-
     try {
       setSending(true);
       const { amount, address: to } = route.params;
