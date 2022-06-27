@@ -32,7 +32,7 @@ export default {
   web: {
     favicon: "./assets/favicon.png",
   },
-  plugins: ["@react-native-google-signin/google-signin"],
+  plugins: ["@react-native-google-signin/google-signin", "sentry-expo"],
   extra: {
     relayerUrl: process.env.RELAYER_URL,
     alchemyApiKey: process.env.ALCHEMY_API_KEY,
@@ -40,5 +40,18 @@ export default {
     googleDriveApiKey: process.env.GOOGLE_DRIVE_API_KEY,
     laserGuardianAddress: process.env.LASER_GUARDIAN_ADDRESS,
     relayerAddress: process.env.RELAYER_ADDRESS,
+    sentryDsn: process.env.SENTRY_DSN,
+  },
+  hooks: {
+    postPublish: [
+      {
+        file: "sentry-expo/upload-sourcemaps",
+        config: {
+          organization: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+        },
+      },
+    ],
   },
 };

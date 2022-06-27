@@ -1,5 +1,3 @@
-import "./src/global";
-import "react-native-get-random-values";
 import "@ethersproject/shims";
 import {
   Inter_400Regular,
@@ -8,22 +6,25 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
+import { providers } from "ethers";
+import AppLoading from "expo-app-loading";
+import Constants from "expo-constants";
+import * as SecureStore from "expo-secure-store";
 import { NativeBaseProvider } from "native-base";
+import { useEffect } from "react";
+import "react-native-get-random-values";
+import { MMKV } from "react-native-mmkv";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import * as Sentry from "sentry-expo";
+import { createClient, createStorage, WagmiConfig } from "wagmi";
+import "./src/global";
 import AppNavigator from "./src/navigators/AppNavigator";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
-import AppLoading from "expo-app-loading";
-import { createClient, createStorage, WagmiConfig } from "wagmi";
-import { MMKV } from "react-native-mmkv";
-import { providers } from "ethers";
-import { PersistGate } from "redux-persist/integration/react";
-import { useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
-import Constants from "expo-constants";
 
 const storage = new MMKV();
 
@@ -41,6 +42,11 @@ const wagmiClient = createClient({
     },
   }),
 });
+
+Sentry.init({
+  dsn: Constants.manifest?.extra?.sentryDsn,
+});
+
 const queryClient = new QueryClient();
 
 const App = () => {
