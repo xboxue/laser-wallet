@@ -68,20 +68,20 @@ const SignUpBackUpScreen = () => {
           mt="4"
           onPress={async () => {
             try {
-              GoogleSignin.configure({
-                scopes: ["https://www.googleapis.com/auth/drive.file"],
-              });
+              // GoogleSignin.configure({
+              //   scopes: ["https://www.googleapis.com/auth/drive.file"],
+              // });
 
-              await GoogleSignin.signIn();
-              const { accessToken } = await GoogleSignin.getTokens();
+              // await GoogleSignin.signIn();
+              // const { accessToken } = await GoogleSignin.getTokens();
               setLoading(true);
               const { owner, recoveryOwner, walletAddress } =
                 await createWallet();
 
-              await createBackup(
-                accessToken,
-                recoveryOwner.getPrivateKeyString()
-              );
+              // await createBackup(
+              //   accessToken,
+              //   recoveryOwner.getPrivateKeyString()
+              // );
 
               dispatch(setOwnerAddress(owner.getAddressString()));
               dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
