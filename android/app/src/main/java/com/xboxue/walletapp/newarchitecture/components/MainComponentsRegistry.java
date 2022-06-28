@@ -1,4 +1,4 @@
-package com.laser.wallet.newarchitecture.components;
+package com.xboxue.walletapp.newarchitecture.components;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;
