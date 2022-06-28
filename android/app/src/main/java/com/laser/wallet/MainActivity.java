@@ -1,4 +1,4 @@
-package com.xboxue.walletapp;
+package com.laser.wallet;
 
 import android.os.Build;
 import android.os.Bundle;

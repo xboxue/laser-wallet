@@ -1,8 +1,8 @@
 import "dotenv/config";
 
 export default {
-  name: "wallet-app",
-  slug: "wallet-app",
+  name: "Laser",
+  slug: "laser-wallet",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
@@ -20,14 +20,14 @@ export default {
     supportsTablet: true,
     googleServicesFile: "./GoogleService-Info.plist",
     buildNumber: "2",
-    bundleIdentifier: "com.xboxue.walletapp",
+    bundleIdentifier: "com.laser.wallet",
   },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
       backgroundColor: "#FFFFFF",
     },
-    package: "com.xboxue.walletapp",
+    package: "com.laser.wallet",
   },
   web: {
     favicon: "./assets/favicon.png",
