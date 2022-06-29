@@ -33,7 +33,7 @@ const SignUpGuardiansScreen = () => {
         <Button mt="4" onPress={() => navigation.navigate("SignUpAddGuardian")}>
           Add guardian
         </Button>
-        <Button mt="4" onPress={() => navigation.navigate("SignUpBackUp")}>
+        <Button mt="4" onPress={() => navigation.navigate("SignUpBackup")}>
           Next
         </Button>
       </Box>

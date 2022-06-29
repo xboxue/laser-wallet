@@ -1,58 +1,8 @@
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import axios from "axios";
-import Wallet from "ethereumjs-wallet";
-import Constants from "expo-constants";
+import { useNavigation } from "@react-navigation/native";
 import { Box, Button, Text } from "native-base";
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setOwnerAddress,
-  setOwnerPrivateKey,
-  setRecoveryOwnerAddress,
-  setWalletAddress,
-} from "../features/auth/authSlice";
-import { selectGuardians } from "../features/guardians/guardiansSlice";
 
-const SignUpBackUpScreen = () => {
-  const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
-  const guardians = useSelector(selectGuardians);
-
-  const createWallet = async () => {
-    const owner = Wallet.generate();
-    const recoveryOwner = Wallet.generate();
-
-    const { data } = await axios.post(
-      `${Constants.manifest?.extra?.relayerUrl}/wallets`,
-      {
-        owner: owner.getAddressString(),
-        recoveryOwner: recoveryOwner.getAddressString(),
-        guardians: guardians.map((guardian) => guardian.address),
-      }
-    );
-
-    if (!data.walletAddress) throw new Error("Wallet creation failed");
-
-    return { owner, recoveryOwner, walletAddress: data.walletAddress };
-  };
-
-  const createBackup = async (accessToken: string, privateKey: string) => {
-    const { data: folder } = await axios.post(
-      `https://www.googleapis.com/drive/v3/files?key=${Constants.manifest?.extra?.googleDriveApiKey}`,
-      { name: "Laser", mimeType: "application/vnd.google-apps.folder" },
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-
-    // TODO: Fix this
-    const { data } = await axios.post(
-      `https://www.googleapis.com/drive/v3/files?key=${Constants.manifest?.extra?.googleDriveApiKey}`,
-      {
-        parents: [folder.id],
-        name: `${privateKey}`,
-      },
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-  };
+const SignUpBackupScreen = () => {
+  const navigation = useNavigation();
 
   return (
     <Box>
@@ -64,35 +14,8 @@ const SignUpBackUpScreen = () => {
         </Text>
 
         <Button
-          isLoading={loading}
           mt="4"
-          onPress={async () => {
-            try {
-              // GoogleSignin.configure({
-              //   scopes: ["https://www.googleapis.com/auth/drive.file"],
-              // });
-
-              // await GoogleSignin.signIn();
-              // const { accessToken } = await GoogleSignin.getTokens();
-              setLoading(true);
-              const { owner, recoveryOwner, walletAddress } =
-                await createWallet();
-
-              // await createBackup(
-              //   accessToken,
-              //   recoveryOwner.getPrivateKeyString()
-              // );
-
-              dispatch(setOwnerAddress(owner.getAddressString()));
-              dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
-              dispatch(
-                setRecoveryOwnerAddress(recoveryOwner.getAddressString())
-              );
-              dispatch(setWalletAddress(walletAddress));
-            } finally {
-              setLoading(false);
-            }
-          }}
+          onPress={() => navigation.navigate("SignUpBackupPassword")}
         >
           Back up on Google Drive
         </Button>
@@ -101,4 +24,4 @@ const SignUpBackUpScreen = () => {
   );
 };
 
-export default SignUpBackUpScreen;
+export default SignUpBackupScreen;

@@ -10,12 +10,13 @@ import SendAmountScreen from "../screens/SendAmountScreen";
 import SendAssetScreen from "../screens/SendAssetScreen";
 import SendConfirmScreen from "../screens/SendConfirmScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
-import SignUpBackUpScreen from "../screens/SignUpBackUpScreen";
+import SignUpBackUpScreen from "../screens/SignUpBackupScreen";
 import SignUpGuardiansScreen from "../screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "../screens/SignUpPasscodeScreen";
 import StartScreen from "../screens/StartScreen";
 import { useSelector } from "react-redux";
 import { selectOwnerAddress } from "../features/auth/authSlice";
+import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
 
 const Stack = createStackNavigator();
 
@@ -57,7 +58,11 @@ const AppNavigator = () => {
             name="SignUpAddGuardian"
             component={SignUpAddGuardianScreen}
           />
-          <Stack.Screen name="SignUpBackUp" component={SignUpBackUpScreen} />
+          <Stack.Screen name="SignUpBackup" component={SignUpBackUpScreen} />
+          <Stack.Screen
+            name="SignUpBackupPassword"
+            component={SignUpBackupPasswordScreen}
+          />
         </>
       )}
     </Stack.Navigator>
