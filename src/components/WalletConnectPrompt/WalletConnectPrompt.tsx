@@ -15,6 +15,7 @@ import hexToAscii from "../../utils/hexToAscii";
 import Constants from "expo-constants";
 import { useState } from "react";
 import { reject } from "lodash";
+import { selectChainId } from "../../features/network/networkSlice";
 
 interface Props {
   walletAddress: string;
@@ -25,7 +26,8 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const pending = useSelector(selectPending);
   const callRequest = useSelector(selectCallRequest);
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
-  const provider = useProvider({ chainId: 5 });
+  const chainId = useSelector(selectChainId);
+  const provider = useProvider({ chainId });
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
@@ -107,7 +109,6 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
                 onPress={() =>
                   connector.approveSession({
                     accounts: [walletAddress],
-                    chainId: 5,
                   })
                 }
               >

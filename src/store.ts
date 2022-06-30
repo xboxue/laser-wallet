@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from "redux-persist";
 import createSecureStore from "redux-persist-expo-securestore";
 import authReducer from "./features/auth/authSlice";
+import networkReducer from "./features/network/networkSlice";
 import guardiansReducer from "./features/guardians/guardiansSlice";
 import walletConnectReducer from "./features/walletConnect/walletConnectSlice";
 
@@ -9,6 +10,7 @@ export const store = configureStore({
   reducer: {
     walletConnect: walletConnectReducer,
     guardians: guardiansReducer,
+    network: networkReducer,
     auth: persistReducer(
       { key: "auth", storage: createSecureStore() },
       authReducer

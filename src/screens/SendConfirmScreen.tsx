@@ -13,18 +13,20 @@ import {
   selectOwnerPrivateKey,
   selectWalletAddress,
 } from "../features/auth/authSlice";
+import { selectChainId } from "../features/network/networkSlice";
 import useTokenBalances from "../hooks/useTokenBalances";
 import formatAddress from "../utils/formatAddress";
 
 const SendConfirmScreen = ({ route }) => {
-  const provider = useProvider({ chainId: 5 });
+  const chainId = useSelector(selectChainId);
+  const provider = useProvider({ chainId });
   const walletAddress = useSelector(selectWalletAddress);
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
 
   const [sending, setSending] = useState(false);
   const { refetch: refetchBalance } = useBalance({
     addressOrName: walletAddress,
-    chainId: 5,
+    chainId,
   });
   const { refetch: refetchTokenBalances } = useTokenBalances(
     [walletAddress],
