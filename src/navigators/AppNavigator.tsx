@@ -17,6 +17,8 @@ import StartScreen from "../screens/StartScreen";
 import { useSelector } from "react-redux";
 import { selectOwnerAddress } from "../features/auth/authSlice";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
+import SettingsScreen from "../screens/SettingsScreen";
+import SettingsNetworkScreen from "../screens/SettingsNetworkScreen";
 
 const Stack = createStackNavigator();
 
@@ -27,17 +29,26 @@ const AppNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         ...TransitionPresets.SlideFromRightIOS,
-        headerTitleStyle: { display: "none" },
+        headerTitle: "",
       }}
     >
       {ownerAddress ? (
         <>
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen name="SendAddress" component={SendAddressScreen} />
           <Stack.Screen name="SendAsset" component={SendAssetScreen} />
           <Stack.Screen name="SendAmount" component={SendAmountScreen} />
           <Stack.Screen name="SendConfirm" component={SendConfirmScreen} />
           <Stack.Screen name="QRCodeScan" component={QRCodeScanScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen
+            name="SettingsNetwork"
+            component={SettingsNetworkScreen}
+          />
         </>
       ) : (
         <>

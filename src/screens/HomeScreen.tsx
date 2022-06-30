@@ -59,13 +59,21 @@ const HomeScreen = () => {
 
   return (
     <Box flex={1}>
-      <Box p="4">
+      <Box flexDir="row" justifyContent="space-between" px="1">
+        <IconButton
+          icon={<Icon as={Ionicons} name="settings-outline" />}
+          onPress={() => {
+            navigation.navigate("Settings");
+          }}
+        />
         <IconButton
           icon={<Icon as={Ionicons} name="qr-code-outline" />}
           onPress={() => {
             navigation.navigate("QRCodeScan");
           }}
         />
+      </Box>
+      <Box p="4">
         <Pressable onPress={() => Clipboard.setStringAsync(walletAddress)}>
           {({ isPressed }) => (
             <Box
