@@ -1,8 +1,8 @@
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import Wallet from "ethereumjs-wallet";
 import Constants from "expo-constants";
-import { Box, Button, Text } from "native-base";
+import { Box, Button, FormControl, Input, Text } from "native-base";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -12,11 +12,15 @@ import {
   setWalletAddress,
 } from "../features/auth/authSlice";
 import { selectGuardians } from "../features/guardians/guardiansSlice";
+import { createBackup, isValidPassword } from "../services/cloudBackup";
 
-const SignUpBackUpScreen = () => {
-  const dispatch = useDispatch();
+const SignUpBackupPasswordScreen = () => {
+  const navigation = useNavigation();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const guardians = useSelector(selectGuardians);
+  const dispatch = useDispatch();
 
   const createWallet = async () => {
     const owner = Wallet.generate();
@@ -36,52 +40,58 @@ const SignUpBackUpScreen = () => {
     return { owner, recoveryOwner, walletAddress: data.walletAddress };
   };
 
-  const createBackup = async (accessToken: string, privateKey: string) => {
-    const { data: folder } = await axios.post(
-      `https://www.googleapis.com/drive/v3/files?key=${Constants.manifest?.extra?.googleDriveApiKey}`,
-      { name: "Laser", mimeType: "application/vnd.google-apps.folder" },
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-
-    // TODO: Fix this
-    const { data } = await axios.post(
-      `https://www.googleapis.com/drive/v3/files?key=${Constants.manifest?.extra?.googleDriveApiKey}`,
-      {
-        parents: [folder.id],
-        name: `${privateKey}`,
-      },
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-  };
-
   return (
     <Box>
       <Box p="4">
-        <Text variant="subtitle1">Back up your recovery wallet</Text>
-        <Text>
-          Store the encrypted key of your recovery wallet. This will be used to
-          recover your funds in case your device is lost.
+        <Text variant="subtitle1" mb="4">
+          Create password
         </Text>
-
+        <FormControl isInvalid={!isValidPassword(password)}>
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            autoFocus
+            size="lg"
+          />
+          <FormControl.ErrorMessage>
+            {password && password.length < 8 && "Must be at least 8 characters"}
+          </FormControl.ErrorMessage>
+        </FormControl>
+        <FormControl
+          isInvalid={!!confirmPassword && password !== confirmPassword}
+        >
+          <Input
+            isDisabled={!isValidPassword(password)}
+            type="password"
+            mt="3"
+            placeholder="Confirm password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            size="lg"
+          />
+          <FormControl.ErrorMessage>
+            Passwords don't match
+          </FormControl.ErrorMessage>
+        </FormControl>
         <Button
           isLoading={loading}
+          isDisabled={
+            !isValidPassword(password) || password !== confirmPassword
+          }
           mt="4"
           onPress={async () => {
             try {
-              // GoogleSignin.configure({
-              //   scopes: ["https://www.googleapis.com/auth/drive.file"],
-              // });
-
-              // await GoogleSignin.signIn();
-              // const { accessToken } = await GoogleSignin.getTokens();
               setLoading(true);
               const { owner, recoveryOwner, walletAddress } =
                 await createWallet();
 
-              // await createBackup(
-              //   accessToken,
-              //   recoveryOwner.getPrivateKeyString()
-              // );
+              await createBackup(
+                recoveryOwner.getPrivateKeyString(),
+                password,
+                recoveryOwner.getAddressString()
+              );
 
               dispatch(setOwnerAddress(owner.getAddressString()));
               dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
@@ -94,11 +104,11 @@ const SignUpBackUpScreen = () => {
             }
           }}
         >
-          Back up on Google Drive
+          Create backup
         </Button>
       </Box>
     </Box>
   );
 };
 
-export default SignUpBackUpScreen;
+export default SignUpBackupPasswordScreen;

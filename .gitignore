@@ -10,6 +10,8 @@ npm-debug.*
 *.orig.*
 web-build/
 .env
+ios/sentry.properties
+android/sentry.properties
 
 # macOS
 .DS_Store
