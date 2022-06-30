@@ -58,6 +58,18 @@
     <string>Allow $(PRODUCT_NAME) to use Face ID</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your microphone</string>
+    <key>NSUbiquitousContainers</key>
+    <dict>
+      <key>iCloud.com.laser.wallet</key>
+      <dict>
+        <key>NSUbiquitousContainerIsDocumentScopePublic</key>
+        <true/>
+        <key>NSUbiquitousContainerSupportedFolderLevels</key>
+        <string>One</string>
+        <key>NSUbiquitousContainerName</key>
+        <string>Laser</string>
+      </dict>
+    </dict>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>
