@@ -9629,9 +9629,9 @@ react-is@^18.0.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.1.0.tgz#61aaed3096d30eacf2a2127118b5b41387d32a67"
   integrity sha512-Fl7FuabXsJnV5Q1qIOQwx/sagGF18kogb4gpfcG4gjLBWO0WDiiz1ko/ExayuxE7InyQkBLkxRFG5oxY6Uu3Kg==
 
-"react-native-cloud-fs@https://github.com/brunobar79/react-native-cloud-fs.git":
+"react-native-cloud-fs@https://github.com/xboxue/react-native-cloud-fs.git":
   version "2.4.0"
-  resolved "https://github.com/brunobar79/react-native-cloud-fs.git#e7e3111fb427b6df5e97f61c700ca1e64636cad8"
+  resolved "https://github.com/xboxue/react-native-cloud-fs.git#3d25f1ddee23072fdb4cda7b6f2faa552ca8db8e"
 
 react-native-codegen@^0.0.17:
   version "0.0.17"
@@ -9658,6 +9658,14 @@ react-native-crypto@^2.0.1:
     pbkdf2 "3.0.8"
     public-encrypt "^4.0.0"
     randomfill "^1.0.3"
+
+react-native-fs@^2.20.0:
+  version "2.20.0"
+  resolved "https://registry.yarnpkg.com/react-native-fs/-/react-native-fs-2.20.0.tgz#05a9362b473bfc0910772c0acbb73a78dbc810f6"
+  integrity sha512-VkTBzs7fIDUiy/XajOSNk0XazFE9l+QlMAce7lGuebZcag5CnjszB+u4BdqzwaQOdcYb5wsJIsqq4kxInIRpJQ==
+  dependencies:
+    base-64 "^0.1.0"
+    utf8 "^3.0.0"
 
 react-native-gesture-handler@~2.2.1:
   version "2.2.1"

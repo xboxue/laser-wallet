@@ -6,13 +6,14 @@ declare module "react-native-cloud-fs" {
   function copyToCloud(options: {
     mimeType: string;
     scope: Scope;
-    sourcePath: { uri: string };
+    sourcePath: { uri?: string; path?: string };
     targetPath: string;
   }): Promise<string>;
 
   function fileExists(options: {
     scope: Scope;
-    targetPath: string;
+    targetPath?: string;
+    fileId?: string;
   }): Promise<boolean>;
 
   function listFiles(options: {

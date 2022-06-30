@@ -10,7 +10,7 @@ import SendAmountScreen from "../screens/SendAmountScreen";
 import SendAssetScreen from "../screens/SendAssetScreen";
 import SendConfirmScreen from "../screens/SendConfirmScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
-import SignUpBackUpScreen from "../screens/SignUpBackupScreen";
+import SignUpBackupScreen from "../screens/SignUpBackupScreen";
 import SignUpGuardiansScreen from "../screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "../screens/SignUpPasscodeScreen";
 import StartScreen from "../screens/StartScreen";
@@ -58,7 +58,7 @@ const AppNavigator = () => {
             name="SignUpAddGuardian"
             component={SignUpAddGuardianScreen}
           />
-          <Stack.Screen name="SignUpBackup" component={SignUpBackUpScreen} />
+          <Stack.Screen name="SignUpBackup" component={SignUpBackupScreen} />
           <Stack.Screen
             name="SignUpBackupPassword"
             component={SignUpBackupPasswordScreen}
