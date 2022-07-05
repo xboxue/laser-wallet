@@ -77,11 +77,12 @@ const SignUpBackupPasswordScreen = () => {
                 recoveryOwnerAddress: recoveryOwner.getAddressString(),
               });
 
-              await createBackup(
-                recoveryOwner.getPrivateKeyString(),
-                password,
-                recoveryOwner.getAddressString()
-              );
+              // TODO: Fix
+              // await createBackup(
+              //   recoveryOwner.getPrivateKeyString(),
+              //   password,
+              //   recoveryOwner.getAddressString()
+              // );
 
               dispatch(setOwnerAddress(owner.getAddressString()));
               dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
