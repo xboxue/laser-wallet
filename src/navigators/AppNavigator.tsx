@@ -37,11 +37,7 @@ const AppNavigator = () => {
     >
       {ownerAddress ? (
         <>
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{ headerShown: false }}
-          />
+          <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="SendAddress" component={SendAddressScreen} />
           <Stack.Screen name="SendAsset" component={SendAssetScreen} />
           <Stack.Screen name="SendAmount" component={SendAmountScreen} />

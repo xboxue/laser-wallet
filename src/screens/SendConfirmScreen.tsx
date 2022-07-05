@@ -1,8 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
-import { ethers, providers } from "ethers";
+import { ethers } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
-import Constants from "expo-constants";
 import { Laser } from "laser-sdk";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
@@ -15,6 +13,7 @@ import {
 } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import useTokenBalances from "../hooks/useTokenBalances";
+import { sendTransaction } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
 
 const SendConfirmScreen = ({ route }) => {
@@ -57,10 +56,11 @@ const SendConfirmScreen = ({ route }) => {
         gasTip: 30000,
       });
 
-      const { data: txData } = await axios.post(
-        `${Constants.manifest?.extra?.relayerUrl}/transactions`,
-        { transaction, sender: walletAddress, chainId }
-      );
+      const txData = await sendTransaction({
+        transaction,
+        sender: walletAddress,
+        chainId,
+      });
       await provider.waitForTransaction(txData.hash);
 
       refetchBalance();
@@ -86,10 +86,11 @@ const SendConfirmScreen = ({ route }) => {
         gasTip: 30000,
       });
 
-      const { data: txData } = await axios.post<providers.TransactionResponse>(
-        `${Constants.manifest?.extra?.relayerUrl}/transactions`,
-        { sender: walletAddress, transaction, chainId }
-      );
+      const txData = await sendTransaction({
+        sender: walletAddress,
+        transaction,
+        chainId,
+      });
       await provider.waitForTransaction(txData.hash);
 
       refetchBalance();

@@ -1,21 +1,19 @@
-import axios from "axios";
 import { ethers, utils } from "ethers";
 import { Laser } from "laser-sdk";
 import { Actionsheet, Button, Image, Stack, Text } from "native-base";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import { selectOwnerPrivateKey } from "../../features/auth/authSlice";
+import { selectChainId } from "../../features/network/networkSlice";
 import {
   selectCallRequest,
   selectConnector,
   selectPending,
   setCallRequest,
 } from "../../features/walletConnect/walletConnectSlice";
+import { sendTransaction } from "../../services/wallet";
 import hexToAscii from "../../utils/hexToAscii";
-import Constants from "expo-constants";
-import { useState } from "react";
-import { reject } from "lodash";
-import { selectChainId } from "../../features/network/networkSlice";
 
 interface Props {
   walletAddress: string;
@@ -71,10 +69,11 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
           gasTip: 30000,
         });
-        const { data: txData } = await axios.post(
-          `${Constants.manifest?.extra?.relayerUrl}/transactions`,
-          { transaction, sender: walletAddress }
-        );
+        const txData = await sendTransaction({
+          sender: walletAddress,
+          transaction,
+          chainId,
+        });
         connector.approveRequest({
           id: callRequest.id,
           result: txData.hash,
@@ -109,6 +108,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
                 onPress={() =>
                   connector.approveSession({
                     accounts: [walletAddress],
+                    chainId,
                   })
                 }
               >
