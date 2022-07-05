@@ -16,12 +16,16 @@ const WalletBalance = ({ walletAddress }: Props) => {
   } = useBalance({
     addressOrName: walletAddress,
     chainId,
-    watch: true,
+    formatUnits: "ether",
   });
 
   if (isLoading) return <Skeleton />;
 
-  return <Text variant="h4">{balance?.formatted.slice(0, 6)} ETH</Text>;
+  return (
+    <Text variant="h4">
+      {balance?.formatted} {balance?.symbol}
+    </Text>
+  );
 };
 
 export default WalletBalance;

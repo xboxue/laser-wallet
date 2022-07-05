@@ -28,6 +28,8 @@ import {
   WagmiConfig,
 } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
+import { infuraProvider } from "wagmi/providers/infura";
+import { publicProvider } from "wagmi/providers/public";
 import AppNavigator from "./src/navigators/AppNavigator";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
@@ -35,7 +37,9 @@ import theme from "./src/styles/theme";
 const storage = new MMKV();
 
 const { provider } = configureChains(defaultChains, [
+  infuraProvider({ infuraId: Constants.manifest?.extra?.infuraApiKey }),
   alchemyProvider({ alchemyId: Constants.manifest?.extra?.alchemyApiKey }),
+  publicProvider(),
 ]);
 
 const wagmiClient = createClient({
@@ -55,6 +59,7 @@ Sentry.init({
 const queryClient = new QueryClient();
 
 const App = () => {
+  Constants.manifest.extra.relayerUrl = "https://1fcb-38-34-50-111.ngrok.io";
   const [loaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,

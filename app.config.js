@@ -35,6 +35,7 @@ export default {
   plugins: ["@react-native-google-signin/google-signin", "sentry-expo"],
   extra: {
     relayerUrl: process.env.RELAYER_URL,
+    infuraApiKey: process.env.INFURA_API_KEY,
     alchemyApiKey: process.env.ALCHEMY_API_KEY,
     etherscanApiKey: process.env.ETHERSCAN_API_KEY,
     googleDriveApiKey: process.env.GOOGLE_DRIVE_API_KEY,

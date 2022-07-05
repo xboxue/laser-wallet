@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DEFAULT_CHAIN } from "../../constants/chains";
 import { RootState } from "../../store";
 
 interface NetworkState {
@@ -6,7 +7,7 @@ interface NetworkState {
 }
 
 const initialState: NetworkState = {
-  chainId: 5,
+  chainId: DEFAULT_CHAIN,
 };
 
 const networkSlice = createSlice({

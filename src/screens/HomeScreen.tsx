@@ -11,6 +11,7 @@ import TransactionHistory from "../components/TransactionHistory/TransactionHist
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
 import { selectWalletAddress } from "../features/auth/authSlice";
+import { selectChainId } from "../features/network/networkSlice";
 import formatAddress from "../utils/formatAddress";
 
 const routes = [

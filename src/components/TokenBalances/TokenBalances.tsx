@@ -25,7 +25,9 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
 
   return (
     <FlatList
-      data={zip(tokens, balances).filter(([_, balance]) => !balance.isZero())}
+      data={zip(tokens, balances).filter(
+        ([_, balance]) => balance && !balance.isZero()
+      )}
       contentContainerStyle={{ padding: 16 }}
       refreshControl={
         <RefreshControl refreshing={isLoading} onRefresh={refetch} />
