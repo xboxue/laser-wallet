@@ -1,3 +1,4 @@
+import { round } from "lodash";
 import { Skeleton, Text } from "native-base";
 import { useSelector } from "react-redux";
 import { useBalance } from "wagmi";
@@ -23,7 +24,7 @@ const WalletBalance = ({ walletAddress }: Props) => {
 
   return (
     <Text variant="h4">
-      {balance?.formatted} {balance?.symbol}
+      {round(balance?.formatted, 4)} {balance?.symbol}
     </Text>
   );
 };

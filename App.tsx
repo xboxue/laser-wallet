@@ -59,7 +59,6 @@ Sentry.init({
 const queryClient = new QueryClient();
 
 const App = () => {
-  Constants.manifest.extra.relayerUrl = "https://1fcb-38-34-50-111.ngrok.io";
   const [loaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,

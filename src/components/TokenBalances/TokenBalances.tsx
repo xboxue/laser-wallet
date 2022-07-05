@@ -1,8 +1,11 @@
+import { providers } from "ethers";
 import { formatEther } from "ethers/lib/utils";
-import { zip } from "lodash";
+import { round, zip } from "lodash";
 import { Box, FlatList, Image, Pressable, Skeleton, Text } from "native-base";
 import { RefreshControl } from "react-native";
-import tokens from "../../constants/tokens";
+import { useSelector } from "react-redux";
+import { CHAIN_TOKENS } from "../../constants/tokens";
+import { selectChainId } from "../../features/network/networkSlice";
 import useTokenBalances from "../../hooks/useTokenBalances";
 
 interface Props {
@@ -11,6 +14,10 @@ interface Props {
 }
 
 const TokenBalances = ({ walletAddress, onPress }: Props) => {
+  const chainId = useSelector(selectChainId);
+  const chain = providers.getNetwork(chainId).name;
+  const tokens = CHAIN_TOKENS[chain];
+
   const {
     data: balances,
     isLoading,
@@ -45,7 +52,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
               <Text ml="3">{token.name}</Text>
             </Box>
             <Text variant="subtitle1" ml="auto">
-              {formatEther(balance).slice(0, 6)}
+              {round(formatEther(balance), 4)}
             </Text>
           </Box>
         </Pressable>

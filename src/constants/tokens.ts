@@ -1,7 +1,8 @@
 import ethIcon from "crypto-icons-plus-128/src/ethereum.png";
 import uniswapIcon from "crypto-icons-plus-128/src/uniswap.png";
+import daiIcon from "crypto-icons-plus-128/src/multi-collateral-dai.png";
 
-const tokens = [
+export const GOERLI_TOKENS = [
   {
     symbol: "ETH",
     name: "Ethereum",
@@ -22,4 +23,28 @@ const tokens = [
   },
 ];
 
-export default tokens;
+export const KOVAN_TOKENS = [
+  {
+    symbol: "ETH",
+    name: "Ethereum",
+    address: "0x0000000000000000000000000000000000000000",
+    icon: ethIcon,
+  },
+  {
+    symbol: "WETH",
+    name: "Wrapped Ethereum",
+    address: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
+    icon: ethIcon,
+  },
+  {
+    symbol: "DAI",
+    name: "Dai Stablecoin",
+    address: "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa",
+    icon: daiIcon,
+  },
+];
+
+export const CHAIN_TOKENS = {
+  goerli: GOERLI_TOKENS,
+  kovan: KOVAN_TOKENS,
+};

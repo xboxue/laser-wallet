@@ -8,7 +8,7 @@ import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useBalance, useFeeData, useProvider } from "wagmi";
-import tokens from "../constants/tokens";
+import { CHAIN_TOKENS } from "../constants/tokens";
 import {
   selectOwnerPrivateKey,
   selectWalletAddress,
@@ -19,6 +19,8 @@ import formatAddress from "../utils/formatAddress";
 
 const SendConfirmScreen = ({ route }) => {
   const chainId = useSelector(selectChainId);
+  const chain = providers.getNetwork(chainId).name;
+  const tokens = CHAIN_TOKENS[chain];
   const provider = useProvider({ chainId });
   const walletAddress = useSelector(selectWalletAddress);
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
@@ -55,7 +57,7 @@ const SendConfirmScreen = ({ route }) => {
 
       const { data: txData } = await axios.post(
         `${Constants.manifest?.extra?.relayerUrl}/transactions`,
-        { transaction, sender: walletAddress }
+        { transaction, sender: walletAddress, chainId }
       );
       await provider.waitForTransaction(txData.hash);
 
@@ -84,7 +86,7 @@ const SendConfirmScreen = ({ route }) => {
 
       const { data: txData } = await axios.post<providers.TransactionResponse>(
         `${Constants.manifest?.extra?.relayerUrl}/transactions`,
-        { sender: walletAddress, transaction }
+        { sender: walletAddress, transaction, chainId }
       );
       await provider.waitForTransaction(txData.hash);
 
