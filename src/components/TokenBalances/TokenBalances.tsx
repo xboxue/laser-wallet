@@ -1,10 +1,9 @@
-import { providers } from "ethers";
 import { formatEther } from "ethers/lib/utils";
 import { round, zip } from "lodash";
 import { Box, FlatList, Image, Pressable, Skeleton, Text } from "native-base";
 import { RefreshControl } from "react-native";
 import { useSelector } from "react-redux";
-import { CHAIN_TOKENS } from "../../constants/tokens";
+import TOKENS from "../../constants/tokens";
 import { selectChainId } from "../../features/network/networkSlice";
 import useTokenBalances from "../../hooks/useTokenBalances";
 
@@ -15,8 +14,9 @@ interface Props {
 
 const TokenBalances = ({ walletAddress, onPress }: Props) => {
   const chainId = useSelector(selectChainId);
-  const chain = providers.getNetwork(chainId).name;
-  const tokens = CHAIN_TOKENS[chain];
+  const tokens = TOKENS.filter(
+    (token) => token.chainId === chainId || token.symbol === "ETH"
+  );
 
   const {
     data: balances,
@@ -44,7 +44,18 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
           onPress={() => onPress({ ...token, balance: formatEther(balance) })}
         >
           <Box flexDirection="row" alignItems="center" key={token.symbol}>
-            <Image source={token.icon} size="9" alt="ethereum-icon" />
+            <Image
+              source={
+                token.icon || {
+                  uri: token.logoURI.replace(
+                    "ipfs://",
+                    "https://cloudflare-ipfs.com/ipfs/"
+                  ),
+                }
+              }
+              size="9"
+              alt="token-icon"
+            />
             <Box>
               <Text variant="subtitle1" ml="3">
                 {token.symbol}

@@ -8,7 +8,7 @@ import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useBalance, useFeeData, useProvider } from "wagmi";
-import { CHAIN_TOKENS } from "../constants/tokens";
+import TOKENS from "../constants/tokens";
 import {
   selectOwnerPrivateKey,
   selectWalletAddress,
@@ -19,8 +19,10 @@ import formatAddress from "../utils/formatAddress";
 
 const SendConfirmScreen = ({ route }) => {
   const chainId = useSelector(selectChainId);
-  const chain = providers.getNetwork(chainId).name;
-  const tokens = CHAIN_TOKENS[chain];
+  const tokens = TOKENS.filter(
+    (token) => token.chainId === chainId || token.symbol === "ETH"
+  );
+
   const provider = useProvider({ chainId });
   const walletAddress = useSelector(selectWalletAddress);
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
