@@ -43,7 +43,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
         <Pressable
           onPress={() => onPress({ ...token, balance: formatEther(balance) })}
         >
-          <Box flexDirection="row" alignItems="center" key={token.symbol}>
+          <Box flexDirection="row" alignItems="center">
             <Image
               source={
                 token.icon || {
@@ -54,13 +54,11 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
                 }
               }
               size="9"
-              alt="token-icon"
+              alt="Token icon"
             />
-            <Box>
-              <Text variant="subtitle1" ml="3">
-                {token.symbol}
-              </Text>
-              <Text ml="3">{token.name}</Text>
+            <Box ml="3">
+              <Text variant="subtitle1">{token.symbol}</Text>
+              <Text>{token.name}</Text>
             </Box>
             <Text variant="subtitle1" ml="auto">
               {round(formatEther(balance), 4)}
