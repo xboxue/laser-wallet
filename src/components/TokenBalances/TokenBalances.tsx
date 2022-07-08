@@ -35,7 +35,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
       data={zip(tokens, balances).filter(
         ([_, balance]) => balance && !balance.isZero()
       )}
-      contentContainerStyle={{ padding: 16 }}
+      contentContainerStyle={{ padding: 16, paddingTop: 8 }}
       refreshControl={
         <RefreshControl refreshing={isLoading} onRefresh={refetch} />
       }
@@ -43,7 +43,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
         <Pressable
           onPress={() => onPress({ ...token, balance: formatEther(balance) })}
         >
-          <Box flexDirection="row" alignItems="center">
+          <Box flexDirection="row" alignItems="center" py="1">
             <Image
               source={
                 token.icon || {

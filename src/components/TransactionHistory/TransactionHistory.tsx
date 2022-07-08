@@ -1,43 +1,37 @@
-import { format, fromUnixTime } from "date-fns";
+import { format, fromUnixTime, isToday } from "date-fns";
 import { formatEther } from "ethers/lib/utils";
 import Constants from "expo-constants";
-import { orderBy } from "lodash";
+import { keyBy, orderBy, round } from "lodash";
 import { Box, FlatList, Image, Pressable, Text } from "native-base";
 import { useMemo } from "react";
 import { RefreshControl } from "react-native";
 import { useQuery } from "react-query";
 import { useSelector } from "react-redux";
+import { useProvider } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
+import { tokensByAddress } from "../../constants/tokens";
+import { TRANSACTION_TYPES } from "../../constants/transactions";
 import { selectChainId } from "../../features/network/networkSlice";
-import { getTransactions } from "../../services/etherscan";
+import {
+  getERC20Transfers,
+  getTransactions,
+  Transaction,
+  TransactionERC20,
+} from "../../services/etherscan";
 import formatAddress from "../../utils/formatAddress";
-interface Transaction {
-  blockNumber: string;
-  contractAddress: string;
-  errCode: string;
-  from: string;
-  gas: string;
-  gasUsed: string;
-  hash: string;
-  input: string;
-  isError: string;
-  timeStamp: string;
-  traceId: string;
-  to: string;
-  type: string;
-  value: string;
-}
+import getTransactionType from "../../utils/getTransactionType";
+import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
 
-interface TransactionERC20 extends Transaction {
-  nonce: string;
-  tokenName: string;
-  tokenSymbol: string;
-  tokenDecimal: string;
-  transactionIndex: string;
-  gasPrice: string;
-  cumulativeGasUsed: string;
-  confirmations: string;
-}
+const titles = {
+  [TRANSACTION_TYPES.CONTRACT_INTERACTION]: "Contract Interaction",
+  [TRANSACTION_TYPES.DEPLOY_CONTRACT]: "Contract Deployment",
+  [TRANSACTION_TYPES.SEND]: "Send",
+  [TRANSACTION_TYPES.TOKEN_APPROVE]: "Approve",
+  [TRANSACTION_TYPES.TOKEN_SET_APPROVAL_FOR_ALL]: "Set Approval for All",
+  [TRANSACTION_TYPES.TOKEN_SAFE_TRANSFER_FROM]: "Safe Transfer From",
+  [TRANSACTION_TYPES.TOKEN_TRANSFER]: "Transfer",
+  [TRANSACTION_TYPES.TOKEN_TRANSFER_FROM]: "Transfer From",
+};
 
 interface Props {
   walletAddress: string;
@@ -45,25 +39,37 @@ interface Props {
 
 const TransactionHistory = ({ walletAddress }: Props) => {
   const chainId = useSelector(selectChainId);
+  const provider = useProvider({ chainId });
 
+  // Only has transactions where ETH is sent to the wallet
+  // Filter out exec transactions from relayer
   const selectTransactions = (result: Transaction[]) =>
     result.filter(
       (transaction) =>
-        transaction.from !==
-        Constants.manifest?.extra?.relayerAddress.toLowerCase()
+        !isEqualCaseInsensitive(
+          transaction.from,
+          Constants.manifest?.extra?.relayerAddress
+        )
     );
 
+  // Has all the transactions to and from the wallet
+  // Filter out transactions to and from relayer
   const selectInternalTxs = (result: Transaction[]) =>
     result.filter(
       (transaction) =>
         transaction.type === "call" &&
-        transaction.from === walletAddress.toLowerCase() &&
-        transaction.to.toLowerCase() !==
-          Constants.manifest?.extra?.relayerAddress.toLowerCase()
+        !isEqualCaseInsensitive(
+          transaction.from,
+          Constants.manifest?.extra?.relayerAddress
+        ) &&
+        !isEqualCaseInsensitive(
+          transaction.to,
+          Constants.manifest?.extra?.relayerAddress
+        )
     );
 
   const {
-    data: transactions,
+    data: transactions = [],
     isLoading: txsLoading,
     refetch: refetchTxs,
   } = useQuery<Transaction[]>(
@@ -72,65 +78,115 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     { select: selectTransactions }
   );
 
+  // Determine the transaction type
   const {
-    data: internalTxs,
+    data: internalTxs = [],
     isLoading: internalTxsLoading,
     refetch: refetchInternalTxs,
-  } = useQuery<Transaction[]>(
-    "internalTxs",
-    () => getTransactions(walletAddress, chainId, true),
-    { select: selectInternalTxs }
+  } = useQuery<Transaction[]>("internalTxs", () =>
+    getTransactions(walletAddress, chainId, true)
+      .then(selectInternalTxs)
+      .then((transactions) =>
+        Promise.all(
+          transactions.map(async (transaction) => ({
+            ...transaction,
+            type: await getTransactionType(provider, transaction),
+          }))
+        )
+      )
+  );
+
+  const {
+    data: erc20Txs = [],
+    isLoading: erc20TxsLoading,
+    refetch: refetchERC20Txs,
+  } = useQuery<TransactionERC20[]>("erc20Txs", () =>
+    getERC20Transfers(walletAddress, chainId)
   );
 
   const allTransactions = useMemo(() => {
+    const erc20TxsByHash = keyBy(erc20Txs, "hash");
+
     return orderBy(
-      [...(internalTxs || []), ...(transactions || [])],
+      [
+        ...internalTxs.filter(
+          (transaction) =>
+            !erc20TxsByHash[transaction.hash] ||
+            // Remove redundant ERC20 transfer transactions
+            !isEqualCaseInsensitive(
+              erc20TxsByHash[transaction.hash]?.contractAddress,
+              transaction.to
+            )
+        ),
+        ...transactions,
+        ...erc20Txs,
+      ],
       "timeStamp",
       "desc"
     );
-  }, [transactions, internalTxs]);
+  }, [transactions, internalTxs, erc20Txs]);
+
+  const renderTitle = (transaction: Transaction) => {
+    // ERC20 transfer
+    if (transaction.tokenSymbol) {
+      if (isEqualCaseInsensitive(transaction.to, walletAddress))
+        return `Receive ${transaction.tokenSymbol}`;
+      return `Send ${transaction.tokenSymbol}`;
+    }
+
+    // Receive ETH
+    if (isEqualCaseInsensitive(transaction.to, walletAddress)) return "Receive";
+
+    return titles[transaction.type];
+  };
 
   return (
     <>
       <FlatList
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingTop: 8 }}
         data={allTransactions}
         refreshControl={
           <RefreshControl
-            refreshing={txsLoading || internalTxsLoading}
+            refreshing={txsLoading || internalTxsLoading || erc20TxsLoading}
             onRefresh={() => {
               refetchTxs();
               refetchInternalTxs();
+              refetchERC20Txs();
             }}
           />
         }
-        renderItem={({ item: transaction }) => (
-          <Pressable>
-            <Box flexDirection="row" alignItems="center">
-              <Image source={ethIcon} size="9" alt="Ethereum icon" />
-              <Box ml="3">
-                <Text variant="subtitle1">
-                  {transaction.to === walletAddress.toLowerCase()
-                    ? "Received"
-                    : "Send"}
-                </Text>
-                <Text>
-                  {format(
-                    fromUnixTime(parseInt(transaction.timeStamp, 10)),
-                    "LLL d"
-                  )}{" "}
-                  ·{" "}
-                  {transaction.to === walletAddress.toLowerCase()
-                    ? `From: ${formatAddress(transaction.from)}`
-                    : `To: ${formatAddress(transaction.to)}`}
+        renderItem={({ item: transaction }) => {
+          const isToken = transaction.tokenName;
+          const tokenUri = tokensByAddress[
+            transaction.contractAddress
+          ]?.logoURI?.replace("ipfs://", "https://cloudflare-ipfs.com/ipfs/");
+          const date = fromUnixTime(parseInt(transaction.timeStamp));
+
+          return (
+            <Pressable>
+              <Box flexDirection="row" alignItems="center" py="2">
+                <Image
+                  source={isToken && tokenUri ? { uri: tokenUri } : ethIcon}
+                  size="9"
+                  alt="Ethereum icon"
+                />
+                <Box ml="3">
+                  <Text variant="subtitle1">{renderTitle(transaction)}</Text>
+                  <Text>
+                    {format(date, isToday(date) ? "h:mm a" : "LLL d")} ·{" "}
+                    {isEqualCaseInsensitive(transaction.to, walletAddress)
+                      ? `From: ${formatAddress(transaction.from)}`
+                      : `To: ${formatAddress(transaction.to)}`}
+                  </Text>
+                </Box>
+                <Text variant="subtitle1" ml="auto">
+                  {round(formatEther(transaction.value), 4)}{" "}
+                  {transaction.tokenSymbol || "ETH"}
                 </Text>
               </Box>
-              <Text variant="subtitle1" ml="auto">
-                {formatEther(transaction.value)} ETH
-              </Text>
-            </Box>
-          </Pressable>
-        )}
+            </Pressable>
+          );
+        }}
       />
     </>
   );

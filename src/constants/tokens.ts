@@ -1,3 +1,4 @@
+import { keyBy } from "lodash";
 import ethIcon from "../../assets/eth-icon.png";
 
 const TOKENS = [
@@ -6090,3 +6091,6 @@ const TOKENS = [
 ];
 
 export default TOKENS;
+export const tokensByAddress = keyBy(TOKENS, (token) =>
+  token.address.toLowerCase()
+);
