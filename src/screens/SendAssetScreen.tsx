@@ -10,22 +10,20 @@ const SendAssetScreen = ({ route }) => {
 
   return (
     <Box>
-      <Box p="4">
-        <Text variant="subtitle1" mb="3">
-          Choose asset
-        </Text>
-        {walletAddress && (
-          <TokenBalances
-            walletAddress={walletAddress}
-            onPress={(token) =>
-              navigation.navigate("SendAmount", {
-                ...route.params,
-                token,
-              })
-            }
-          />
-        )}
-      </Box>
+      <Text variant="subtitle1" mb="3" p="4" pb="0">
+        Choose asset
+      </Text>
+      {walletAddress && (
+        <TokenBalances
+          walletAddress={walletAddress}
+          onPress={(token) =>
+            navigation.navigate("SendAmount", {
+              ...route.params,
+              token,
+            })
+          }
+        />
+      )}
     </Box>
   );
 };
