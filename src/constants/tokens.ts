@@ -2758,6 +2758,15 @@ const TOKENS = [
       "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
   },
   {
+    name: "USDCoin",
+    address: "0x07865c6e87b9f70255377e024ace6630c1eaa37f",
+    symbol: "USDC",
+    decimals: 6,
+    chainId: 5,
+    logoURI:
+      "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
+  },
+  {
     chainId: 10,
     address: "0x3e7eF8f50246f725885102E8238CBba33F276747",
     name: "BarnBridge",

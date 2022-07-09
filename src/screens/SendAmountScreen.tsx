@@ -1,10 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
 import { BigNumber } from "ethers";
-import { parseEther } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { round } from "lodash";
 import { Box, Button, Text } from "native-base";
 import { useState } from "react";
 import NumberPad from "../components/NumberPad/NumberPad";
+import formatAmount from "../utils/formatAmount";
 
 const SendAmountScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -19,7 +20,8 @@ const SendAmountScreen = ({ route }) => {
           {amount}
         </Text>
         <Text>
-          {token.symbol} balance: {round(token.balance, 4)}
+          {token.symbol} balance:{" "}
+          {formatAmount(token.balance, { decimals: token.decimals })}
         </Text>
         <Button
           mt="5"
@@ -31,7 +33,7 @@ const SendAmountScreen = ({ route }) => {
           }
           isDisabled={
             !amount ||
-            BigNumber.from(parseEther(amount)).gt(parseEther(token.balance))
+            BigNumber.from(parseUnits(amount, token.decimals)).gt(token.balance)
           }
         >
           Next

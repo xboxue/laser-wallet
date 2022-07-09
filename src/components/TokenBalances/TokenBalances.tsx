@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import TOKENS from "../../constants/tokens";
 import { selectChainId } from "../../features/network/networkSlice";
 import useTokenBalances from "../../hooks/useTokenBalances";
+import formatAmount from "../../utils/formatAmount";
 
 interface Props {
   walletAddress: string;
@@ -41,7 +42,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
       }
       renderItem={({ item: [token, balance] }) => (
         <Pressable
-          onPress={() => onPress({ ...token, balance: formatEther(balance) })}
+          onPress={() => onPress({ ...token, balance: balance.toString() })}
         >
           <Box flexDirection="row" alignItems="center" py="1">
             <Image
@@ -61,7 +62,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
               <Text>{token.name}</Text>
             </Box>
             <Text variant="subtitle1" ml="auto">
-              {round(formatEther(balance), 4)}
+              {formatAmount(balance, { decimals: token.decimals })}
             </Text>
           </Box>
         </Pressable>

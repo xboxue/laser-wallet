@@ -1,5 +1,4 @@
 import { format, fromUnixTime, isToday } from "date-fns";
-import { formatEther } from "ethers/lib/utils";
 import Constants from "expo-constants";
 import { keyBy, orderBy, round } from "lodash";
 import { Box, FlatList, Image, Pressable, Text } from "native-base";
@@ -19,6 +18,7 @@ import {
   TransactionERC20,
 } from "../../services/etherscan";
 import formatAddress from "../../utils/formatAddress";
+import formatAmount from "../../utils/formatAmount";
 import getTransactionType from "../../utils/getTransactionType";
 import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
 
@@ -180,7 +180,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
                   </Text>
                 </Box>
                 <Text variant="subtitle1" ml="auto">
-                  {round(formatEther(transaction.value), 4)}{" "}
+                  {formatAmount(transaction.value)}{" "}
                   {transaction.tokenSymbol || "ETH"}
                 </Text>
               </Box>

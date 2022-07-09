@@ -2,6 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { ethers } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 import { Laser } from "laser-sdk";
+import { round } from "lodash";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
 import { useSelector } from "react-redux";
@@ -15,6 +16,7 @@ import { selectChainId } from "../features/network/networkSlice";
 import useTokenBalances from "../hooks/useTokenBalances";
 import { sendTransaction } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
+import formatAmount from "../utils/formatAmount";
 
 const SendConfirmScreen = ({ route }) => {
   const chainId = useSelector(selectChainId);
@@ -104,49 +106,48 @@ const SendConfirmScreen = ({ route }) => {
   const navigation = useNavigation();
 
   return (
-    <Box flex="1">
-      <Box p="4" flex="1">
-        <Text variant="subtitle1">Review</Text>
-        <Stack space="4">
-          <Box flexDirection="row" justifyContent="space-between">
-            <Text variant="subtitle2">Amount</Text>
+    <Box p="4">
+      <Text variant="subtitle1" pb="2">
+        Review
+      </Text>
+      <Stack space="4">
+        <Box flexDirection="row" justifyContent="space-between">
+          <Text variant="subtitle2">Amount</Text>
+          <Text variant="subtitle2">
+            {route.params.amount} {route.params.token.symbol}
+          </Text>
+        </Box>
+        <Box flexDirection="row" justifyContent="space-between">
+          <Text variant="subtitle2">To</Text>
+          <Text variant="subtitle2">{formatAddress(route.params.address)}</Text>
+        </Box>
+        <Box flexDirection="row" justifyContent="space-between">
+          <Text variant="subtitle2">Gas (estimate)</Text>
+          {!loadingFeeData &&
+          feeData?.maxFeePerGas &&
+          feeData?.maxPriorityFeePerGas ? (
             <Text variant="subtitle2">
-              {route.params.amount} {route.params.token.symbol}
+              {formatAmount(
+                feeData.maxFeePerGas
+                  .add(feeData.maxPriorityFeePerGas)
+                  .mul(21000),
+                { precision: 6 }
+              )}{" "}
+              ETH
             </Text>
-          </Box>
-          <Box flexDirection="row" justifyContent="space-between">
-            <Text variant="subtitle2">To</Text>
-            <Text variant="subtitle2">
-              {formatAddress(route.params.address)}
-            </Text>
-          </Box>
-          <Box flexDirection="row" justifyContent="space-between">
-            <Text variant="subtitle2">Gas (estimate)</Text>
-            {!loadingFeeData &&
-            feeData?.maxFeePerGas &&
-            feeData?.maxPriorityFeePerGas ? (
-              <Text variant="subtitle2">
-                {formatUnits(
-                  feeData.maxFeePerGas
-                    .add(feeData.maxPriorityFeePerGas)
-                    .mul(21000)
-                )}{" "}
-                ETH
-              </Text>
-            ) : (
-              <Skeleton />
-            )}
-          </Box>
-          <Button
-            onPress={
-              route.params.token.symbol === "ETH" ? sendEth : transferTokens
-            }
-            isLoading={sending}
-          >
-            Confirm
-          </Button>
-        </Stack>
-      </Box>
+          ) : (
+            <Skeleton />
+          )}
+        </Box>
+        <Button
+          onPress={
+            route.params.token.symbol === "ETH" ? sendEth : transferTokens
+          }
+          isLoading={sending}
+        >
+          Confirm
+        </Button>
+      </Stack>
     </Box>
   );
 };
