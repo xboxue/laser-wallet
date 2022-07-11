@@ -25,7 +25,7 @@ const walletConnectSlice = createSlice({
     setPending: (state, action: PayloadAction<boolean>) => {
       state.pending = action.payload;
     },
-    setCallRequest: (state, action: PayloadAction<IJsonRpcRequest>) => {
+    setCallRequest: (state, action: PayloadAction<IJsonRpcRequest | null>) => {
       state.callRequest = action.payload;
     },
   },

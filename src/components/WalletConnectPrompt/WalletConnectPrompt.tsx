@@ -1,9 +1,9 @@
 import { ethers, utils } from "ethers";
 import { Laser } from "laser-sdk";
-import { Actionsheet, Button, Image, Stack, Text } from "native-base";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider } from "wagmi";
+import { REQUEST_TYPES } from "../../constants/walletConnect";
 import { selectOwnerPrivateKey } from "../../features/auth/authSlice";
 import { selectChainId } from "../../features/network/networkSlice";
 import {
@@ -13,7 +13,9 @@ import {
   setCallRequest,
 } from "../../features/walletConnect/walletConnectSlice";
 import { sendTransaction } from "../../services/wallet";
-import hexToAscii from "../../utils/hexToAscii";
+import WalletConnectRequestPrompt from "./WalletConnectRequestPrompt/WalletConnectRequestPrompt";
+import WalletConnectSessionPrompt from "./WalletConnectSessionPrompt/WalletConnectSessionPrompt";
+import WalletConnectTransactionPrompt from "./WalletConnectTransactionPrompt/WalletConnectTransactionPrompt";
 
 interface Props {
   walletAddress: string;
@@ -34,7 +36,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
 
     const owner = new ethers.Wallet(ownerPrivateKey);
 
-    if (callRequest.method === "eth_signTypedData") {
+    if (callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA) {
       const { types, domain, message } = JSON.parse(callRequest.params[1]);
       const result = await owner._signTypedData(domain, types, message);
 
@@ -45,7 +47,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
       dispatch(setCallRequest(null));
     }
 
-    if (callRequest.method === "personal_sign") {
+    if (callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA) {
       const result = await owner.signMessage(
         utils.arrayify(callRequest.params[0])
       );
@@ -57,7 +59,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
       dispatch(setCallRequest(null));
     }
 
-    if (callRequest.method === "eth_sendTransaction") {
+    if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
       setLoading(true);
       const laser = new Laser(provider, owner, walletAddress);
       const { to, value = 0, data } = callRequest.params[0];
@@ -97,54 +99,40 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
 
   return (
     <>
-      {connector?.peerMeta && pending && (
-        <Actionsheet isOpen onClose={() => connector.rejectSession()}>
-          <Actionsheet.Content>
-            <Text>{connector.peerMeta.name} wants to connect</Text>
-            <Text>{connector.peerMeta.url}</Text>
-            <Image source={{ uri: connector.peerMeta.icons[0] }} alt="logo" />
-            <Stack space="3" direction="row" mt="4">
-              <Button
-                onPress={() =>
-                  connector.approveSession({
-                    accounts: [walletAddress],
-                    chainId,
-                  })
-                }
-              >
-                Approve
-              </Button>
-              <Button onPress={() => connector.rejectSession()}>Reject</Button>
-            </Stack>
-          </Actionsheet.Content>
-        </Actionsheet>
+      {pending && connector?.peerMeta && (
+        <WalletConnectSessionPrompt
+          onApprove={() =>
+            connector.approveSession({
+              accounts: [walletAddress],
+              chainId,
+            })
+          }
+          onReject={() => connector.rejectSession()}
+          onClose={() => connector.rejectSession()}
+          peerMeta={connector.peerMeta}
+        />
       )}
-      {callRequest && connector?.peerMeta && (
-        <Actionsheet isOpen onClose={() => {}}>
-          <Actionsheet.Content>
-            <Text>
-              {connector.peerMeta.name}: {callRequest.method}
-            </Text>
-            <Text>
-              {callRequest.method === "eth_signTypedData" &&
-                JSON.stringify(
-                  JSON.parse(callRequest.params[1]).message,
-                  null,
-                  2
-                )}
-              {callRequest.method === "personal_sign" &&
-                hexToAscii(callRequest.params[0])}
-            </Text>
-            <Image source={{ uri: connector.peerMeta.icons[0] }} alt="logo" />
-            <Stack space="3" direction="row">
-              <Button isLoading={loading} onPress={approveRequest}>
-                Approve
-              </Button>
-              <Button onPress={rejectRequest}>Reject</Button>
-            </Stack>
-          </Actionsheet.Content>
-        </Actionsheet>
-      )}
+      {callRequest &&
+        callRequest.method !== REQUEST_TYPES.SEND_TRANSACTION &&
+        connector?.peerMeta && (
+          <WalletConnectRequestPrompt
+            onApprove={approveRequest}
+            onReject={rejectRequest}
+            onClose={rejectRequest}
+            peerMeta={connector.peerMeta}
+            callRequest={callRequest}
+          />
+        )}
+      {callRequest?.method === REQUEST_TYPES.SEND_TRANSACTION &&
+        connector?.peerMeta && (
+          <WalletConnectTransactionPrompt
+            onApprove={approveRequest}
+            onReject={rejectRequest}
+            onClose={rejectRequest}
+            peerMeta={connector.peerMeta}
+            callRequest={callRequest}
+          />
+        )}
     </>
   );
 };
