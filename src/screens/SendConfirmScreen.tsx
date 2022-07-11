@@ -1,14 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
-import { ethers } from "ethers";
-import { Laser } from "laser-sdk";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
 import { useQuery } from "react-query";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useFeeData, useProvider } from "wagmi";
 import TOKENS from "../constants/tokens";
 import { selectWalletAddress } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
+import { addPendingTransaction } from "../features/transactions/transactionsSlice";
 import useLaser from "../hooks/useLaser";
 import useTokenBalances from "../hooks/useTokenBalances";
 import { sendTransaction } from "../services/wallet";
@@ -21,6 +20,7 @@ const SendConfirmScreen = ({ route }) => {
   const provider = useProvider({ chainId });
   const laser = useLaser();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const [sending, setSending] = useState(false);
 
@@ -68,16 +68,16 @@ const SendConfirmScreen = ({ route }) => {
         gasTip: 30000,
       });
 
-      const txData = await sendTransaction({
+      const { hash } = await sendTransaction({
         transaction,
         sender: walletAddress,
         chainId,
       });
-      await provider.waitForTransaction(txData.hash);
+      dispatch(addPendingTransaction({ ...transaction, hash }));
 
       refetchBalance();
       refetchTokenBalances();
-      navigation.navigate("Home");
+      navigation.navigate("Home", { tab: 1 });
     } finally {
       setSending(false);
     }
@@ -94,16 +94,16 @@ const SendConfirmScreen = ({ route }) => {
         gasTip: 30000,
       });
 
-      const txData = await sendTransaction({
+      const { hash } = await sendTransaction({
         sender: walletAddress,
         transaction,
         chainId,
       });
-      await provider.waitForTransaction(txData.hash);
+      dispatch(addPendingTransaction({ ...transaction, hash }));
 
       refetchBalance();
       refetchTokenBalances();
-      navigation.navigate("Home");
+      navigation.navigate("Home", { tab: 1 });
     } finally {
       setSending(false);
     }
@@ -142,7 +142,7 @@ const SendConfirmScreen = ({ route }) => {
               ETH
             </Text>
           ) : (
-            <Skeleton />
+            <Skeleton w="16" />
           )}
         </Box>
         <Button

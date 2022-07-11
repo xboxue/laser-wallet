@@ -1,7 +1,14 @@
 import { format, fromUnixTime, isToday } from "date-fns";
 import Constants from "expo-constants";
 import { keyBy, orderBy, round } from "lodash";
-import { Box, FlatList, Image, Pressable, Text } from "native-base";
+import {
+  Box,
+  FlatList,
+  Image,
+  Pressable,
+  SectionList,
+  Text,
+} from "native-base";
 import { useMemo } from "react";
 import { RefreshControl } from "react-native";
 import { useQuery } from "react-query";
@@ -12,6 +19,10 @@ import { tokensByAddress } from "../../constants/tokens";
 import { TRANSACTION_TYPES } from "../../constants/transactions";
 import { selectChainId } from "../../features/network/networkSlice";
 import {
+  PendingTransaction,
+  selectPendingTransactions,
+} from "../../features/transactions/transactionsSlice";
+import {
   getERC20Transfers,
   getTransactions,
   Transaction,
@@ -21,6 +32,7 @@ import formatAddress from "../../utils/formatAddress";
 import formatAmount from "../../utils/formatAmount";
 import getTransactionType from "../../utils/getTransactionType";
 import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
+import PendingTransactionItem from "../PendingTransactionItem/PendingTransactionItem";
 
 const titles = {
   [TRANSACTION_TYPES.CONTRACT_INTERACTION]: "Contract Interaction",
@@ -39,6 +51,7 @@ interface Props {
 
 const TransactionHistory = ({ walletAddress }: Props) => {
   const chainId = useSelector(selectChainId);
+  const pendingTransactions = useSelector(selectPendingTransactions);
   const provider = useProvider({ chainId });
 
   // Only has transactions where ETH is sent to the wallet
@@ -140,11 +153,57 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     return titles[transaction.type];
   };
 
+  const renderTransaction = ({ item: transaction }: { item: Transaction }) => {
+    const isToken = transaction.tokenName;
+    const tokenUri = tokensByAddress[
+      transaction.contractAddress
+    ]?.logoURI?.replace("ipfs://", "https://cloudflare-ipfs.com/ipfs/");
+    const date = fromUnixTime(parseInt(transaction.timeStamp));
+
+    return (
+      <Pressable>
+        <Box flexDirection="row" alignItems="center" py="2">
+          <Image
+            source={isToken && tokenUri ? { uri: tokenUri } : ethIcon}
+            size="9"
+            alt="Ethereum icon"
+          />
+          <Box ml="3">
+            <Text variant="subtitle1">{renderTitle(transaction)}</Text>
+            <Text>
+              {format(date, isToday(date) ? "h:mm a" : "LLL d")} ·{" "}
+              {isEqualCaseInsensitive(transaction.to, walletAddress)
+                ? `From: ${formatAddress(transaction.from)}`
+                : `To: ${formatAddress(transaction.to)}`}
+            </Text>
+          </Box>
+          <Text variant="subtitle1" ml="auto">
+            {formatAmount(transaction.value, {
+              decimals: transaction.tokenDecimal,
+            })}{" "}
+            {transaction.tokenSymbol || "ETH"}
+          </Text>
+        </Box>
+      </Pressable>
+    );
+  };
+
+  const renderPendingTransaction = ({
+    item: transaction,
+  }: {
+    item: PendingTransaction;
+  }) => {
+    return <PendingTransactionItem transaction={transaction} />;
+  };
+
   return (
     <>
-      <FlatList
+      <SectionList
         contentContainerStyle={{ padding: 16, paddingTop: 8 }}
-        data={allTransactions}
+        sections={[
+          { data: pendingTransactions, renderItem: renderPendingTransaction },
+          { data: allTransactions, renderItem: renderTransaction },
+        ]}
         refreshControl={
           <RefreshControl
             refreshing={txsLoading || internalTxsLoading || erc20TxsLoading}
@@ -155,38 +214,6 @@ const TransactionHistory = ({ walletAddress }: Props) => {
             }}
           />
         }
-        renderItem={({ item: transaction }) => {
-          const isToken = transaction.tokenName;
-          const tokenUri = tokensByAddress[
-            transaction.contractAddress
-          ]?.logoURI?.replace("ipfs://", "https://cloudflare-ipfs.com/ipfs/");
-          const date = fromUnixTime(parseInt(transaction.timeStamp));
-
-          return (
-            <Pressable>
-              <Box flexDirection="row" alignItems="center" py="2">
-                <Image
-                  source={isToken && tokenUri ? { uri: tokenUri } : ethIcon}
-                  size="9"
-                  alt="Ethereum icon"
-                />
-                <Box ml="3">
-                  <Text variant="subtitle1">{renderTitle(transaction)}</Text>
-                  <Text>
-                    {format(date, isToday(date) ? "h:mm a" : "LLL d")} ·{" "}
-                    {isEqualCaseInsensitive(transaction.to, walletAddress)
-                      ? `From: ${formatAddress(transaction.from)}`
-                      : `To: ${formatAddress(transaction.to)}`}
-                  </Text>
-                </Box>
-                <Text variant="subtitle1" ml="auto">
-                  {formatAmount(transaction.value)}{" "}
-                  {transaction.tokenSymbol || "ETH"}
-                </Text>
-              </Box>
-            </Pressable>
-          );
-        }}
       />
     </>
   );

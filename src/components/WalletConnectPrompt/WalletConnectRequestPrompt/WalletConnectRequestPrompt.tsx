@@ -21,19 +21,28 @@ const WalletConnectRequestPrompt = ({
   return (
     <Actionsheet isOpen onClose={onClose}>
       <Actionsheet.Content>
-        <Text>
-          {peerMeta.name}: {callRequest.method}
-        </Text>
-        <Text>
-          {callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA &&
-            JSON.stringify(JSON.parse(callRequest.params[1]).message, null, 2)}
-          {callRequest.method === REQUEST_TYPES.PERSONAL_SIGN &&
-            hexToAscii(callRequest.params[0])}
-        </Text>
-        <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
-        <Stack space="3" direction="row">
-          <Button onPress={onApprove}>Approve</Button>
-          <Button onPress={onReject}>Reject</Button>
+        <Stack space="4" width="100%" px="4" py="2">
+          <Text variant="subtitle1">
+            {peerMeta.name}: {callRequest.method}
+          </Text>
+          <Text>
+            {(callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
+              callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4) &&
+              JSON.stringify(
+                JSON.parse(callRequest.params[1]).message,
+                null,
+                2
+              )}
+            {callRequest.method === REQUEST_TYPES.PERSONAL_SIGN &&
+              hexToAscii(callRequest.params[0])}
+          </Text>
+          <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
+          <Stack space="1">
+            <Button onPress={onApprove}>Approve</Button>
+            <Button variant="ghost" onPress={onReject}>
+              Reject
+            </Button>
+          </Stack>
         </Stack>
       </Actionsheet.Content>
     </Actionsheet>

@@ -5,6 +5,7 @@ import { useProvider } from "wagmi";
 import { REQUEST_TYPES } from "../../constants/walletConnect";
 import { selectOwnerPrivateKey } from "../../features/auth/authSlice";
 import { selectChainId } from "../../features/network/networkSlice";
+import { addPendingTransaction } from "../../features/transactions/transactionsSlice";
 import {
   selectCallRequest,
   selectConnector,
@@ -48,7 +49,10 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
       dispatch(setCallRequest(null));
     }
 
-    if (callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA) {
+    if (
+      callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
+      callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4
+    ) {
       const result = await owner.signMessage(
         utils.arrayify(callRequest.params[0])
       );
@@ -71,14 +75,15 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
           gasTip: 30000,
         });
-        const txData = await sendTransaction({
+        const { hash } = await sendTransaction({
           sender: walletAddress,
           transaction,
           chainId,
         });
+        dispatch(addPendingTransaction({ ...transaction, hash }));
         connector.approveRequest({
           id: callRequest.id,
-          result: txData.hash,
+          result: hash,
         });
         dispatch(setCallRequest(null));
       } finally {
@@ -131,6 +136,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
             onClose={rejectRequest}
             peerMeta={connector.peerMeta}
             callRequest={callRequest}
+            loading={loading}
           />
         )}
     </>

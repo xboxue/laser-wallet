@@ -11,7 +11,6 @@ import TransactionHistory from "../components/TransactionHistory/TransactionHist
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
 import { selectWalletAddress } from "../features/auth/authSlice";
-import { selectChainId } from "../features/network/networkSlice";
 import formatAddress from "../utils/formatAddress";
 
 const routes = [
@@ -19,11 +18,11 @@ const routes = [
   { key: "second", title: "Activity" },
 ];
 
-const HomeScreen = () => {
+const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
 
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState(route.params?.initialTab || 0);
   const window = useWindowDimensions();
 
   if (!walletAddress) return <Text>Error</Text>;

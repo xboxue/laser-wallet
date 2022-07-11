@@ -6,11 +6,13 @@ import authReducer from "./features/auth/authSlice";
 import guardiansReducer from "./features/guardians/guardiansSlice";
 import networkReducer from "./features/network/networkSlice";
 import walletConnectReducer from "./features/walletConnect/walletConnectSlice";
+import transactionsReducer from "./features/transactions/transactionsSlice";
 
 export const store = configureStore({
   reducer: {
     walletConnect: walletConnectReducer,
     guardians: guardiansReducer,
+    transactions: transactionsReducer,
     network: persistReducer(
       { key: "network", storage: AsyncStorage },
       networkReducer

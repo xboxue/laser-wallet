@@ -20,6 +20,7 @@ interface Props {
   onApprove: () => void;
   peerMeta: IClientMeta;
   callRequest: IJsonRpcRequest;
+  loading?: boolean;
 }
 
 const WalletConnectTransactionPrompt = ({
@@ -28,6 +29,7 @@ const WalletConnectTransactionPrompt = ({
   onReject,
   peerMeta,
   callRequest,
+  loading = false,
 }: Props) => {
   const { to, value = 0, data } = callRequest.params[0];
   const laser = useLaser();
@@ -84,7 +86,9 @@ const WalletConnectTransactionPrompt = ({
             )}
           </Box>
           <Stack space="1">
-            <Button onPress={onApprove}>Approve</Button>
+            <Button isLoading={loading} onPress={onApprove}>
+              Approve
+            </Button>
             <Button variant="ghost" onPress={onReject}>
               Reject
             </Button>
