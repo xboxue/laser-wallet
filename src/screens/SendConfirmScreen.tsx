@@ -1,10 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
 import { ethers } from "ethers";
-import { formatUnits } from "ethers/lib/utils";
 import { Laser } from "laser-sdk";
-import { round } from "lodash";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
+import { useQuery } from "react-query";
 import { useSelector } from "react-redux";
 import { useBalance, useFeeData, useProvider } from "wagmi";
 import TOKENS from "../constants/tokens";
@@ -38,11 +37,36 @@ const SendConfirmScreen = ({ route }) => {
     tokens.map((token) => token.address)
   );
 
+  const { amount, address: to, token } = route.params;
+
+  const estimateGas = async () => {
+    if (!walletAddress || !ownerPrivateKey) return null;
+    const owner = new ethers.Wallet(ownerPrivateKey);
+    const laser = new Laser(provider, owner, walletAddress);
+
+    const transactionInfo = {
+      maxFeePerGas: 0,
+      maxPriorityFeePerGas: 0,
+      gasTip: 0,
+    };
+
+    const transaction =
+      token === "ETH"
+        ? await laser.sendEth(to, amount, transactionInfo)
+        : await laser.transferERC20(token.address, to, amount, transactionInfo);
+
+    return laser.simulateTransaction(transaction);
+  };
+
+  const { data: callGas, isLoading: callGasLoading } = useQuery(
+    "callGas",
+    estimateGas
+  );
+
   const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
 
-  if (!walletAddress || !ownerPrivateKey) return null;
-
   const transferTokens = async () => {
+    if (!walletAddress || !ownerPrivateKey) return null;
     try {
       setSending(true);
       const { amount, address: to, token } = route.params;
@@ -74,6 +98,7 @@ const SendConfirmScreen = ({ route }) => {
   };
 
   const sendEth = async () => {
+    if (!walletAddress || !ownerPrivateKey) return null;
     try {
       setSending(true);
       const { amount, address: to } = route.params;
@@ -114,23 +139,25 @@ const SendConfirmScreen = ({ route }) => {
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">Amount</Text>
           <Text variant="subtitle2">
-            {route.params.amount} {route.params.token.symbol}
+            {amount} {token.symbol}
           </Text>
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">To</Text>
-          <Text variant="subtitle2">{formatAddress(route.params.address)}</Text>
+          <Text variant="subtitle2">{formatAddress(to)}</Text>
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">Gas (estimate)</Text>
           {!loadingFeeData &&
+          !callGasLoading &&
+          callGas &&
           feeData?.maxFeePerGas &&
           feeData?.maxPriorityFeePerGas ? (
             <Text variant="subtitle2">
               {formatAmount(
                 feeData.maxFeePerGas
                   .add(feeData.maxPriorityFeePerGas)
-                  .mul(21000),
+                  .mul(callGas),
                 { precision: 6 }
               )}{" "}
               ETH
@@ -140,9 +167,7 @@ const SendConfirmScreen = ({ route }) => {
           )}
         </Box>
         <Button
-          onPress={
-            route.params.token.symbol === "ETH" ? sendEth : transferTokens
-          }
+          onPress={token.symbol === "ETH" ? sendEth : transferTokens}
           isLoading={sending}
         >
           Confirm
