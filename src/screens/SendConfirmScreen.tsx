@@ -7,11 +7,9 @@ import { useQuery } from "react-query";
 import { useSelector } from "react-redux";
 import { useBalance, useFeeData, useProvider } from "wagmi";
 import TOKENS from "../constants/tokens";
-import {
-  selectOwnerPrivateKey,
-  selectWalletAddress,
-} from "../features/auth/authSlice";
+import { selectWalletAddress } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
+import useLaser from "../hooks/useLaser";
 import useTokenBalances from "../hooks/useTokenBalances";
 import { sendTransaction } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
@@ -19,15 +17,17 @@ import formatAmount from "../utils/formatAmount";
 
 const SendConfirmScreen = ({ route }) => {
   const chainId = useSelector(selectChainId);
+  const walletAddress = useSelector(selectWalletAddress);
+  const provider = useProvider({ chainId });
+  const laser = useLaser();
+  const navigation = useNavigation();
+
+  const [sending, setSending] = useState(false);
+
   const tokens = TOKENS.filter(
     (token) => token.chainId === chainId || token.symbol === "ETH"
   );
 
-  const provider = useProvider({ chainId });
-  const walletAddress = useSelector(selectWalletAddress);
-  const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
-
-  const [sending, setSending] = useState(false);
   const { refetch: refetchBalance } = useBalance({
     addressOrName: walletAddress,
     chainId,
@@ -39,41 +39,27 @@ const SendConfirmScreen = ({ route }) => {
 
   const { amount, address: to, token } = route.params;
 
-  const estimateGas = async () => {
-    if (!walletAddress || !ownerPrivateKey) return null;
-    const owner = new ethers.Wallet(ownerPrivateKey);
-    const laser = new Laser(provider, owner, walletAddress);
-
-    const transactionInfo = {
-      maxFeePerGas: 0,
-      maxPriorityFeePerGas: 0,
-      gasTip: 0,
-    };
-
-    const transaction =
-      token === "ETH"
-        ? await laser.sendEth(to, amount, transactionInfo)
-        : await laser.transferERC20(token.address, to, amount, transactionInfo);
-
-    return laser.simulateTransaction(transaction);
-  };
-
   const { data: callGas, isLoading: callGasLoading } = useQuery(
     "callGas",
-    estimateGas
+    async () => {
+      const transactionInfo = {
+        maxFeePerGas: 0,
+        maxPriorityFeePerGas: 0,
+        gasTip: 0,
+      };
+
+      const transaction = await (token === "ETH"
+        ? laser.sendEth(to, amount, transactionInfo)
+        : laser.transferERC20(token.address, to, amount, transactionInfo));
+      return laser.simulateTransaction(transaction);
+    }
   );
 
   const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
 
   const transferTokens = async () => {
-    if (!walletAddress || !ownerPrivateKey) return null;
     try {
       setSending(true);
-      const { amount, address: to, token } = route.params;
-
-      const owner = new ethers.Wallet(ownerPrivateKey);
-      const laser = new Laser(provider, owner, walletAddress);
-
       const feeData = await provider.getFeeData();
 
       const transaction = await laser.transferERC20(token.address, to, amount, {
@@ -98,13 +84,8 @@ const SendConfirmScreen = ({ route }) => {
   };
 
   const sendEth = async () => {
-    if (!walletAddress || !ownerPrivateKey) return null;
     try {
       setSending(true);
-      const { amount, address: to } = route.params;
-
-      const owner = new ethers.Wallet(ownerPrivateKey);
-      const laser = new Laser(provider, owner, walletAddress);
       const feeData = await provider.getFeeData();
 
       const transaction = await laser.sendEth(to, amount, {
@@ -127,8 +108,6 @@ const SendConfirmScreen = ({ route }) => {
       setSending(false);
     }
   };
-
-  const navigation = useNavigation();
 
   return (
     <Box p="4">

@@ -1,6 +1,4 @@
 import { IClientMeta, IJsonRpcRequest } from "@walletconnect/types";
-import { ethers } from "ethers";
-import { Laser } from "laser-sdk";
 import {
   Actionsheet,
   Box,
@@ -11,13 +9,8 @@ import {
   Text,
 } from "native-base";
 import { useQuery } from "react-query";
-import { useSelector } from "react-redux";
-import { useFeeData, useProvider } from "wagmi";
-import {
-  selectOwnerPrivateKey,
-  selectWalletAddress,
-} from "../../../features/auth/authSlice";
-import { selectChainId } from "../../../features/network/networkSlice";
+import { useFeeData } from "wagmi";
+import useLaser from "../../../hooks/useLaser";
 import formatAddress from "../../../utils/formatAddress";
 import formatAmount from "../../../utils/formatAmount";
 
@@ -37,37 +30,20 @@ const WalletConnectTransactionPrompt = ({
   callRequest,
 }: Props) => {
   const { to, value = 0, data } = callRequest.params[0];
-  const chainId = useSelector(selectChainId);
-  const walletAddress = useSelector(selectWalletAddress);
-  const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
-  const provider = useProvider({ chainId });
-
-  const estimateGas = async () => {
-    const owner = new ethers.Wallet(ownerPrivateKey);
-    const laser = new Laser(provider, owner, walletAddress);
-
-    const transactionInfo = {
-      maxFeePerGas: 0,
-      maxPriorityFeePerGas: 0,
-      gasTip: 0,
-    };
-
-    const transaction = await laser.sendTransaction(
-      to,
-      data,
-      value,
-      transactionInfo
-    );
-
-    return laser.simulateTransaction(transaction);
-  };
-
-  const { data: callGas, isLoading: callGasLoading } = useQuery(
-    "callGas",
-    estimateGas
-  );
+  const laser = useLaser();
 
   const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
+  const { data: callGas, isLoading: callGasLoading } = useQuery(
+    "callGas",
+    async () => {
+      const transaction = await laser.sendTransaction(to, data, value, {
+        maxFeePerGas: 0,
+        maxPriorityFeePerGas: 0,
+        gasTip: 0,
+      });
+      return laser.simulateTransaction(transaction);
+    }
+  );
 
   return (
     <Actionsheet isOpen onClose={onClose}>

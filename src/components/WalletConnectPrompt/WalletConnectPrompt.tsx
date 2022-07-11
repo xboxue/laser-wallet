@@ -1,5 +1,4 @@
 import { ethers, utils } from "ethers";
-import { Laser } from "laser-sdk";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider } from "wagmi";
@@ -12,6 +11,7 @@ import {
   selectPending,
   setCallRequest,
 } from "../../features/walletConnect/walletConnectSlice";
+import useLaser from "../../hooks/useLaser";
 import { sendTransaction } from "../../services/wallet";
 import WalletConnectRequestPrompt from "./WalletConnectRequestPrompt/WalletConnectRequestPrompt";
 import WalletConnectSessionPrompt from "./WalletConnectSessionPrompt/WalletConnectSessionPrompt";
@@ -28,6 +28,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
   const chainId = useSelector(selectChainId);
   const provider = useProvider({ chainId });
+  const laser = useLaser();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
@@ -61,7 +62,6 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
 
     if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
       setLoading(true);
-      const laser = new Laser(provider, owner, walletAddress);
       const { to, value = 0, data } = callRequest.params[0];
 
       const feeData = await provider.getFeeData();
