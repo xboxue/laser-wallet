@@ -3,6 +3,7 @@ import { Skeleton, Text } from "native-base";
 import { useSelector } from "react-redux";
 import { useBalance } from "wagmi";
 import { selectChainId } from "../../features/network/networkSlice";
+import formatAmount from "../../utils/formatAmount";
 
 interface Props {
   walletAddress: string;
@@ -17,14 +18,13 @@ const WalletBalance = ({ walletAddress }: Props) => {
   } = useBalance({
     addressOrName: walletAddress,
     chainId,
-    formatUnits: "ether",
   });
 
   if (isLoading) return <Skeleton />;
 
   return (
     <Text variant="h4">
-      {round(balance?.formatted, 4)} {balance?.symbol}
+      {formatAmount(balance?.value)} {balance?.symbol}
     </Text>
   );
 };

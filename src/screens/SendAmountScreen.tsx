@@ -1,7 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { BigNumber } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
-import { round } from "lodash";
+import { parseUnits } from "ethers/lib/utils";
 import { Box, Button, Text } from "native-base";
 import { useState } from "react";
 import NumberPad from "../components/NumberPad/NumberPad";

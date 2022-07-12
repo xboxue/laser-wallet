@@ -3,13 +3,11 @@ import { Box, Button, Skeleton, Stack, Text } from "native-base";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
-import { useBalance, useFeeData, useProvider } from "wagmi";
-import TOKENS from "../constants/tokens";
+import { useFeeData, useProvider } from "wagmi";
 import { selectWalletAddress } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
 import useLaser from "../hooks/useLaser";
-import useTokenBalances from "../hooks/useTokenBalances";
 import { sendTransaction } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
@@ -24,19 +22,6 @@ const SendConfirmScreen = ({ route }) => {
 
   const [sending, setSending] = useState(false);
 
-  const tokens = TOKENS.filter(
-    (token) => token.chainId === chainId || token.symbol === "ETH"
-  );
-
-  const { refetch: refetchBalance } = useBalance({
-    addressOrName: walletAddress,
-    chainId,
-  });
-  const { refetch: refetchTokenBalances } = useTokenBalances(
-    [walletAddress],
-    tokens.map((token) => token.address)
-  );
-
   const { amount, address: to, token } = route.params;
 
   const { data: callGas, isLoading: callGasLoading } = useQuery(
@@ -48,9 +33,9 @@ const SendConfirmScreen = ({ route }) => {
         gasTip: 0,
       };
 
-      const transaction = await (token === "ETH"
-        ? laser.sendEth(to, amount, transactionInfo)
-        : laser.transferERC20(token.address, to, amount, transactionInfo));
+      const transaction = await (token.isToken
+        ? laser.transferERC20(token.address, to, amount, transactionInfo)
+        : laser.sendEth(to, amount, transactionInfo));
       return laser.simulateTransaction(transaction);
     }
   );
@@ -75,8 +60,6 @@ const SendConfirmScreen = ({ route }) => {
       });
       dispatch(addPendingTransaction({ ...transaction, hash }));
 
-      refetchBalance();
-      refetchTokenBalances();
       navigation.navigate("Home", { tab: 1 });
     } finally {
       setSending(false);
@@ -101,8 +84,6 @@ const SendConfirmScreen = ({ route }) => {
       });
       dispatch(addPendingTransaction({ ...transaction, hash }));
 
-      refetchBalance();
-      refetchTokenBalances();
       navigation.navigate("Home", { tab: 1 });
     } finally {
       setSending(false);
@@ -146,7 +127,7 @@ const SendConfirmScreen = ({ route }) => {
           )}
         </Box>
         <Button
-          onPress={token.symbol === "ETH" ? sendEth : transferTokens}
+          onPress={token.isToken ? transferTokens : sendEth}
           isLoading={sending}
         >
           Confirm

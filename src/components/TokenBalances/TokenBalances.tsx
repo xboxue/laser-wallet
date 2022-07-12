@@ -1,72 +1,122 @@
-import { formatEther } from "ethers/lib/utils";
-import { round, zip } from "lodash";
-import { Box, FlatList, Image, Pressable, Skeleton, Text } from "native-base";
+import { Box, Image, Pressable, SectionList, Text } from "native-base";
 import { RefreshControl } from "react-native";
 import { useSelector } from "react-redux";
-import TOKENS from "../../constants/tokens";
+import { useBalance } from "wagmi";
+import ethIcon from "../../../assets/eth-icon.png";
 import { selectChainId } from "../../features/network/networkSlice";
-import useTokenBalances from "../../hooks/useTokenBalances";
+import useRefreshOnFocus from "../../hooks/useRefreshOnFocus";
+import useTokenBalances, { TokenBalance } from "../../hooks/useTokenBalances";
 import formatAmount from "../../utils/formatAmount";
+
+const IPFS_GATEWAY_URL = "https://cloudflare-ipfs.com/ipfs/";
 
 interface Props {
   walletAddress: string;
-  onPress: (symbol: string) => void;
+  onPress: (token: {
+    address?: string;
+    balance: string;
+    symbol: string;
+    decimals: number;
+    isToken: boolean;
+  }) => void;
 }
 
 const TokenBalances = ({ walletAddress, onPress }: Props) => {
   const chainId = useSelector(selectChainId);
-  const tokens = TOKENS.filter(
-    (token) => token.chainId === chainId || token.symbol === "ETH"
-  );
 
   const {
-    data: balances,
-    isLoading,
+    data: balance,
+    isLoading: balanceLoading,
+    refetch: refetchBalance,
+  } = useBalance({
+    addressOrName: walletAddress,
+    chainId,
+    watch: true,
+  });
+
+  const {
+    data: tokens,
+    isLoading: tokensLoading,
     isError,
-    refetch,
-  } = useTokenBalances(
-    [walletAddress],
-    tokens.map((token) => token.address)
+    refetch: refetchTokens,
+  } = useTokenBalances(walletAddress);
+
+  useRefreshOnFocus(refetchBalance);
+  useRefreshOnFocus(refetchTokens);
+
+  const renderToken = ({ item: token }: { item: TokenBalance }) => (
+    <Pressable
+      onPress={() =>
+        onPress({
+          address: token.address,
+          balance: token.balance.toString(),
+          symbol: token.symbol,
+          decimals: token.decimals,
+          isToken: true,
+        })
+      }
+    >
+      <Box flexDirection="row" alignItems="center" py="1">
+        <Image
+          source={{
+            uri: token.logoURI.replace("ipfs://", IPFS_GATEWAY_URL),
+          }}
+          size="9"
+          alt="Token icon"
+        />
+        <Box ml="3">
+          <Text variant="subtitle1">{token.symbol}</Text>
+          <Text>{token.name}</Text>
+        </Box>
+        <Text variant="subtitle1" ml="auto">
+          {formatAmount(token.balance, { decimals: token.decimals })}
+        </Text>
+      </Box>
+    </Pressable>
   );
 
-  if (isLoading) return <Skeleton />;
-
+  const renderEth = () => {
+    if (!balance || balance.value.isZero()) return null;
+    return (
+      <Pressable
+        onPress={() =>
+          onPress({
+            balance: balance.value.toString(),
+            symbol: balance.symbol,
+            decimals: balance.decimals,
+            isToken: false,
+          })
+        }
+      >
+        <Box flexDirection="row" alignItems="center" py="1">
+          <Image source={ethIcon} size="9" alt="Token icon" />
+          <Box ml="3">
+            <Text variant="subtitle1">{balance.symbol}</Text>
+            <Text>Ethereum</Text>
+          </Box>
+          <Text variant="subtitle1" ml="auto">
+            {formatAmount(balance.value, { decimals: balance.decimals })}
+          </Text>
+        </Box>
+      </Pressable>
+    );
+  };
   return (
-    <FlatList
-      data={zip(tokens, balances).filter(
-        ([_, balance]) => balance && !balance.isZero()
-      )}
+    <SectionList
+      sections={[
+        { data: [balance], renderItem: renderEth },
+        { data: tokens || [], renderItem: renderToken },
+      ]}
       contentContainerStyle={{ padding: 16, paddingTop: 8 }}
       refreshControl={
-        <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+        <RefreshControl
+          refreshing={tokensLoading || balanceLoading}
+          onRefresh={() => {
+            refetchBalance();
+            refetchTokens();
+          }}
+        />
       }
-      renderItem={({ item: [token, balance] }) => (
-        <Pressable
-          onPress={() => onPress({ ...token, balance: balance.toString() })}
-        >
-          <Box flexDirection="row" alignItems="center" py="1">
-            <Image
-              source={
-                token.icon || {
-                  uri: token.logoURI.replace(
-                    "ipfs://",
-                    "https://cloudflare-ipfs.com/ipfs/"
-                  ),
-                }
-              }
-              size="9"
-              alt="Token icon"
-            />
-            <Box ml="3">
-              <Text variant="subtitle1">{token.symbol}</Text>
-              <Text>{token.name}</Text>
-            </Box>
-            <Text variant="subtitle1" ml="auto">
-              {formatAmount(balance, { decimals: token.decimals })}
-            </Text>
-          </Box>
-        </Pressable>
-      )}
     />
   );
 };

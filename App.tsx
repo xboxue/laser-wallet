@@ -34,9 +34,19 @@ import AppNavigator from "./src/navigators/AppNavigator";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
 
+Promise.allSettled = (promises: Promise<any>[]) => {
+  return Promise.all(
+    promises.map((promise) =>
+      promise
+        .then((value) => ({ status: "fulfilled", value }))
+        .catch((reason) => ({ status: "rejected", reason }))
+    )
+  );
+};
+
 const storage = new MMKV();
 
-const { provider } = configureChains(defaultChains, [
+const { provider, webSocketProvider } = configureChains(defaultChains, [
   infuraProvider({ infuraId: Constants.manifest?.extra?.infuraApiKey }),
   alchemyProvider({ alchemyId: Constants.manifest?.extra?.alchemyApiKey }),
   publicProvider(),
@@ -44,6 +54,7 @@ const { provider } = configureChains(defaultChains, [
 
 const wagmiClient = createClient({
   provider,
+  webSocketProvider,
   storage: createStorage({
     storage: {
       setItem: (key, value) => storage.set(key, value),

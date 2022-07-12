@@ -1,13 +1,6 @@
 import { keyBy } from "lodash";
-import ethIcon from "../../assets/eth-icon.png";
 
 const TOKENS = [
-  {
-    symbol: "ETH",
-    name: "Ethereum",
-    address: "0x0000000000000000000000000000000000000000",
-    icon: ethIcon,
-  },
   {
     chainId: 1,
     address: "0x111111111117dC0aa78b770fA6A738034120C302",
