@@ -1,27 +1,22 @@
 import { format, fromUnixTime, isToday } from "date-fns";
 import Constants from "expo-constants";
-import { keyBy, orderBy, round } from "lodash";
-import {
-  Box,
-  FlatList,
-  Image,
-  Pressable,
-  SectionList,
-  Text,
-} from "native-base";
+import { keyBy, orderBy } from "lodash";
+import { Box, Image, Pressable, SectionList, Text } from "native-base";
 import { useMemo } from "react";
 import { RefreshControl } from "react-native";
 import { useQuery } from "react-query";
-import { useSelector } from "react-redux";
-import { useProvider } from "wagmi";
+import { useDispatch, useSelector } from "react-redux";
+import { useBalance, useProvider } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
 import { tokensByAddress } from "../../constants/tokens";
 import { TRANSACTION_TYPES } from "../../constants/transactions";
 import { selectChainId } from "../../features/network/networkSlice";
 import {
   PendingTransaction,
+  removePendingTransaction,
   selectPendingTransactions,
 } from "../../features/transactions/transactionsSlice";
+import useTokenBalances from "../../hooks/useTokenBalances";
 import {
   getERC20Transfers,
   getTransactions,
@@ -53,6 +48,13 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   const chainId = useSelector(selectChainId);
   const pendingTransactions = useSelector(selectPendingTransactions);
   const provider = useProvider({ chainId });
+  const dispatch = useDispatch();
+
+  const { refetch: refetchTokens } = useTokenBalances(walletAddress);
+  const { refetch: refetchBalance } = useBalance({
+    addressOrName: walletAddress,
+    chainId,
+  });
 
   // Only has transactions where ETH is sent to the wallet
   // Filter out exec transactions from relayer
@@ -139,6 +141,14 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     );
   }, [transactions, internalTxs, erc20Txs]);
 
+  const handleRefresh = () => {
+    refetchTxs();
+    refetchInternalTxs();
+    refetchERC20Txs();
+    refetchTokens();
+    refetchBalance();
+  };
+
   const renderTitle = (transaction: Transaction) => {
     // ERC20 transfer
     if (transaction.tokenSymbol) {
@@ -193,7 +203,15 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   }: {
     item: PendingTransaction;
   }) => {
-    return <PendingTransactionItem transaction={transaction} />;
+    return (
+      <PendingTransactionItem
+        transaction={transaction}
+        onSuccess={() => {
+          dispatch(removePendingTransaction(transaction.hash));
+          handleRefresh();
+        }}
+      />
+    );
   };
 
   return (
@@ -207,11 +225,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
         refreshControl={
           <RefreshControl
             refreshing={txsLoading || internalTxsLoading || erc20TxsLoading}
-            onRefresh={() => {
-              refetchTxs();
-              refetchInternalTxs();
-              refetchERC20Txs();
-            }}
+            onRefresh={handleRefresh}
           />
         }
       />
