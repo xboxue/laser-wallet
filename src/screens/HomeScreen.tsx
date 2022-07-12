@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import * as Clipboard from "expo-clipboard";
 import { Box, Button, Icon, IconButton, Pressable, Text } from "native-base";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWindowDimensions } from "react-native";
 import { NavigationState, Route, TabView } from "react-native-tab-view";
 import { useSelector } from "react-redux";
@@ -18,11 +18,12 @@ const routes = [
   { key: "second", title: "Activity" },
 ];
 
-const HomeScreen = () => {
+const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
 
-  const [tab, setTab] = useState(0);
+  const { tab } = route.params;
+
   const window = useWindowDimensions();
 
   if (!walletAddress) return <Text>Error</Text>;
@@ -35,7 +36,11 @@ const HomeScreen = () => {
     return (
       <Box flexDir="row">
         {navigationState.routes.map((route, index) => (
-          <Pressable flex={1} onPress={() => setTab(index)} key={route.key}>
+          <Pressable
+            flex={1}
+            onPress={() => navigation.setParams({ tab: index })}
+            key={route.key}
+          >
             <Box
               borderColor={tab === index ? "gray.500" : "gray.100"}
               borderBottomWidth="3"
@@ -59,13 +64,21 @@ const HomeScreen = () => {
 
   return (
     <Box flex={1}>
-      <Box p="4">
+      <Box flexDir="row" justifyContent="space-between" px="1">
+        <IconButton
+          icon={<Icon as={Ionicons} name="settings-outline" />}
+          onPress={() => {
+            navigation.navigate("Settings");
+          }}
+        />
         <IconButton
           icon={<Icon as={Ionicons} name="qr-code-outline" />}
           onPress={() => {
             navigation.navigate("QRCodeScan");
           }}
         />
+      </Box>
+      <Box p="4">
         <Pressable onPress={() => Clipboard.setStringAsync(walletAddress)}>
           {({ isPressed }) => (
             <Box
@@ -92,7 +105,7 @@ const HomeScreen = () => {
         navigationState={{ index: tab, routes }}
         renderScene={renderScene}
         renderTabBar={renderTabBar}
-        onIndexChange={setTab}
+        onIndexChange={(index) => navigation.setParams({ tab: index })}
         initialLayout={{ width: window.width }}
       />
       <WalletConnectPrompt walletAddress={walletAddress} />

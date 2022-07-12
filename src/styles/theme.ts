@@ -32,14 +32,14 @@ const theme = extendTheme({
         },
       },
     },
+    IconButton: {
+      defaultProps: {
+        colorScheme: "coolGray",
+      },
+    },
     Button: {
       baseStyle: {
         borderRadius: "3",
-      },
-      variants: {
-        solid: {
-          bgColor: "#319795",
-        },
       },
     },
   },

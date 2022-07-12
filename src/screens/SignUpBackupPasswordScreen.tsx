@@ -1,11 +1,11 @@
 import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
 import Wallet from "ethereumjs-wallet";
-import Constants from "expo-constants";
 import { Box, Button, FormControl, Input, Text } from "native-base";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { DEFAULT_CHAIN } from "../constants/chains";
 import {
+  addWallet,
   setOwnerAddress,
   setOwnerPrivateKey,
   setRecoveryOwnerAddress,
@@ -13,6 +13,7 @@ import {
 } from "../features/auth/authSlice";
 import { selectGuardians } from "../features/guardians/guardiansSlice";
 import { createBackup, isValidPassword } from "../services/cloudBackup";
+import { createWallet } from "../services/wallet";
 
 const SignUpBackupPasswordScreen = () => {
   const navigation = useNavigation();
@@ -21,24 +22,6 @@ const SignUpBackupPasswordScreen = () => {
   const [loading, setLoading] = useState(false);
   const guardians = useSelector(selectGuardians);
   const dispatch = useDispatch();
-
-  const createWallet = async () => {
-    const owner = Wallet.generate();
-    const recoveryOwner = Wallet.generate();
-
-    const { data } = await axios.post(
-      `${Constants.manifest?.extra?.relayerUrl}/wallets`,
-      {
-        owner: owner.getAddressString(),
-        recoveryOwner: recoveryOwner.getAddressString(),
-        guardians: guardians.map((guardian) => guardian.address),
-      }
-    );
-
-    if (!data.walletAddress) throw new Error("Wallet creation failed");
-
-    return { owner, recoveryOwner, walletAddress: data.walletAddress };
-  };
 
   return (
     <Box>
@@ -84,14 +67,22 @@ const SignUpBackupPasswordScreen = () => {
           onPress={async () => {
             try {
               setLoading(true);
-              const { owner, recoveryOwner, walletAddress } =
-                await createWallet();
+              const owner = Wallet.generate();
+              const recoveryOwner = Wallet.generate();
 
-              await createBackup(
-                recoveryOwner.getPrivateKeyString(),
-                password,
-                recoveryOwner.getAddressString()
-              );
+              const walletAddress = await createWallet({
+                chainId: DEFAULT_CHAIN,
+                guardians: guardians.map((guardian) => guardian.address),
+                ownerAddress: owner.getAddressString(),
+                recoveryOwnerAddress: recoveryOwner.getAddressString(),
+              });
+
+              // TODO: Fix
+              // await createBackup(
+              //   recoveryOwner.getPrivateKeyString(),
+              //   password,
+              //   recoveryOwner.getAddressString()
+              // );
 
               dispatch(setOwnerAddress(owner.getAddressString()));
               dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
@@ -99,6 +90,9 @@ const SignUpBackupPasswordScreen = () => {
                 setRecoveryOwnerAddress(recoveryOwner.getAddressString())
               );
               dispatch(setWalletAddress(walletAddress));
+              dispatch(
+                addWallet({ address: walletAddress, chainId: DEFAULT_CHAIN })
+              );
             } finally {
               setLoading(false);
             }

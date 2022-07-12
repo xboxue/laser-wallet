@@ -1,11 +1,14 @@
 import { useNavigation } from "@react-navigation/native";
+import { BigNumber } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { Box, Button, Text } from "native-base";
 import { useState } from "react";
 import NumberPad from "../components/NumberPad/NumberPad";
+import formatAmount from "../utils/formatAmount";
 
 const SendAmountScreen = ({ route }) => {
   const navigation = useNavigation();
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("0");
   const { token } = route.params;
 
   return (
@@ -13,10 +16,11 @@ const SendAmountScreen = ({ route }) => {
       <Box p="4" flex="1">
         <Text variant="subtitle1">Choose amount</Text>
         <Text variant="h4" mt="2">
-          {amount || "0"}
+          {amount}
         </Text>
         <Text>
-          {token.symbol} balance: {token.balance}
+          {token.symbol} balance:{" "}
+          {formatAmount(token.balance, { decimals: token.decimals })}
         </Text>
         <Button
           mt="5"
@@ -26,6 +30,10 @@ const SendAmountScreen = ({ route }) => {
               amount,
             })
           }
+          isDisabled={
+            !amount ||
+            BigNumber.from(parseUnits(amount, token.decimals)).gt(token.balance)
+          }
         >
           Next
         </Button>
@@ -34,9 +42,10 @@ const SendAmountScreen = ({ route }) => {
         isDecimal
         onChange={(value) => {
           if (value === "backspace") {
-            setAmount(amount.slice(0, amount.length - 1));
+            if (amount.length === 1) setAmount("0");
+            else setAmount(amount.slice(0, amount.length - 1));
           } else if (value === "clear") {
-            setAmount("");
+            setAmount("0");
           } else if (value === "0") {
             if (amount === "0") return;
             else setAmount(amount.concat(value));
