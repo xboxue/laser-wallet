@@ -12,7 +12,7 @@ import {
 } from "native-base";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useEnsAddress, useEnsAvatar } from "wagmi";
+import { useEnsAddress, useEnsAvatar, useEnsName } from "wagmi";
 import { selectChainId } from "../features/network/networkSlice";
 import formatAddress from "../utils/formatAddress";
 
@@ -21,20 +21,58 @@ const SendAddressScreen = () => {
   const navigation = useNavigation();
   const [value, setValue] = useState("");
 
-  const { data: ensAddress, isLoading: ensAddressLoading } = useEnsAddress({
-    name: value,
-    enabled: value.includes("."),
-    chainId,
-  });
+  const isEnsDomain = value.includes(".");
 
+  // Resolve ENS name to address if input is ENS domain
+  const { data: addressFromEnsName, isLoading: addressFromEnsNameLoading } =
+    useEnsAddress({
+      name: value,
+      enabled: isEnsDomain,
+      chainId: 1,
+    });
+
+  // Resolve address to ENS name if input is a valid address
+  const { data: ensNameFromAddress, isLoading: ensNameFromAddressLoading } =
+    useEnsName({
+      address: value,
+      enabled: isAddress(value),
+      chainId: 1,
+    });
+
+  // Fetch ENS avatar if input is ENS domain or if address resolved to an ENS name
   const { data: ensAvatar, isLoading: ensAvatarLoading } = useEnsAvatar({
-    addressOrName: value,
-    enabled: !!ensAddress,
-    chainId,
+    addressOrName: isEnsDomain ? value : (ensNameFromAddress as string),
+    enabled: isEnsDomain || !!ensNameFromAddress,
+    chainId: 1,
   });
 
   const renderItem = () => {
-    if (isAddress(value))
+    if (isAddress(value)) {
+      if (ensNameFromAddressLoading || ensAvatarLoading) return <Skeleton />;
+
+      if (ensNameFromAddress) {
+        return (
+          <Pressable
+            onPress={() =>
+              navigation.navigate("SendAsset", {
+                address: value,
+                ensName: ensNameFromAddress,
+              })
+            }
+          >
+            <Box flexDirection="row" alignItems="center" mt="3">
+              <Avatar source={ensAvatar ? { uri: ensAvatar } : undefined}>
+                {ensNameFromAddress[0]}
+              </Avatar>
+              <Box ml="2">
+                <Text variant="subtitle1">{ensNameFromAddress}</Text>
+                <Text>{formatAddress(value)}</Text>
+              </Box>
+            </Box>
+          </Pressable>
+        );
+      }
+
       return (
         <Pressable
           onPress={() => navigation.navigate("SendAsset", { address: value })}
@@ -47,30 +85,33 @@ const SendAddressScreen = () => {
           </Box>
         </Pressable>
       );
+    }
 
-    if (ensAddressLoading || ensAvatarLoading) return <Skeleton />;
+    if (isEnsDomain) {
+      if (addressFromEnsNameLoading || ensAvatarLoading) return <Skeleton />;
 
-    if (ensAddress && isAddress(ensAddress))
-      return (
-        <Pressable
-          onPress={() =>
-            navigation.navigate("SendAsset", {
-              address: ensAddress,
-              ensName: value,
-            })
-          }
-        >
-          <Box flexDirection="row" alignItems="center" mt="3">
-            <Avatar source={ensAvatar ? { uri: ensAvatar } : undefined}>
-              {value[0]}
-            </Avatar>
-            <Box ml="2">
-              <Text variant="subtitle1">{value}</Text>
-              <Text>{formatAddress(ensAddress)}</Text>
+      if (addressFromEnsName && isAddress(addressFromEnsName))
+        return (
+          <Pressable
+            onPress={() =>
+              navigation.navigate("SendAsset", {
+                address: addressFromEnsName,
+                ensName: value,
+              })
+            }
+          >
+            <Box flexDirection="row" alignItems="center" mt="3">
+              <Avatar source={ensAvatar ? { uri: ensAvatar } : undefined}>
+                {value[0]}
+              </Avatar>
+              <Box ml="2">
+                <Text variant="subtitle1">{value}</Text>
+                <Text>{formatAddress(addressFromEnsName)}</Text>
+              </Box>
             </Box>
-          </Box>
-        </Pressable>
-      );
+          </Pressable>
+        );
+    }
 
     if (value) return <Text mt="3">Invalid address</Text>;
   };
