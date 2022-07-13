@@ -22,7 +22,7 @@ const SendConfirmScreen = ({ route }) => {
 
   const [sending, setSending] = useState(false);
 
-  const { amount, address: to, token } = route.params;
+  const { amount, address: to, ensName, token } = route.params;
 
   const { data: callGas, isLoading: callGasLoading } = useQuery(
     "callGas",
@@ -104,7 +104,7 @@ const SendConfirmScreen = ({ route }) => {
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">To</Text>
-          <Text variant="subtitle2">{formatAddress(to)}</Text>
+          <Text variant="subtitle2">{ensName || formatAddress(to)}</Text>
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">Gas (estimate)</Text>

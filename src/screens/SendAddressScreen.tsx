@@ -50,11 +50,14 @@ const SendAddressScreen = () => {
 
     if (ensAddressLoading || ensAvatarLoading) return <Skeleton />;
 
-    if (ensAddress)
+    if (ensAddress && isAddress(ensAddress))
       return (
         <Pressable
           onPress={() =>
-            navigation.navigate("SendAsset", { address: ensAddress })
+            navigation.navigate("SendAsset", {
+              address: ensAddress,
+              ensName: value,
+            })
           }
         >
           <Box flexDirection="row" alignItems="center" mt="3">
