@@ -28,7 +28,7 @@ const SendAddressScreen = () => {
     useEnsAddress({
       name: value,
       enabled: isEnsDomain,
-      chainId: 1,
+      chainId,
     });
 
   // Resolve address to ENS name if input is a valid address
@@ -36,14 +36,14 @@ const SendAddressScreen = () => {
     useEnsName({
       address: value,
       enabled: isAddress(value),
-      chainId: 1,
+      chainId,
     });
 
   // Fetch ENS avatar if input is ENS domain or if address resolved to an ENS name
   const { data: ensAvatar, isLoading: ensAvatarLoading } = useEnsAvatar({
     addressOrName: isEnsDomain ? value : (ensNameFromAddress as string),
     enabled: isEnsDomain || !!ensNameFromAddress,
-    chainId: 1,
+    chainId,
   });
 
   const renderItem = () => {
