@@ -26,7 +26,7 @@ const SignUpGuardiansScreen = () => {
             <Avatar>{guardian.name[0]}</Avatar>
             <Box ml="3">
               <Text variant="subtitle1">{guardian.name}</Text>
-              <Text>{formatAddress(guardian.address)}</Text>
+              <Text>{guardian.ensName || formatAddress(guardian.address)}</Text>
             </Box>
           </Box>
         ))}

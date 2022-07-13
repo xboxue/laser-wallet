@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 interface Guardian {
   name: string;
   address: string;
+  ensName?: string;
 }
 
 interface GuardiansState {
