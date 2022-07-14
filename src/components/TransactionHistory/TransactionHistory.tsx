@@ -1,15 +1,11 @@
-import { format, fromUnixTime, isToday } from "date-fns";
 import Constants from "expo-constants";
 import { keyBy, orderBy } from "lodash";
-import { Box, Image, Pressable, SectionList, Text } from "native-base";
+import { SectionList } from "native-base";
 import { useMemo } from "react";
 import { RefreshControl } from "react-native";
 import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useProvider } from "wagmi";
-import ethIcon from "../../../assets/eth-icon.png";
-import { tokensByAddress } from "../../constants/tokens";
-import { TRANSACTION_TYPES } from "../../constants/transactions";
 import { selectChainId } from "../../features/network/networkSlice";
 import {
   PendingTransaction,
@@ -23,22 +19,10 @@ import {
   Transaction,
   TransactionERC20,
 } from "../../services/etherscan";
-import formatAddress from "../../utils/formatAddress";
-import formatAmount from "../../utils/formatAmount";
 import getTransactionType from "../../utils/getTransactionType";
 import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
 import PendingTransactionItem from "../PendingTransactionItem/PendingTransactionItem";
-
-const titles = {
-  [TRANSACTION_TYPES.CONTRACT_INTERACTION]: "Contract Interaction",
-  [TRANSACTION_TYPES.DEPLOY_CONTRACT]: "Contract Deployment",
-  [TRANSACTION_TYPES.SEND]: "Send",
-  [TRANSACTION_TYPES.TOKEN_APPROVE]: "Approve",
-  [TRANSACTION_TYPES.TOKEN_SET_APPROVAL_FOR_ALL]: "Set Approval for All",
-  [TRANSACTION_TYPES.TOKEN_SAFE_TRANSFER_FROM]: "Safe Transfer From",
-  [TRANSACTION_TYPES.TOKEN_TRANSFER]: "Transfer",
-  [TRANSACTION_TYPES.TOKEN_TRANSFER_FROM]: "Transfer From",
-};
+import TransactionItem from "../TransactionItem/TransactionItem";
 
 interface Props {
   walletAddress: string;
@@ -149,53 +133,8 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     refetchBalance();
   };
 
-  const renderTitle = (transaction: Transaction) => {
-    // ERC20 transfer
-    if (transaction.tokenSymbol) {
-      if (isEqualCaseInsensitive(transaction.to, walletAddress))
-        return `Receive ${transaction.tokenSymbol}`;
-      return `Send ${transaction.tokenSymbol}`;
-    }
-
-    // Receive ETH
-    if (isEqualCaseInsensitive(transaction.to, walletAddress)) return "Receive";
-
-    return titles[transaction.type];
-  };
-
   const renderTransaction = ({ item: transaction }: { item: Transaction }) => {
-    const isToken = transaction.tokenName;
-    const tokenUri = tokensByAddress[
-      transaction.contractAddress
-    ]?.logoURI?.replace("ipfs://", "https://cloudflare-ipfs.com/ipfs/");
-    const date = fromUnixTime(parseInt(transaction.timeStamp));
-
-    return (
-      <Pressable>
-        <Box flexDirection="row" alignItems="center" py="2">
-          <Image
-            source={isToken && tokenUri ? { uri: tokenUri } : ethIcon}
-            size="9"
-            alt="Ethereum icon"
-          />
-          <Box ml="3">
-            <Text variant="subtitle1">{renderTitle(transaction)}</Text>
-            <Text>
-              {format(date, isToday(date) ? "h:mm a" : "LLL d")} ·{" "}
-              {isEqualCaseInsensitive(transaction.to, walletAddress)
-                ? `From: ${formatAddress(transaction.from)}`
-                : `To: ${formatAddress(transaction.to)}`}
-            </Text>
-          </Box>
-          <Text variant="subtitle1" ml="auto">
-            {formatAmount(transaction.value, {
-              decimals: transaction.tokenDecimal,
-            })}{" "}
-            {transaction.tokenSymbol || "ETH"}
-          </Text>
-        </Box>
-      </Pressable>
-    );
+    return <TransactionItem transaction={transaction} />;
   };
 
   const renderPendingTransaction = ({
