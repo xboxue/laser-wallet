@@ -1,11 +1,10 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import * as Clipboard from "expo-clipboard";
 import { Box, Button, Icon, IconButton, Pressable, Text } from "native-base";
-import { useEffect, useState } from "react";
 import { useWindowDimensions } from "react-native";
 import { NavigationState, Route, TabView } from "react-native-tab-view";
 import { useSelector } from "react-redux";
+import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
 import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
@@ -79,18 +78,10 @@ const HomeScreen = ({ route }) => {
         />
       </Box>
       <Box p="4">
-        <Pressable onPress={() => Clipboard.setStringAsync(walletAddress)}>
-          {({ isPressed }) => (
-            <Box
-              flexDirection="row"
-              alignItems="center"
-              opacity={isPressed ? 0.2 : 1}
-            >
-              <Text mr="1">{formatAddress(walletAddress)}</Text>
-              <Icon as={<Ionicons name="copy-outline" size={24} />} />
-            </Box>
-          )}
-        </Pressable>
+        <Box flexDirection="row" alignItems="center">
+          <Text mr="1">{formatAddress(walletAddress)}</Text>
+          <CopyIconButton value={walletAddress} />
+        </Box>
 
         <WalletBalance walletAddress={walletAddress} />
         <Button
