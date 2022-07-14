@@ -38,7 +38,10 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
 
     const owner = new ethers.Wallet(ownerPrivateKey);
 
-    if (callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA) {
+    if (
+      callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
+      callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4
+    ) {
       const { types, domain, message } = JSON.parse(callRequest.params[1]);
       const result = await owner._signTypedData(domain, types, message);
 
@@ -49,10 +52,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
       dispatch(setCallRequest(null));
     }
 
-    if (
-      callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
-      callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4
-    ) {
+    if (callRequest.method === REQUEST_TYPES.PERSONAL_SIGN) {
       const result = await owner.signMessage(
         utils.arrayify(callRequest.params[0])
       );
