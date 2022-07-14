@@ -5,7 +5,7 @@ interface Props {
   address: string;
   ensName?: string;
   ensAvatar?: string;
-  onPress: (address: string, ensName?: string) => void;
+  onPress?: (address: string, ensName?: string) => void;
 }
 
 const AddressOrEnsPreviewItem = ({
@@ -15,7 +15,7 @@ const AddressOrEnsPreviewItem = ({
   onPress,
 }: Props) => {
   return (
-    <Pressable onPress={() => onPress(address, ensName)}>
+    <Pressable onPress={() => onPress?.(address, ensName)}>
       <Box flexDirection="row" alignItems="center" mt="3">
         <Avatar source={ensAvatar ? { uri: ensAvatar } : undefined}>
           {ensName ? ensName[0] : "0x"}

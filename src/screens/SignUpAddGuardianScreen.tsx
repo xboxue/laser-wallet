@@ -1,58 +1,37 @@
 import { useNavigation } from "@react-navigation/native";
 import { isAddress } from "ethers/lib/utils";
-import { Avatar, Box, Button, Input, Skeleton, Text } from "native-base";
+import { Box, Button, Input, Text } from "native-base";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useEnsAddress, useEnsAvatar } from "wagmi";
-import { DEFAULT_CHAIN } from "../constants/chains";
+import AddressPreviewContainer from "../components/AddressPreviewContainer/AddressPreviewContainer";
+import EnsPreviewContainer from "../components/EnsPreviewContainer/EnsPreviewContainer";
 import { addGuardian } from "../features/guardians/guardiansSlice";
-import formatAddress from "../utils/formatAddress";
+import useEnsAddressAndAvatar from "../hooks/useEnsAddressAndAvatar";
+import useEnsNameAndAvatar from "../hooks/useEnsNameAndAvatar";
+import isEnsDomain from "../utils/isEnsDomain";
 
 const SignUpAddGuardianScreen = () => {
   const navigation = useNavigation();
   const [name, setName] = useState("");
   const [value, setValue] = useState("");
+
+  const { address: ensAddress } = useEnsAddressAndAvatar(value);
+  const { ensName } = useEnsNameAndAvatar(value);
+
   const dispatch = useDispatch();
 
-  const { data: ensAddress, isLoading: ensAddressLoading } = useEnsAddress({
-    name: value,
-    enabled: value.includes("."),
-    chainId: DEFAULT_CHAIN,
-  });
+  const renderPreviewItem = () => {
+    if (isAddress(value)) return <AddressPreviewContainer address={value} />;
 
-  const { data: ensAvatar, isLoading: ensAvatarLoading } = useEnsAvatar({
-    addressOrName: value,
-    enabled: !!ensAddress,
-    chainId: DEFAULT_CHAIN,
-  });
-
-  const renderItem = () => {
-    if (isAddress(value))
+    if (isEnsDomain(value))
       return (
-        <Box flexDirection="row" alignItems="center" mt="3">
-          <Avatar>0x</Avatar>
-          <Text ml="2" variant="subtitle1">
-            {formatAddress(value)}
-          </Text>
-        </Box>
+        <EnsPreviewContainer
+          ensName={value}
+          errorComponent={<Text mt="3">Invalid address</Text>}
+        />
       );
 
-    if (ensAddressLoading || ensAvatarLoading) return <Skeleton />;
-
-    if (ensAddress && isAddress(ensAddress))
-      return (
-        <Box flexDirection="row" alignItems="center" mt="3">
-          <Avatar source={ensAvatar ? { uri: ensAvatar } : undefined}>
-            {value[0]}
-          </Avatar>
-          <Box ml="2">
-            <Text variant="subtitle1">{value}</Text>
-            <Text>{formatAddress(ensAddress)}</Text>
-          </Box>
-        </Box>
-      );
-
-    if (value) return <Text mt="1">Invalid address</Text>;
+    if (value) return <Text mt="3">Invalid address</Text>;
   };
 
   return (
@@ -77,7 +56,7 @@ const SignUpAddGuardianScreen = () => {
           autoCorrect={false}
           autoCapitalize="none"
         />
-        {renderItem()}
+        {renderPreviewItem()}
         <Button
           mt="4"
           isDisabled={
@@ -90,7 +69,7 @@ const SignUpAddGuardianScreen = () => {
               addGuardian({
                 name,
                 address: isAddress(value) ? value : (ensAddress as string),
-                ensName: ensAddress ? value : undefined,
+                ensName: ensAddress ? value : (ensName as string),
               })
             );
             navigation.goBack();

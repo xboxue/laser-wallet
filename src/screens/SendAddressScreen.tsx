@@ -3,8 +3,8 @@ import { useNavigation } from "@react-navigation/native";
 import { isAddress } from "ethers/lib/utils";
 import { Box, Icon, Input, Text } from "native-base";
 import { useState } from "react";
-import AddressPreviewContainer from "../components/AddressOrEnsPreview/AddressPreviewContainer/AddressPreviewContainer";
-import EnsPreviewContainer from "../components/AddressOrEnsPreview/EnsPreviewContainer/EnsPreviewContainer";
+import AddressPreviewContainer from "../components/AddressPreviewContainer/AddressPreviewContainer";
+import EnsPreviewContainer from "../components/EnsPreviewContainer/EnsPreviewContainer";
 
 const SendAddressScreen = () => {
   const navigation = useNavigation();
