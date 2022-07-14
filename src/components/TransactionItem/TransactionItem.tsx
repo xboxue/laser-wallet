@@ -5,7 +5,7 @@ import { useEnsName } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
 import { tokensByAddress } from "../../constants/tokens";
 import { TRANSACTION_TYPES } from "../../constants/transactions";
-import { selectWalletAddress } from "../../features/auth/authSlice";
+import { selectWalletAddress } from "../../features/wallet/walletSlice";
 import { selectChainId } from "../../features/network/networkSlice";
 import { Transaction } from "../../services/etherscan";
 import formatAddress from "../../utils/formatAddress";

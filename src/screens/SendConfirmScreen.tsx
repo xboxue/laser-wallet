@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useFeeData, useProvider } from "wagmi";
-import { selectWalletAddress } from "../features/auth/authSlice";
+import { selectWalletAddress } from "../features/wallet/walletSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
 import useLaser from "../hooks/useLaser";

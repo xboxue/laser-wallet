@@ -9,7 +9,7 @@ import {
   selectRecoveryOwnerAddress,
   selectWallets,
   setWalletAddress,
-} from "../features/auth/authSlice";
+} from "../features/wallet/walletSlice";
 import { selectGuardians } from "../features/guardians/guardiansSlice";
 import { selectChainId, setChainId } from "../features/network/networkSlice";
 import { createWallet } from "../services/wallet";

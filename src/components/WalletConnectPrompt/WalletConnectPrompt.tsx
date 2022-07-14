@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import { REQUEST_TYPES } from "../../constants/walletConnect";
-import { selectOwnerPrivateKey } from "../../features/auth/authSlice";
+import { selectOwnerPrivateKey } from "../../features/wallet/walletSlice";
 import { selectChainId } from "../../features/network/networkSlice";
 import { addPendingTransaction } from "../../features/transactions/transactionsSlice";
 import {

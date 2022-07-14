@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Box, Text } from "native-base";
 import { useSelector } from "react-redux";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
-import { selectWalletAddress } from "../features/auth/authSlice";
+import { selectWalletAddress } from "../features/wallet/walletSlice";
 
 const SendAssetScreen = ({ route }) => {
   const navigation = useNavigation();

@@ -8,7 +8,7 @@ type Wallet = {
   // recoveryOwnerAddress: string;
 };
 
-interface AuthState {
+interface WalletState {
   ownerAddress: string | null;
   ownerPrivateKey: string | null;
   walletAddress: string | null;
@@ -16,7 +16,7 @@ interface AuthState {
   wallets: Wallet[];
 }
 
-const initialState: AuthState = {
+const initialState: WalletState = {
   ownerAddress: null,
   ownerPrivateKey: null,
   walletAddress: null,
@@ -24,8 +24,8 @@ const initialState: AuthState = {
   wallets: [],
 };
 
-const authSlice = createSlice({
-  name: "auth",
+const walletSlice = createSlice({
+  name: "wallet",
   initialState,
   reducers: {
     setOwnerAddress: (state, action: PayloadAction<string>) => {
@@ -46,14 +46,15 @@ const authSlice = createSlice({
   },
 });
 
-export const selectOwnerAddress = (state: RootState) => state.auth.ownerAddress;
+export const selectOwnerAddress = (state: RootState) =>
+  state.wallet.ownerAddress;
 export const selectOwnerPrivateKey = (state: RootState) =>
-  state.auth.ownerPrivateKey;
+  state.wallet.ownerPrivateKey;
 export const selectWalletAddress = (state: RootState) =>
-  state.auth.walletAddress;
+  state.wallet.walletAddress;
 export const selectRecoveryOwnerAddress = (state: RootState) =>
-  state.auth.recoveryOwnerAddress;
-export const selectWallets = (state: RootState) => state.auth.wallets;
+  state.wallet.recoveryOwnerAddress;
+export const selectWallets = (state: RootState) => state.wallet.wallets;
 
 export const {
   setOwnerAddress,
@@ -61,6 +62,6 @@ export const {
   setWalletAddress,
   setRecoveryOwnerAddress,
   addWallet,
-} = authSlice.actions;
+} = walletSlice.actions;
 
-export default authSlice.reducer;
+export default walletSlice.reducer;

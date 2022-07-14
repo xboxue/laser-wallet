@@ -10,7 +10,7 @@ import {
   setOwnerPrivateKey,
   setRecoveryOwnerAddress,
   setWalletAddress,
-} from "../features/auth/authSlice";
+} from "../features/wallet/walletSlice";
 import { selectGuardians } from "../features/guardians/guardiansSlice";
 import { createBackup, isValidPassword } from "../services/cloudBackup";
 import { createWallet } from "../services/wallet";

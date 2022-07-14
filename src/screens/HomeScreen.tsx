@@ -9,7 +9,7 @@ import TokenBalances from "../components/TokenBalances/TokenBalances";
 import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
-import { selectWalletAddress } from "../features/auth/authSlice";
+import { selectWalletAddress } from "../features/wallet/walletSlice";
 import formatAddress from "../utils/formatAddress";
 
 const routes = [

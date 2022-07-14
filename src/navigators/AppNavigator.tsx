@@ -3,7 +3,7 @@ import {
   TransitionPresets,
 } from "@react-navigation/stack";
 import { useSelector } from "react-redux";
-import { selectOwnerAddress } from "../features/auth/authSlice";
+import { selectOwnerAddress } from "../features/wallet/walletSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import HomeScreen from "../screens/HomeScreen";
 import QRCodeScanScreen from "../screens/QRCodeScanScreen";
