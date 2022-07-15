@@ -3,12 +3,14 @@ import { RootState } from "../../store";
 
 interface AuthState {
   passcode: string | null;
-  authenticated: boolean;
+  isAuthenticated: boolean;
+  isBiometricsEnabled: boolean;
 }
 
 const initialState: AuthState = {
   passcode: null,
-  authenticated: false,
+  isAuthenticated: false,
+  isBiometricsEnabled: true,
 };
 
 const authSlice = createSlice({
@@ -18,16 +20,22 @@ const authSlice = createSlice({
     setPasscode: (state, action: PayloadAction<string>) => {
       state.passcode = action.payload;
     },
-    setAuthenticated: (state, action: PayloadAction<boolean>) => {
-      state.authenticated = action.payload;
+    setIsAuthenticated: (state, action: PayloadAction<boolean>) => {
+      state.isAuthenticated = action.payload;
+    },
+    setIsBiometricsEnabled: (state, action: PayloadAction<boolean>) => {
+      state.isBiometricsEnabled = action.payload;
     },
   },
 });
 
-export const selectAuthenticated = (state: RootState) =>
-  state.auth.authenticated;
+export const selectIsAuthenticated = (state: RootState) =>
+  state.auth.isAuthenticated;
 export const selectPasscode = (state: RootState) => state.auth.passcode;
+export const selectIsBiometricsEnabled = (state: RootState) =>
+  state.auth.isBiometricsEnabled;
 
-export const { setPasscode, setAuthenticated } = authSlice.actions;
+export const { setPasscode, setIsAuthenticated, setIsBiometricsEnabled } =
+  authSlice.actions;
 
 export default authSlice.reducer;

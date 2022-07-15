@@ -1,14 +1,23 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import { Box, Circle, Icon, Pressable, Text } from "native-base";
+import { Box, Icon } from "native-base";
+import SettingsItem from "../components/SettingsItem/SettingsItem";
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
+
   const options = [
     {
       title: "Network",
       icon: <Icon as={Ionicons} color="white" name="planet-outline" size="5" />,
       onPress: () => navigation.navigate("SettingsNetwork"),
+    },
+    {
+      title: "App security",
+      icon: (
+        <Icon as={Ionicons} color="white" name="settings-outline" size="5" />
+      ),
+      onPress: () => navigation.navigate("SettingsSecurity"),
     },
     {
       title: "Backups",
@@ -39,27 +48,11 @@ const SettingsScreen = () => {
       ),
     },
   ];
+
   return (
     <Box>
       {options.map(({ title, icon, onPress }) => (
-        <Pressable onPress={onPress} key={title}>
-          {({ isPressed }) => (
-            <Box
-              px="4"
-              py="3"
-              flexDir="row"
-              alignItems="center"
-              opacity={isPressed ? "0.2" : "1"}
-            >
-              <Circle bg="black" size="40px">
-                {icon}
-              </Circle>
-              <Text variant="subtitle1" ml="3">
-                {title}
-              </Text>
-            </Box>
-          )}
-        </Pressable>
+        <SettingsItem title={title} icon={icon} onPress={onPress} key={title} />
       ))}
     </Box>
   );

@@ -5,10 +5,15 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import PasscodeNumberPad from "../components/PasscodeNumberPad/PasscodeNumberPad";
 import { PASSCODE_LENGTH } from "../constants/auth";
-import { selectPasscode, setAuthenticated } from "../features/auth/authSlice";
+import {
+  selectIsBiometricsEnabled,
+  selectPasscode,
+  setIsAuthenticated,
+} from "../features/auth/authSlice";
 
 const SignInPasscodeScreen = () => {
   const passcode = useSelector(selectPasscode);
+  const isBiometricsEnabled = useSelector(selectIsBiometricsEnabled);
   const [passcodeAttempt, setPasscodeAttempt] = useState("");
   const [error, setError] = useState("");
   const dispatch = useDispatch();
@@ -18,11 +23,11 @@ const SignInPasscodeScreen = () => {
       cancelLabel: "Cancel",
       disableDeviceFallback: true,
     });
-    if (success) dispatch(setAuthenticated(true));
+    if (success) dispatch(setIsAuthenticated(true));
   };
 
   useEffect(() => {
-    authenticate();
+    if (isBiometricsEnabled) authenticate();
   }, []);
 
   useEffect(() => {
@@ -31,7 +36,7 @@ const SignInPasscodeScreen = () => {
 
     if (passcodeAttempt === passcode) {
       setPasscodeAttempt("");
-      dispatch(setAuthenticated(true));
+      dispatch(setIsAuthenticated(true));
       return;
     } else {
       setPasscodeAttempt("");
@@ -49,17 +54,19 @@ const SignInPasscodeScreen = () => {
         onChange={setPasscodeAttempt}
         helperText={error}
         toolbar={
-          <Button
-            variant="ghost"
-            leftIcon={
-              <Icon size="lg" as={<MaterialIcons name="fingerprint" />} />
-            }
-            onPress={authenticate}
-            mb="3"
-            alignSelf="center"
-          >
-            Use fingerprint
-          </Button>
+          isBiometricsEnabled ? (
+            <Button
+              variant="ghost"
+              leftIcon={
+                <Icon size="lg" as={<MaterialIcons name="fingerprint" />} />
+              }
+              onPress={authenticate}
+              mb="3"
+              alignSelf="center"
+            >
+              Use fingerprint
+            </Button>
+          ) : undefined
         }
       />
     </>

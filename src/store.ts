@@ -26,7 +26,7 @@ export const store = configureStore({
       {
         key: "passcode",
         storage: createSecureStore(),
-        whitelist: ["passcode"],
+        blacklist: ["isAuthenticated"],
       },
       authReducer
     ),

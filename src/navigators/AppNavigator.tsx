@@ -3,7 +3,7 @@ import {
   TransitionPresets,
 } from "@react-navigation/stack";
 import { useSelector } from "react-redux";
-import { selectAuthenticated } from "../features/auth/authSlice";
+import { selectIsAuthenticated } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import { selectOwnerAddress } from "../features/wallet/walletSlice";
 import HomeScreen from "../screens/HomeScreen";
@@ -14,6 +14,7 @@ import SendAssetScreen from "../screens/SendAssetScreen";
 import SendConfirmScreen from "../screens/SendConfirmScreen";
 import SettingsNetworkScreen from "../screens/SettingsNetworkScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import SettingsSecurityScreen from "../screens/SettingsSecurityScreen";
 import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
@@ -27,7 +28,7 @@ const Stack = createStackNavigator();
 const AppNavigator = () => {
   const ownerAddress = useSelector(selectOwnerAddress);
   const chainId = useSelector(selectChainId);
-  const authenticated = useSelector(selectAuthenticated);
+  const authenticated = useSelector(selectIsAuthenticated);
 
   const renderScreens = () => {
     if (!ownerAddress)
@@ -75,6 +76,14 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SettingsNetwork"
             component={SettingsNetworkScreen}
+          />
+          <Stack.Screen
+            name="SettingsSecurity"
+            component={SettingsSecurityScreen}
+          />
+          <Stack.Screen
+            name="ChangePasscode"
+            component={SignUpPasscodeScreen}
           />
         </>
       );
