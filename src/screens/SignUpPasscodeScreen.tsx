@@ -1,39 +1,39 @@
 import { useNavigation } from "@react-navigation/native";
-import { range } from "lodash";
-import { Box, Circle, Text } from "native-base";
+import { Box, Text } from "native-base";
 import { useEffect, useState } from "react";
-import NumberPad from "../components/NumberPad/NumberPad";
-
-const PASSCODE_LENGTH = 6;
+import { useDispatch } from "react-redux";
+import PasscodeNumberPad from "../components/PasscodeNumberPad/PasscodeNumberPad";
+import { PASSCODE_LENGTH } from "../constants/auth";
+import { setPasscode } from "../features/auth/authSlice";
 
 const SignUpPasscodeScreen = () => {
   const navigation = useNavigation();
-  const [passcode, setPasscode] = useState("");
-  const [firstPasscode, setFirstPasscode] = useState("");
+  const [currentPasscode, setCurrentPasscode] = useState("");
+  const [passcodeToConfirm, setPasscodeToConfirm] = useState("");
   const [error, setError] = useState("");
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (passcode.length > 0 && error) {
-      setError("");
+    if (currentPasscode.length > 0 && error) setError("");
+    if (currentPasscode.length !== PASSCODE_LENGTH) return;
+
+    if (!passcodeToConfirm) {
+      setPasscodeToConfirm(currentPasscode);
+      setCurrentPasscode("");
+      return;
     }
 
-    if (passcode.length === PASSCODE_LENGTH) {
-      if (firstPasscode) {
-        if (passcode === firstPasscode) {
-          // Store
-          setPasscode("");
-          setFirstPasscode("");
-          navigation.navigate("SignUpGuardians");
-        } else {
-          setPasscode("");
-          setError("Incorrect");
-        }
-      } else {
-        setFirstPasscode(passcode);
-        setPasscode("");
-      }
+    if (currentPasscode === passcodeToConfirm) {
+      setCurrentPasscode("");
+      setPasscodeToConfirm("");
+      dispatch(setPasscode(currentPasscode));
+      navigation.navigate("SignUpGuardians");
+      return;
+    } else {
+      setCurrentPasscode("");
+      setError("Incorrect");
     }
-  }, [passcode]);
+  }, [currentPasscode]);
 
   return (
     <Box flex={1} pb="4">
@@ -41,31 +41,12 @@ const SignUpPasscodeScreen = () => {
         <Text variant="subtitle1">Protect your wallet</Text>
         <Text>Enter a passcode to keep your wallet safe.</Text>
       </Box>
-      <Box flex={1} justifyContent="center" alignItems="center">
-        <Box flexDirection="row" mb="3">
-          {range(PASSCODE_LENGTH).map((value, index) => (
-            <Circle
-              key={value}
-              size="3"
-              bg="black"
-              mx="1"
-              opacity={index >= passcode.length ? "0.3" : "1"}
-            />
-          ))}
-        </Box>
-        {firstPasscode && <Text>Confirm passcode</Text>}
-        {error && <Text>{error}</Text>}
-      </Box>
-      <NumberPad
-        onChange={(value) => {
-          if (value === "backspace") {
-            setPasscode(passcode.slice(0, passcode.length - 1));
-          } else if (value === "clear") {
-            setPasscode("");
-          } else if (passcode.length < PASSCODE_LENGTH) {
-            setPasscode(passcode.concat(value));
-          }
-        }}
+      <PasscodeNumberPad
+        passcode={currentPasscode}
+        onChange={setCurrentPasscode}
+        helperText={
+          error || (!!passcodeToConfirm ? "Confirm passcode" : undefined)
+        }
       />
     </Box>
   );

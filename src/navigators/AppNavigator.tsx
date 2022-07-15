@@ -3,8 +3,9 @@ import {
   TransitionPresets,
 } from "@react-navigation/stack";
 import { useSelector } from "react-redux";
-import { selectOwnerAddress } from "../features/wallet/walletSlice";
+import { selectAuthenticated } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
+import { selectOwnerAddress } from "../features/wallet/walletSlice";
 import HomeScreen from "../screens/HomeScreen";
 import QRCodeScanScreen from "../screens/QRCodeScanScreen";
 import SendAddressScreen from "../screens/SendAddressScreen";
@@ -13,6 +14,7 @@ import SendAssetScreen from "../screens/SendAssetScreen";
 import SendConfirmScreen from "../screens/SendConfirmScreen";
 import SettingsNetworkScreen from "../screens/SettingsNetworkScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
 import SignUpBackupScreen from "../screens/SignUpBackupScreen";
@@ -25,35 +27,11 @@ const Stack = createStackNavigator();
 const AppNavigator = () => {
   const ownerAddress = useSelector(selectOwnerAddress);
   const chainId = useSelector(selectChainId);
+  const authenticated = useSelector(selectAuthenticated);
 
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        ...TransitionPresets.SlideFromRightIOS,
-        headerTitle: "",
-      }}
-      // Fix stale data in wagmi by rerendering app when chain changes
-      key={chainId}
-    >
-      {ownerAddress ? (
-        <>
-          <Stack.Screen
-            name="Home"
-            component={HomeScreen}
-            initialParams={{ tab: 0 }}
-          />
-          <Stack.Screen name="SendAddress" component={SendAddressScreen} />
-          <Stack.Screen name="SendAsset" component={SendAssetScreen} />
-          <Stack.Screen name="SendAmount" component={SendAmountScreen} />
-          <Stack.Screen name="SendConfirm" component={SendConfirmScreen} />
-          <Stack.Screen name="QRCodeScan" component={QRCodeScanScreen} />
-          <Stack.Screen name="Settings" component={SettingsScreen} />
-          <Stack.Screen
-            name="SettingsNetwork"
-            component={SettingsNetworkScreen}
-          />
-        </>
-      ) : (
+  const renderScreens = () => {
+    if (!ownerAddress)
+      return (
         <>
           <Stack.Screen
             name="Start"
@@ -78,7 +56,44 @@ const AppNavigator = () => {
             component={SignUpBackupPasswordScreen}
           />
         </>
-      )}
+      );
+
+    if (authenticated)
+      return (
+        <>
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            initialParams={{ tab: 0 }}
+          />
+          <Stack.Screen name="SendAddress" component={SendAddressScreen} />
+          <Stack.Screen name="SendAsset" component={SendAssetScreen} />
+          <Stack.Screen name="SendAmount" component={SendAmountScreen} />
+          <Stack.Screen name="SendConfirm" component={SendConfirmScreen} />
+          <Stack.Screen name="QRCodeScan" component={QRCodeScanScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen
+            name="SettingsNetwork"
+            component={SettingsNetworkScreen}
+          />
+        </>
+      );
+
+    return (
+      <Stack.Screen name="SignInPasscode" component={SignInPasscodeScreen} />
+    );
+  };
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
+        headerTitle: "",
+      }}
+      // Fix stale data in wagmi by rerendering app when chain changes
+      key={chainId}
+    >
+      {renderScreens()}
     </Stack.Navigator>
   );
 };

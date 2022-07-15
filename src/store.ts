@@ -7,6 +7,7 @@ import guardiansReducer from "./features/guardians/guardiansSlice";
 import networkReducer from "./features/network/networkSlice";
 import walletConnectReducer from "./features/walletConnect/walletConnectSlice";
 import transactionsReducer from "./features/transactions/transactionsSlice";
+import authReducer from "./features/auth/authSlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,10 @@ export const store = configureStore({
     wallet: persistReducer(
       { key: "auth", storage: createSecureStore() },
       walletReducer
+    ),
+    auth: persistReducer(
+      { key: "auth", storage: AsyncStorage, blacklist: ["authenticated"] },
+      authReducer
     ),
   },
   middleware: (getDefaultMiddleware) =>
