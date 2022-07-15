@@ -30,7 +30,7 @@ const SettingsSecurityScreen = () => {
       </Box>
       <Pressable
         onPress={() => {
-          navigation.navigate("ChangePasscode");
+          navigation.navigate("SettingsPasscode");
         }}
       >
         <Box

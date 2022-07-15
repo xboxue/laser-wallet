@@ -13,6 +13,7 @@ import SendAmountScreen from "../screens/SendAmountScreen";
 import SendAssetScreen from "../screens/SendAssetScreen";
 import SendConfirmScreen from "../screens/SendConfirmScreen";
 import SettingsNetworkScreen from "../screens/SettingsNetworkScreen";
+import SettingsPasscodeScreen from "../screens/SettingsPasscodeScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import SettingsSecurityScreen from "../screens/SettingsSecurityScreen";
 import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
@@ -82,8 +83,8 @@ const AppNavigator = () => {
             component={SettingsSecurityScreen}
           />
           <Stack.Screen
-            name="ChangePasscode"
-            component={SignUpPasscodeScreen}
+            name="SettingsPasscode"
+            component={SettingsPasscodeScreen}
           />
         </>
       );
