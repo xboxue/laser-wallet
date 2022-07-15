@@ -23,7 +23,11 @@ export const store = configureStore({
       walletReducer
     ),
     auth: persistReducer(
-      { key: "auth", storage: AsyncStorage, blacklist: ["authenticated"] },
+      {
+        key: "passcode",
+        storage: createSecureStore(),
+        whitelist: ["passcode"],
+      },
       authReducer
     ),
   },
