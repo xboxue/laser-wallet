@@ -1,11 +1,12 @@
+import { signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
 import { ethers, utils } from "ethers";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import { REQUEST_TYPES } from "../../constants/walletConnect";
-import { selectOwnerPrivateKey } from "../../features/wallet/walletSlice";
 import { selectChainId } from "../../features/network/networkSlice";
 import { addPendingTransaction } from "../../features/transactions/transactionsSlice";
+import { selectOwnerPrivateKey } from "../../features/wallet/walletSlice";
 import {
   selectCallRequest,
   selectConnector,
@@ -42,8 +43,11 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
       callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
       callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4
     ) {
-      const { types, domain, message } = JSON.parse(callRequest.params[1]);
-      const result = await owner._signTypedData(domain, types, message);
+      const result = signTypedData({
+        privateKey: ethers.utils.arrayify(ownerPrivateKey),
+        version: SignTypedDataVersion.V4,
+        data: JSON.parse(callRequest.params[1]),
+      });
 
       connector.approveRequest({
         id: callRequest.id,
