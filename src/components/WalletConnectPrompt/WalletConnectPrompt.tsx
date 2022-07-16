@@ -94,6 +94,27 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
         setLoading(false);
       }
     }
+
+    if (callRequest.method === REQUEST_TYPES.SIGN_TRANSACTION) {
+      setLoading(true);
+      const { to, value = 0, data } = callRequest.params[0];
+      const feeData = await provider.getFeeData();
+
+      try {
+        const transaction = await laser.sendTransaction(to, data, value, {
+          maxFeePerGas: feeData.maxFeePerGas,
+          maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+          gasTip: 30000,
+        });
+        connector.approveRequest({
+          id: callRequest.id,
+          result: transaction,
+        });
+        dispatch(setCallRequest(null));
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   const rejectRequest = () => {
@@ -132,7 +153,8 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
             callRequest={callRequest}
           />
         )}
-      {callRequest?.method === REQUEST_TYPES.SEND_TRANSACTION &&
+      {(callRequest?.method === REQUEST_TYPES.SEND_TRANSACTION ||
+        callRequest?.method === REQUEST_TYPES.SIGN_TRANSACTION) &&
         connector?.peerMeta && (
           <WalletConnectTransactionPrompt
             onApprove={approveRequest}
