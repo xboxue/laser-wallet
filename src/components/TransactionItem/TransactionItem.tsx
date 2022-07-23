@@ -64,6 +64,7 @@ const TransactionItem = ({ transaction }: Props) => {
       <Box flexDirection="row" alignItems="center" py="2">
         <Image
           source={isToken && tokenUri ? { uri: tokenUri } : ethIcon}
+          fallbackSource={ethIcon}
           size="9"
           alt="Ethereum icon"
         />
