@@ -58,9 +58,8 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
     >
       <Box flexDirection="row" alignItems="center" py="1">
         <Image
-          source={{
-            uri: token.logoURI.replace("ipfs://", IPFS_GATEWAY_URL),
-          }}
+          source={{ uri: token.logoURI.replace("ipfs://", IPFS_GATEWAY_URL) }}
+          fallbackSource={ethIcon}
           size="9"
           alt="Token icon"
         />

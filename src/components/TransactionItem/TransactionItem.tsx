@@ -1,12 +1,13 @@
+import { tokens } from "@uniswap/default-token-list";
 import { format, fromUnixTime, isToday } from "date-fns";
+import { keyBy } from "lodash";
 import { Box, Image, Pressable, Text } from "native-base";
 import { useSelector } from "react-redux";
 import { useEnsName } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
-import { tokensByAddress } from "../../constants/tokens";
 import { TRANSACTION_TYPES } from "../../constants/transactions";
-import { selectWalletAddress } from "../../features/wallet/walletSlice";
 import { selectChainId } from "../../features/network/networkSlice";
+import { selectWalletAddress } from "../../features/wallet/walletSlice";
 import { Transaction } from "../../services/etherscan";
 import formatAddress from "../../utils/formatAddress";
 import formatAmount from "../../utils/formatAmount";
@@ -22,6 +23,8 @@ const titles = {
   [TRANSACTION_TYPES.TOKEN_TRANSFER]: "Transfer",
   [TRANSACTION_TYPES.TOKEN_TRANSFER_FROM]: "Transfer From",
 };
+
+const tokensByAddress = keyBy(tokens, (token) => token.address.toLowerCase());
 
 interface Props {
   transaction: Transaction;
