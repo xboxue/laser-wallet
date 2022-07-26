@@ -1,7 +1,7 @@
 import WalletConnect from "@walletconnect/client";
 
-interface ConnectOptions {
-  uri: string;
+interface SubscribeOptions {
+  connector: WalletConnect;
   onSessionRequest: (payload: any) => void;
   onSessionUpdate: (payload: any) => void;
   onCallRequest: (payload: any) => void;
@@ -9,15 +9,8 @@ interface ConnectOptions {
   onDisconnect: (payload: any) => void;
 }
 
-export const connect = async ({
-  uri,
-  onSessionRequest,
-  onSessionUpdate,
-  onCallRequest,
-  onConnect,
-  onDisconnect,
-}: ConnectOptions) => {
-  const connector = new WalletConnect({
+export const connect = (uri: string) => {
+  return new WalletConnect({
     uri,
     clientMeta: {
       description: "WalletConnect Developer App",
@@ -26,15 +19,19 @@ export const connect = async ({
       name: "WalletConnect",
     },
   });
+};
 
-  await connector.createSession();
-
-  await new Promise<void>((resolve, reject) => {
-    connector.on("session_request", (error, payload) => {
-      if (error) reject(error);
-      onSessionRequest(payload);
-      resolve();
-    });
+export const subscribe = ({
+  connector,
+  onSessionRequest,
+  onSessionUpdate,
+  onCallRequest,
+  onConnect,
+  onDisconnect,
+}: SubscribeOptions) => {
+  connector.on("session_request", (error, payload) => {
+    if (error) throw error;
+    onSessionRequest(payload);
   });
 
   connector.on("session_update", (error, payload) => {
@@ -56,6 +53,5 @@ export const connect = async ({
     if (error) throw error;
     onDisconnect(payload);
   });
-
   return connector;
 };

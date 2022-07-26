@@ -9,8 +9,9 @@ import { addPendingTransaction } from "../../features/transactions/transactionsS
 import { selectOwnerPrivateKey } from "../../features/wallet/walletSlice";
 import {
   selectCallRequest,
-  selectConnector,
-  selectPending,
+  selectConnectors,
+  selectIsConnecting,
+  selectSessionRequest,
   setCallRequest,
 } from "../../features/walletConnect/walletConnectSlice";
 import useLaser from "../../hooks/useLaser";
@@ -24,18 +25,26 @@ interface Props {
 }
 
 const WalletConnectPrompt = ({ walletAddress }: Props) => {
-  const connector = useSelector(selectConnector);
-  const pending = useSelector(selectPending);
+  const dispatch = useDispatch();
+
+  const connectors = useSelector(selectConnectors);
+  const sessionRequest = useSelector(selectSessionRequest);
   const callRequest = useSelector(selectCallRequest);
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
+  const isConnecting = useSelector(selectIsConnecting);
   const chainId = useSelector(selectChainId);
   const provider = useProvider({ chainId });
   const laser = useLaser();
-  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
-  const approveRequest = async () => {
-    if (!ownerPrivateKey || !callRequest || !connector) return;
+  const getConnector = (peerId: string) => {
+    return connectors.find((connector) => connector.peerId === peerId);
+  };
+
+  const approveCallRequest = async () => {
+    if (!ownerPrivateKey || !callRequest) return;
+    const connector = getConnector(callRequest.peerId);
+    if (!connector) return;
 
     const owner = new ethers.Wallet(ownerPrivateKey);
 
@@ -117,8 +126,10 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
     }
   };
 
-  const rejectRequest = () => {
-    if (!callRequest || !connector) return;
+  const rejectCallRequest = () => {
+    if (!callRequest) return;
+    const connector = getConnector(callRequest.peerId);
+    if (!connector) return;
 
     connector.rejectRequest({
       id: callRequest.id,
@@ -127,44 +138,55 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
     dispatch(setCallRequest(null));
   };
 
+  const approveSessionRequest = () => {
+    if (!sessionRequest) return;
+    const connector = getConnector(sessionRequest.peerId);
+    if (!connector) return;
+
+    connector.approveSession({
+      accounts: [walletAddress],
+      chainId,
+    });
+  };
+
+  const rejectSessionRequest = () => {
+    if (!sessionRequest) return;
+    const connector = getConnector(sessionRequest.peerId);
+    if (!connector) return;
+    connector.rejectSession();
+  };
+
   return (
     <>
-      {pending && connector?.peerMeta && (
+      {(isConnecting || sessionRequest) && (
         <WalletConnectSessionPrompt
-          onApprove={() =>
-            connector.approveSession({
-              accounts: [walletAddress],
-              chainId,
-            })
-          }
-          onReject={() => connector.rejectSession()}
-          onClose={() => connector.rejectSession()}
-          peerMeta={connector.peerMeta}
+          onApprove={approveSessionRequest}
+          onReject={rejectSessionRequest}
+          onClose={rejectSessionRequest}
+          peerMeta={sessionRequest?.peerMeta}
+          isConnecting={isConnecting}
         />
       )}
-      {callRequest &&
-        callRequest.method !== REQUEST_TYPES.SEND_TRANSACTION &&
-        connector?.peerMeta && (
-          <WalletConnectRequestPrompt
-            onApprove={approveRequest}
-            onReject={rejectRequest}
-            onClose={rejectRequest}
-            peerMeta={connector.peerMeta}
-            callRequest={callRequest}
-          />
-        )}
+      {callRequest && callRequest.method !== REQUEST_TYPES.SEND_TRANSACTION && (
+        <WalletConnectRequestPrompt
+          onApprove={approveCallRequest}
+          onReject={rejectCallRequest}
+          onClose={rejectCallRequest}
+          peerMeta={callRequest.peerMeta}
+          callRequest={callRequest}
+        />
+      )}
       {(callRequest?.method === REQUEST_TYPES.SEND_TRANSACTION ||
-        callRequest?.method === REQUEST_TYPES.SIGN_TRANSACTION) &&
-        connector?.peerMeta && (
-          <WalletConnectTransactionPrompt
-            onApprove={approveRequest}
-            onReject={rejectRequest}
-            onClose={rejectRequest}
-            peerMeta={connector.peerMeta}
-            callRequest={callRequest}
-            loading={loading}
-          />
-        )}
+        callRequest?.method === REQUEST_TYPES.SIGN_TRANSACTION) && (
+        <WalletConnectTransactionPrompt
+          onApprove={approveCallRequest}
+          onReject={rejectCallRequest}
+          onClose={rejectCallRequest}
+          peerMeta={callRequest.peerMeta}
+          callRequest={callRequest}
+          loading={loading}
+        />
+      )}
     </>
   );
 };
