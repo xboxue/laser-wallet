@@ -1,4 +1,4 @@
-import AES from "crypto-js/aes";
+import CryptoJS from "crypto-js";
 import { Platform } from "react-native";
 import RNCloudFs from "react-native-cloud-fs";
 import RNFS from "react-native-fs";
@@ -35,7 +35,7 @@ export const createBackup = async (
   }
   if (Platform.OS === "android") await RNCloudFs.loginIfNeeded();
 
-  const encryptedData = AES.encrypt(JSON.stringify(data), password).toString();
+  const encryptedData = CryptoJS.AES.encrypt(data, password).toString();
 
   const path = `${RNFS.DocumentDirectoryPath}${fileName}`;
   const targetPath = `${BACKUP_DIR}/${fileName}`;
@@ -57,6 +57,36 @@ export const createBackup = async (
 
   await RNFS.unlink(path);
   return result;
+};
+
+export const getBackup = async (backupPassword: string, fileName: string) => {
+  const backups = await getBackups();
+  if (!backups?.files?.length) throw new Error("No backups found");
+
+  let backupFile;
+  if (Platform.OS === "ios") {
+    backupFile = backups.files.find((file) => file.name === fileName);
+  } else {
+    backupFile = backups.files.find(
+      (file) => file.name === `${BACKUP_DIR}/${fileName}`
+    );
+  }
+
+  if (!backupFile) throw new Error("Backup file not found");
+
+  const encryptedData =
+    Platform.OS === "ios"
+      ? await RNCloudFs.getIcloudDocument(fileName)
+      : await RNCloudFs.getGoogleDriveDocument(backupFile.id);
+
+  if (!encryptedData) throw new Error("Error getting backup data");
+  const backupData = CryptoJS.AES.decrypt(
+    encryptedData,
+    backupPassword
+  ).toString(CryptoJS.enc.Utf8);
+
+  if (!backupData) throw new Error("Couldn't decrypt backup");
+  return backupData;
 };
 
 export const isValidPassword = (password: string) => {

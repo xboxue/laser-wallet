@@ -5,12 +5,14 @@ interface AuthState {
   passcode: string | null;
   isAuthenticated: boolean;
   isBiometricsEnabled: boolean;
+  backupPassword: string | null;
 }
 
 const initialState: AuthState = {
   passcode: null,
   isAuthenticated: false,
   isBiometricsEnabled: true,
+  backupPassword: null,
 };
 
 const authSlice = createSlice({
@@ -26,6 +28,9 @@ const authSlice = createSlice({
     setIsBiometricsEnabled: (state, action: PayloadAction<boolean>) => {
       state.isBiometricsEnabled = action.payload;
     },
+    setBackupPassword: (state, action: PayloadAction<string>) => {
+      state.backupPassword = action.payload;
+    },
   },
 });
 
@@ -34,8 +39,14 @@ export const selectIsAuthenticated = (state: RootState) =>
 export const selectPasscode = (state: RootState) => state.auth.passcode;
 export const selectIsBiometricsEnabled = (state: RootState) =>
   state.auth.isBiometricsEnabled;
+export const selectBackupPassword = (state: RootState) =>
+  state.auth.backupPassword;
 
-export const { setPasscode, setIsAuthenticated, setIsBiometricsEnabled } =
-  authSlice.actions;
+export const {
+  setPasscode,
+  setIsAuthenticated,
+  setIsBiometricsEnabled,
+  setBackupPassword,
+} = authSlice.actions;
 
 export default authSlice.reducer;

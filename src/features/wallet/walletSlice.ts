@@ -13,6 +13,7 @@ interface WalletState {
   ownerPrivateKey: string | null;
   walletAddress: string | null;
   recoveryOwnerAddress: string | null;
+  recoveryOwnerPrivateKey: string | null;
   wallets: Wallet[];
 }
 
@@ -21,6 +22,7 @@ const initialState: WalletState = {
   ownerPrivateKey: null,
   walletAddress: null,
   recoveryOwnerAddress: null,
+  recoveryOwnerPrivateKey: null,
   wallets: [],
 };
 
@@ -40,6 +42,9 @@ const walletSlice = createSlice({
     setRecoveryOwnerAddress: (state, action: PayloadAction<string>) => {
       state.recoveryOwnerAddress = action.payload;
     },
+    setRecoveryOwnerPrivateKey: (state, action: PayloadAction<string>) => {
+      state.recoveryOwnerPrivateKey = action.payload;
+    },
     addWallet: (state, action: PayloadAction<Wallet>) => {
       state.wallets.push(action.payload);
     },
@@ -54,6 +59,8 @@ export const selectWalletAddress = (state: RootState) =>
   state.wallet.walletAddress;
 export const selectRecoveryOwnerAddress = (state: RootState) =>
   state.wallet.recoveryOwnerAddress;
+export const selectRecoveryOwnerPrivateKey = (state: RootState) =>
+  state.wallet.recoveryOwnerPrivateKey;
 export const selectWallets = (state: RootState) => state.wallet.wallets;
 
 export const {
@@ -61,6 +68,7 @@ export const {
   setOwnerPrivateKey,
   setWalletAddress,
   setRecoveryOwnerAddress,
+  setRecoveryOwnerPrivateKey,
   addWallet,
 } = walletSlice.actions;
 

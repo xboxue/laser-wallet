@@ -24,4 +24,8 @@ declare module "react-native-cloud-fs" {
   function deleteFromCloud(file: any): Promise<boolean>;
 
   function loginIfNeeded(): Promise<boolean>;
+
+  function getIcloudDocument(fileName: string): Promise<string>;
+
+  function getGoogleDriveDocument(id: string): Promise<string>;
 }

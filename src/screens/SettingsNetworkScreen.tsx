@@ -57,7 +57,7 @@ const SettingsNetworkScreen = () => {
 
   const walletsByChain = keyBy(wallets, "chainId");
   return (
-    <Box>
+    <Box px="4">
       {defaultChains.map(({ name, id }) => (
         <Pressable
           disabled={!walletsByChain[id]}
@@ -69,13 +69,12 @@ const SettingsNetworkScreen = () => {
         >
           {({ isPressed }) => (
             <Box
-              px="4"
               py="2"
               flexDir="row"
               alignItems="center"
               opacity={isPressed ? "0.2" : "1"}
             >
-              <Text variant="subtitle1" ml="3">
+              <Text variant="subtitle1">
                 {name}
                 {currentChainId === id && " (current)"}
               </Text>

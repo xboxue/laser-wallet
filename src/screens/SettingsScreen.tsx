@@ -20,21 +20,9 @@ const SettingsScreen = () => {
       onPress: () => navigation.navigate("SettingsSecurity"),
     },
     {
-      title: "Backups",
-      icon: (
-        <Icon
-          as={Ionicons}
-          color="white"
-          name="cloud-upload-outline"
-          size="5"
-        />
-      ),
-    },
-    {
       title: "Wallet recovery",
-      icon: (
-        <Icon as={Ionicons} color="white" name="lock-closed-outline" size="5" />
-      ),
+      icon: <Icon as={Ionicons} color="white" name="md-refresh" size="5" />,
+      onPress: () => navigation.navigate("SettingsWalletRecovery"),
     },
     {
       title: "Account",

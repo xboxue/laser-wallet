@@ -12,10 +12,12 @@ import SendAddressScreen from "../screens/SendAddressScreen";
 import SendAmountScreen from "../screens/SendAmountScreen";
 import SendAssetScreen from "../screens/SendAssetScreen";
 import SendConfirmScreen from "../screens/SendConfirmScreen";
+import SettingsBackupPasswordScreen from "../screens/SettingsBackupPasswordScreen";
 import SettingsNetworkScreen from "../screens/SettingsNetworkScreen";
 import SettingsPasscodeScreen from "../screens/SettingsPasscodeScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import SettingsSecurityScreen from "../screens/SettingsSecurityScreen";
+import SettingsWalletRecoveryScreen from "../screens/SettingsWalletRecoveryScreen";
 import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
@@ -85,6 +87,14 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SettingsPasscode"
             component={SettingsPasscodeScreen}
+          />
+          <Stack.Screen
+            name="SettingsWalletRecovery"
+            component={SettingsWalletRecoveryScreen}
+          />
+          <Stack.Screen
+            name="SettingsBackupPassword"
+            component={SettingsBackupPasswordScreen}
           />
         </>
       );
