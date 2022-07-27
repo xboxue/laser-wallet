@@ -1,6 +1,10 @@
-import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import WalletConnect from "@walletconnect/client";
-import { IClientMeta, IJsonRpcRequest } from "@walletconnect/types";
+import {
+  IClientMeta,
+  IJsonRpcRequest,
+  IWalletConnectSession,
+} from "@walletconnect/types";
 import { RootState } from "../../store";
 
 type SessionRequest = {
@@ -15,6 +19,7 @@ type CallRequest = {
 
 interface WalletConnectState {
   connectors: WalletConnect[];
+  sessions: IWalletConnectSession[];
   callRequest: CallRequest | null;
   sessionRequest: SessionRequest | null;
   isConnecting: boolean;
@@ -22,6 +27,7 @@ interface WalletConnectState {
 
 const initialState: WalletConnectState = {
   connectors: [],
+  sessions: [],
   callRequest: null,
   sessionRequest: null,
   isConnecting: false,
@@ -42,6 +48,14 @@ const walletConnectSlice = createSlice({
         (connector) => connector.peerId !== action.payload
       );
     },
+    addSession: (state, action: PayloadAction<IWalletConnectSession>) => {
+      state.sessions.push(action.payload);
+    },
+    removeSession: (state, action: PayloadAction<string>) => {
+      state.sessions = state.sessions.filter(
+        (session) => session.peerId !== action.payload
+      );
+    },
     setSessionRequest: (
       state,
       action: PayloadAction<SessionRequest | null>
@@ -58,6 +72,8 @@ export const selectIsConnecting = (state: RootState) =>
   state.walletConnect.isConnecting;
 export const selectConnectors = (state: RootState) =>
   state.walletConnect.connectors;
+export const selectSessions = (state: RootState) =>
+  state.walletConnect.sessions;
 export const selectCallRequest = (state: RootState) =>
   state.walletConnect.callRequest;
 export const selectSessionRequest = (state: RootState) =>
@@ -66,6 +82,8 @@ export const selectSessionRequest = (state: RootState) =>
 export const {
   setSessionRequest,
   setCallRequest,
+  addSession,
+  removeSession,
   addConnector,
   removeConnector,
   setIsConnecting,

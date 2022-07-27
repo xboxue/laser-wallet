@@ -2,16 +2,23 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from "redux-persist";
 import createSecureStore from "redux-persist-expo-securestore";
-import walletReducer from "./features/wallet/walletSlice";
+import authReducer from "./features/auth/authSlice";
 import guardiansReducer from "./features/guardians/guardiansSlice";
 import networkReducer from "./features/network/networkSlice";
-import walletConnectReducer from "./features/walletConnect/walletConnectSlice";
 import transactionsReducer from "./features/transactions/transactionsSlice";
-import authReducer from "./features/auth/authSlice";
+import walletReducer from "./features/wallet/walletSlice";
+import walletConnectReducer from "./features/walletConnect/walletConnectSlice";
 
 export const store = configureStore({
   reducer: {
-    walletConnect: walletConnectReducer,
+    walletConnect: persistReducer(
+      {
+        key: "walletConnect",
+        storage: AsyncStorage,
+        whitelist: ["sessions"],
+      },
+      walletConnectReducer
+    ),
     guardians: guardiansReducer,
     transactions: transactionsReducer,
     network: persistReducer(

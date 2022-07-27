@@ -10,6 +10,7 @@ import TransactionHistory from "../components/TransactionHistory/TransactionHist
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
+import useWalletConnectSubscription from "../hooks/useWalletConnectSubscription";
 import formatAddress from "../utils/formatAddress";
 
 const routes = [
@@ -20,10 +21,10 @@ const routes = [
 const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
+  const window = useWindowDimensions();
+  useWalletConnectSubscription();
 
   const { tab } = route.params;
-
-  const window = useWindowDimensions();
 
   if (!walletAddress) return <Text>Error</Text>;
 

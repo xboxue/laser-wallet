@@ -1,4 +1,10 @@
 import WalletConnect from "@walletconnect/client";
+import { IWalletConnectSession } from "@walletconnect/types";
+
+interface ConnectOptions {
+  uri?: string;
+  session?: IWalletConnectSession;
+}
 
 interface SubscribeOptions {
   connector: WalletConnect;
@@ -9,9 +15,10 @@ interface SubscribeOptions {
   onDisconnect: (payload: any) => void;
 }
 
-export const connect = (uri: string) => {
+export const connect = ({ uri, session }: ConnectOptions) => {
   return new WalletConnect({
     uri,
+    session,
     clientMeta: {
       description: "WalletConnect Developer App",
       url: "https://walletconnect.org",
