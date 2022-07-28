@@ -12,6 +12,7 @@ import {
   selectPasscode,
   setIsAuthenticated,
 } from "../features/auth/authSlice";
+import useBiometricTypes from "../hooks/useBiometricTypes";
 import theme from "../styles/theme";
 
 const SignInPasscodeScreen = () => {
@@ -21,11 +22,7 @@ const SignInPasscodeScreen = () => {
   const [error, setError] = useState("");
   const dispatch = useDispatch();
 
-  const { data: biometricTypes, isLoading } = useQuery(
-    "biometricTypes",
-    () => LocalAuthentication.supportedAuthenticationTypesAsync(),
-    { enabled: isBiometricsEnabled }
-  );
+  const { data: biometricTypes } = useBiometricTypes(isBiometricsEnabled);
 
   const authenticate = async () => {
     const { success } = await LocalAuthentication.authenticateAsync({
@@ -73,7 +70,7 @@ const SignInPasscodeScreen = () => {
           mb="3"
           alignSelf="center"
         >
-          Use face recognition
+          Use Face ID
         </Button>
       );
 

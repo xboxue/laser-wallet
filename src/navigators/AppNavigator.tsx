@@ -20,6 +20,7 @@ import SettingsSecurityScreen from "../screens/SettingsSecurityScreen";
 import SettingsWalletRecoveryScreen from "../screens/SettingsWalletRecoveryScreen";
 import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
+import SignUpAuthScreen from "../screens/SignUpAuthScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
 import SignUpBackupScreen from "../screens/SignUpBackupScreen";
 import SignUpGuardiansScreen from "../screens/SignUpGuardiansScreen";
@@ -42,6 +43,7 @@ const AppNavigator = () => {
             component={StartScreen}
             options={{ headerShown: false }}
           />
+          <Stack.Screen name="SignUpAuth" component={SignUpAuthScreen} />
           <Stack.Screen
             name="SignUpPasscode"
             component={SignUpPasscodeScreen}
