@@ -3,6 +3,7 @@ import { Box } from "native-base";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordForm";
+import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { DEFAULT_CHAIN } from "../constants/chains";
 import { selectGuardians } from "../features/guardians/guardiansSlice";
 import {
@@ -19,6 +20,7 @@ const SignUpBackupPasswordScreen = () => {
   const [loading, setLoading] = useState(false);
   const guardians = useSelector(selectGuardians);
   const dispatch = useDispatch();
+  const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
 
   const handleSubmit = async (password: string) => {
     try {
@@ -53,6 +55,10 @@ const SignUpBackupPasswordScreen = () => {
 
   return (
     <Box p="4">
+      <EnableICloudPrompt
+        open={iCloudPromptOpen}
+        onClose={() => setICloudPromptOpen(false)}
+      />
       <BackupPasswordForm onSubmit={handleSubmit} submitting={loading} />
     </Box>
   );
