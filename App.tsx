@@ -33,6 +33,7 @@ import { publicProvider } from "wagmi/providers/public";
 import AppNavigator from "./src/navigators/AppNavigator";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
+import { ClerkProvider } from "@clerk/clerk-expo";
 
 Promise.allSettled = (promises: Promise<any>[]) => {
   return Promise.all(
@@ -45,6 +46,12 @@ Promise.allSettled = (promises: Promise<any>[]) => {
 };
 
 const storage = new MMKV();
+
+const tokenCache = {
+  getToken: (key: string) => SecureStore.getItemAsync(key),
+  saveToken: (key: string, value: string) =>
+    SecureStore.setItemAsync(key, value),
+};
 
 const { provider, webSocketProvider } = configureChains(defaultChains, [
   infuraProvider({ infuraId: Constants.manifest?.extra?.infuraApiKey }),
@@ -97,9 +104,16 @@ const App = () => {
         <WagmiConfig client={wagmiClient}>
           <QueryClientProvider client={queryClient}>
             <NativeBaseProvider theme={theme}>
-              <NavigationContainer theme={{ colors: { background: "white" } }}>
-                <AppNavigator />
-              </NavigationContainer>
+              <ClerkProvider
+                frontendApi="clerk.eager.panda-0.lcl.dev"
+                tokenCache={tokenCache}
+              >
+                <NavigationContainer
+                  theme={{ colors: { background: "white" } }}
+                >
+                  <AppNavigator />
+                </NavigationContainer>
+              </ClerkProvider>
             </NativeBaseProvider>
           </QueryClientProvider>
         </WagmiConfig>

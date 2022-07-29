@@ -23,8 +23,10 @@ import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpAuthScreen from "../screens/SignUpAuthScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
 import SignUpBackupScreen from "../screens/SignUpBackupScreen";
+import SignUpEmailScreen from "../screens/SignUpEmailScreen";
 import SignUpGuardiansScreen from "../screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "../screens/SignUpPasscodeScreen";
+import SignUpVerifyEmailScreen from "../screens/SignUpVerifyEmail";
 import StartScreen from "../screens/StartScreen";
 
 const Stack = createStackNavigator();
@@ -42,6 +44,11 @@ const AppNavigator = () => {
             name="Start"
             component={StartScreen}
             options={{ headerShown: false }}
+          />
+          <Stack.Screen name="SignUpEmail" component={SignUpEmailScreen} />
+          <Stack.Screen
+            name="SignUpVerifyEmail"
+            component={SignUpVerifyEmailScreen}
           />
           <Stack.Screen name="SignUpAuth" component={SignUpAuthScreen} />
           <Stack.Screen

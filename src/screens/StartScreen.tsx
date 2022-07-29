@@ -9,7 +9,7 @@ const StartScreen = () => {
       <Text variant="h4" textAlign="center" mb="5">
         Laser Wallet
       </Text>
-      <Button onPress={() => navigation.navigate("SignUpAuth")}>
+      <Button onPress={() => navigation.navigate("SignUpEmail")}>
         Create new wallet
       </Button>
       <Button variant="ghost" mt="2">
