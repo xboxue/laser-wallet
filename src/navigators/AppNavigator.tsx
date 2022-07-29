@@ -24,6 +24,7 @@ import SignUpAuthScreen from "../screens/SignUpAuthScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
 import SignUpBackupScreen from "../screens/SignUpBackupScreen";
 import SignUpEmailScreen from "../screens/SignUpEmailScreen";
+import SignUpGuardianDetailsScreen from "../screens/SignUpGuardianDetailsScreen";
 import SignUpGuardiansScreen from "../screens/SignUpGuardiansScreen";
 import SignUpPasscodeScreen from "../screens/SignUpPasscodeScreen";
 import SignUpVerifyEmailScreen from "../screens/SignUpVerifyEmail";
@@ -58,6 +59,10 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SignUpGuardians"
             component={SignUpGuardiansScreen}
+          />
+          <Stack.Screen
+            name="SignUpGuardianDetails"
+            component={SignUpGuardianDetailsScreen}
           />
           <Stack.Screen
             name="SignUpAddGuardian"

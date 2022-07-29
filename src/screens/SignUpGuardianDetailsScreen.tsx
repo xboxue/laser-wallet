@@ -3,18 +3,21 @@ import { isAddress } from "ethers/lib/utils";
 import { Box, Button, Input, Text } from "native-base";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { v4 as uuidv4 } from "uuid";
 import AddressPreviewContainer from "../components/AddressPreviewContainer/AddressPreviewContainer";
 import EnsPreviewContainer from "../components/EnsPreviewContainer/EnsPreviewContainer";
-import { addGuardian } from "../features/guardians/guardiansSlice";
+import {
+  removeGuardian,
+  updateGuardian,
+} from "../features/guardians/guardiansSlice";
 import useEnsAddressAndAvatar from "../hooks/useEnsAddressAndAvatar";
 import useEnsNameAndAvatar from "../hooks/useEnsNameAndAvatar";
 import isEnsDomain from "../utils/isEnsDomain";
 
-const SignUpAddGuardianScreen = () => {
+const SignUpGuardianDetailsScreen = ({ route }) => {
+  const { guardian } = route.params;
   const navigation = useNavigation();
-  const [name, setName] = useState("");
-  const [value, setValue] = useState("");
+  const [name, setName] = useState(guardian.name);
+  const [value, setValue] = useState(guardian.ensName || guardian.address);
 
   const { address: ensAddress } = useEnsAddressAndAvatar(value);
   const { ensName } = useEnsNameAndAvatar(value);
@@ -39,13 +42,12 @@ const SignUpAddGuardianScreen = () => {
     <Box>
       <Box p="4">
         <Text variant="subtitle1" mb="4">
-          Add guardian
+          Change guardian
         </Text>
         <Input
           placeholder="Name"
           value={name}
           onChangeText={setName}
-          autoFocus
           size="lg"
         />
         <Input
@@ -67,21 +69,33 @@ const SignUpAddGuardianScreen = () => {
             if (!isAddress(value) && !(ensAddress && isAddress(ensAddress)))
               return;
             dispatch(
-              addGuardian({
-                id: uuidv4(),
-                name,
-                address: isAddress(value) ? value : (ensAddress as string),
-                ensName: ensAddress ? value : (ensName as string),
+              updateGuardian({
+                id: guardian.id,
+                changes: {
+                  name,
+                  address: isAddress(value) ? value : (ensAddress as string),
+                  ensName: ensAddress ? value : (ensName as string),
+                },
               })
             );
             navigation.goBack();
           }}
         >
-          Add
+          Save
+        </Button>
+        <Button
+          variant="ghost"
+          mt="1"
+          onPress={() => {
+            dispatch(removeGuardian(guardian.id));
+            navigation.goBack();
+          }}
+        >
+          Remove
         </Button>
       </Box>
     </Box>
   );
 };
 
-export default SignUpAddGuardianScreen;
+export default SignUpGuardianDetailsScreen;

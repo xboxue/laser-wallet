@@ -1,5 +1,7 @@
+import { useAuth } from "@clerk/clerk-react";
 import { useNavigation } from "@react-navigation/native";
-import { Avatar, Box, Button, Text } from "native-base";
+import Constants from "expo-constants";
+import { Avatar, Box, Button, Pressable, Text } from "native-base";
 import { useSelector } from "react-redux";
 import { selectGuardians } from "../features/guardians/guardiansSlice";
 import formatAddress from "../utils/formatAddress";
@@ -7,6 +9,7 @@ import formatAddress from "../utils/formatAddress";
 const SignUpGuardiansScreen = () => {
   const navigation = useNavigation();
   const guardians = useSelector(selectGuardians);
+  const { isSignedIn } = useAuth();
 
   return (
     <Box>
@@ -16,19 +19,58 @@ const SignUpGuardiansScreen = () => {
           Guardians ensure you can recover your wallet in case your device is
           lost.
         </Text>
+        <Pressable
+          onPress={() =>
+            navigation.navigate("SignUpGuardianDetails", {
+              isLaserGuardian: true,
+            })
+          }
+        >
+          {({ isPressed }) => (
+            <Box
+              flexDirection="row"
+              alignItems="center"
+              mb="2"
+              opacity={isPressed ? 0.3 : 1}
+            >
+              <Avatar>L</Avatar>
+              <Box ml="3">
+                <Text variant="subtitle1">
+                  Laser Guardian {!isSignedIn && "(Disabled)"}
+                </Text>
+                <Text>
+                  {formatAddress(
+                    Constants.manifest?.extra?.laserGuardianAddress
+                  )}
+                </Text>
+              </Box>
+            </Box>
+          )}
+        </Pressable>
         {guardians.map((guardian) => (
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            mb="2"
+          <Pressable
+            onPress={() =>
+              navigation.navigate("SignUpGuardianDetails", { guardian })
+            }
             key={guardian.address}
           >
-            <Avatar>{guardian.name[0]}</Avatar>
-            <Box ml="3">
-              <Text variant="subtitle1">{guardian.name}</Text>
-              <Text>{guardian.ensName || formatAddress(guardian.address)}</Text>
-            </Box>
-          </Box>
+            {({ isPressed }) => (
+              <Box
+                flexDirection="row"
+                alignItems="center"
+                mb="2"
+                opacity={isPressed ? 0.3 : 1}
+              >
+                <Avatar>{guardian.name[0]}</Avatar>
+                <Box ml="3">
+                  <Text variant="subtitle1">{guardian.name}</Text>
+                  <Text>
+                    {guardian.ensName || formatAddress(guardian.address)}
+                  </Text>
+                </Box>
+              </Box>
+            )}
+          </Pressable>
         ))}
         <Button mt="4" onPress={() => navigation.navigate("SignUpAddGuardian")}>
           Add guardian
