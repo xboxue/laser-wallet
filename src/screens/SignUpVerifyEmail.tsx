@@ -1,4 +1,4 @@
-import { useSignUp } from "@clerk/clerk-react";
+import { useClerk, useSignUp } from "@clerk/clerk-expo";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
 import { Box, Button, Input, Text } from "native-base";
@@ -7,6 +7,7 @@ import * as yup from "yup";
 
 const SignUpVerifyEmailScreen = () => {
   const { signUp } = useSignUp();
+  const clerk = useClerk();
   const navigation = useNavigation();
 
   const { mutate: verifyCode, isLoading } = useMutation(
@@ -15,8 +16,9 @@ const SignUpVerifyEmailScreen = () => {
       return signUp.attemptEmailAddressVerification({ code });
     },
     {
-      onSuccess: () => {
-        navigation.dispatch(StackActions.replace("SignUpAuth"));
+      onSuccess: (data) => {
+        clerk.setSession(data.createdSessionId);
+        navigation.dispatch(StackActions.replace("SignUpGuardians"));
       },
       onError: (error) => {
         const clerkError = error?.errors?.[0];

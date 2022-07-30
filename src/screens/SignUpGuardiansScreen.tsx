@@ -1,15 +1,17 @@
-import { useAuth } from "@clerk/clerk-react";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import { Avatar, Box, Button, Pressable, Text } from "native-base";
 import { useSelector } from "react-redux";
-import { selectGuardians } from "../features/guardians/guardiansSlice";
+import {
+  selectGuardians,
+  selectIsLaserGuardianEnabled,
+} from "../features/guardians/guardiansSlice";
 import formatAddress from "../utils/formatAddress";
 
 const SignUpGuardiansScreen = () => {
   const navigation = useNavigation();
   const guardians = useSelector(selectGuardians);
-  const { isSignedIn } = useAuth();
+  const isLaserGuardianEnabled = useSelector(selectIsLaserGuardianEnabled);
 
   return (
     <Box>
@@ -20,11 +22,7 @@ const SignUpGuardiansScreen = () => {
           lost.
         </Text>
         <Pressable
-          onPress={() =>
-            navigation.navigate("SignUpGuardianDetails", {
-              isLaserGuardian: true,
-            })
-          }
+          onPress={() => navigation.navigate("SignUpLaserGuardianDetails")}
         >
           {({ isPressed }) => (
             <Box
@@ -36,7 +34,7 @@ const SignUpGuardiansScreen = () => {
               <Avatar>L</Avatar>
               <Box ml="3">
                 <Text variant="subtitle1">
-                  Laser Guardian {!isSignedIn && "(Disabled)"}
+                  Laser Guardian {!isLaserGuardianEnabled && "(Disabled)"}
                 </Text>
                 <Text>
                   {formatAddress(
@@ -75,7 +73,11 @@ const SignUpGuardiansScreen = () => {
         <Button mt="4" onPress={() => navigation.navigate("SignUpAddGuardian")}>
           Add guardian
         </Button>
-        <Button mt="4" onPress={() => navigation.navigate("SignUpBackup")}>
+        <Button
+          mt="4"
+          onPress={() => navigation.navigate("SignUpBackup")}
+          isDisabled={!guardians.length && !isLaserGuardianEnabled}
+        >
           Next
         </Button>
       </Box>

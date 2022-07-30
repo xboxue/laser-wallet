@@ -1,13 +1,17 @@
-import { useSignUp } from "@clerk/clerk-react";
+import { useAuth, useSignUp } from "@clerk/clerk-expo";
 import { useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
 import { Box, Button, Input, Text } from "native-base";
 import { useMutation } from "react-query";
+import { useDispatch } from "react-redux";
 import * as yup from "yup";
+import { setIsLaserGuardianEnabled } from "../features/guardians/guardiansSlice";
 
 const SignUpEmailScreen = () => {
+  const { isSignedIn } = useAuth();
   const { signUp } = useSignUp();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const { mutate: verifyEmail, isLoading } = useMutation(
     async (email: string) => {
@@ -19,6 +23,7 @@ const SignUpEmailScreen = () => {
     },
     {
       onSuccess: () => {
+        dispatch(setIsLaserGuardianEnabled(true));
         navigation.navigate("SignUpVerifyEmail");
       },
       onError: (error) => {
@@ -30,7 +35,10 @@ const SignUpEmailScreen = () => {
 
   const formik = useFormik({
     initialValues: { email: "" },
-    onSubmit: (values) => verifyEmail(values.email),
+    onSubmit: (values) => {
+      if (isSignedIn) return navigation.navigate("SignUpGuardians");
+      verifyEmail(values.email);
+    },
     validationSchema: yup.object().shape({
       email: yup.string().email("Invalid email").required("Required"),
     }),
@@ -61,7 +69,10 @@ const SignUpEmailScreen = () => {
       <Button
         variant="ghost"
         mt="1"
-        onPress={() => navigation.navigate("SignUpAuth")}
+        onPress={() => {
+          dispatch(setIsLaserGuardianEnabled(false));
+          navigation.navigate("SignUpGuardians");
+        }}
       >
         Skip
       </Button>

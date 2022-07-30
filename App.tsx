@@ -48,9 +48,8 @@ Promise.allSettled = (promises: Promise<any>[]) => {
 const storage = new MMKV();
 
 const tokenCache = {
-  getToken: (key: string) => SecureStore.getItemAsync(key),
-  saveToken: (key: string, value: string) =>
-    SecureStore.setItemAsync(key, value),
+  getToken: (key: string) => storage.getString(key),
+  saveToken: (key: string, value: string) => storage.set(key, value),
 };
 
 const { provider, webSocketProvider } = configureChains(defaultChains, [
