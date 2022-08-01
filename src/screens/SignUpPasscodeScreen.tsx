@@ -12,7 +12,7 @@ const SignUpPasscodeScreen = () => {
         <Text>Enter a passcode to keep your wallet safe.</Text>
       </Box>
       <CreatePasscodeContainer
-        onSuccess={() => navigation.navigate("SignUpGuardians")}
+        onSuccess={() => navigation.navigate("SignUpEmail")}
       />
     </Box>
   );
