@@ -1,7 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import Wallet from "ethereumjs-wallet";
 import { ethers } from "ethers";
-import Constants from "expo-constants";
 import { LaserFactory } from "laser-sdk";
 import { random } from "lodash";
 import { Box, Text } from "native-base";
@@ -13,11 +12,7 @@ import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordF
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { DEFAULT_CHAIN } from "../constants/chains";
 import { setIsAuthenticated } from "../features/auth/authSlice";
-import {
-  selectGuardianAddresses,
-  selectGuardians,
-  selectIsLaserGuardianEnabled,
-} from "../features/guardians/guardiansSlice";
+import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import {
   addWallet,
@@ -54,11 +49,11 @@ const SignUpBackupPasswordScreen = () => {
         salt
       );
 
-      // await createBackup(
-      //   recoveryOwner.getPrivateKeyString(),
-      //   password,
-      //   recoveryOwner.getAddressString()
-      // );
+      await createBackup(
+        recoveryOwner.getPrivateKeyString(),
+        password,
+        recoveryOwner.getAddressString()
+      );
 
       dispatch(setIsAuthenticated(true));
       dispatch(setSalt(salt));
@@ -66,7 +61,13 @@ const SignUpBackupPasswordScreen = () => {
       dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
       dispatch(setRecoveryOwnerAddress(recoveryOwner.getAddressString()));
       dispatch(setRecoveryOwnerPrivateKey(recoveryOwner.getPrivateKeyString()));
-      dispatch(addWallet({ address: walletAddress, chainId: DEFAULT_CHAIN }));
+      dispatch(
+        addWallet({
+          address: walletAddress,
+          chainId: DEFAULT_CHAIN,
+          isDeployed: false,
+        })
+      );
       dispatch(setOwnerAddress(owner.getAddressString()));
       navigation.navigate("SignUpDeployWallet");
     },

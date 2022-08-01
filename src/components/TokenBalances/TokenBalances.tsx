@@ -1,4 +1,12 @@
-import { Box, Image, Pressable, SectionList, Text } from "native-base";
+import {
+  Box,
+  Image,
+  Pressable,
+  SectionList,
+  Text,
+  Circle,
+  Icon,
+} from "native-base";
 import { RefreshControl } from "react-native";
 import { useSelector } from "react-redux";
 import { useBalance } from "wagmi";
@@ -7,6 +15,9 @@ import { selectChainId } from "../../features/network/networkSlice";
 import useRefreshOnFocus from "../../hooks/useRefreshOnFocus";
 import useTokenBalances, { TokenBalance } from "../../hooks/useTokenBalances";
 import formatAmount from "../../utils/formatAmount";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
+import { selectIsWalletDeployed } from "../../features/wallet/walletSlice";
 
 const IPFS_GATEWAY_URL = "https://cloudflare-ipfs.com/ipfs/";
 
@@ -23,6 +34,8 @@ interface Props {
 
 const TokenBalances = ({ walletAddress, onPress }: Props) => {
   const chainId = useSelector(selectChainId);
+  const isWalletDeployed = useSelector(selectIsWalletDeployed);
+  const navigation = useNavigation();
 
   const {
     data: balance,
@@ -56,7 +69,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
         })
       }
     >
-      <Box flexDirection="row" alignItems="center" py="1">
+      <Box flexDirection="row" alignItems="center" px="4" py="1.5">
         <Image
           source={{ uri: token.logoURI.replace("ipfs://", IPFS_GATEWAY_URL) }}
           fallbackSource={ethIcon}
@@ -75,7 +88,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   );
 
   const renderEth = () => {
-    if (!balance || balance.value.isZero()) return null;
+    if (!balance) return null;
     return (
       <Pressable
         onPress={() =>
@@ -87,7 +100,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
           })
         }
       >
-        <Box flexDirection="row" alignItems="center" py="1">
+        <Box flexDirection="row" alignItems="center" px="4" py="1.5">
           <Image source={ethIcon} size="9" alt="Token icon" />
           <Box ml="3">
             <Text variant="subtitle1">{balance.symbol}</Text>
@@ -100,13 +113,43 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
       </Pressable>
     );
   };
+
+  const renderActivateWallet = () => {
+    if (isWalletDeployed) return null;
+    return (
+      <Pressable onPress={() => navigation.navigate("SignUpDeployWallet")}>
+        {({ isPressed }) => (
+          <Box
+            borderColor="gray.200"
+            borderBottomWidth="1"
+            pt="2"
+            p="4"
+            flexDir="row"
+            alignItems="center"
+            mb="1"
+            opacity={isPressed ? 0.3 : 1}
+          >
+            <Circle bg="gray.800" size="9">
+              <Icon as={Ionicons} color="white" name="ios-arrow-up" size="5" />
+            </Circle>
+            <Box ml="3">
+              <Text variant="subtitle1">Activate wallet</Text>
+              <Text>Deposit funds to activate your wallet</Text>
+            </Box>
+          </Box>
+        )}
+      </Pressable>
+    );
+  };
+
   return (
     <SectionList
       sections={[
+        { data: [null], renderItem: renderActivateWallet },
         { data: [balance], renderItem: renderEth },
         { data: tokens || [], renderItem: renderToken },
       ]}
-      contentContainerStyle={{ padding: 16, paddingTop: 8 }}
+      contentContainerStyle={{ paddingTop: 8 }}
       refreshControl={
         <RefreshControl
           refreshing={tokensLoading || balanceLoading}

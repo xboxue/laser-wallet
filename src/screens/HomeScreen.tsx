@@ -9,7 +9,10 @@ import TokenBalances from "../components/TokenBalances/TokenBalances";
 import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
-import { selectWalletAddress } from "../features/wallet/walletSlice";
+import {
+  selectIsWalletDeployed,
+  selectWalletAddress,
+} from "../features/wallet/walletSlice";
 import useWalletConnectSubscription from "../hooks/useWalletConnectSubscription";
 import formatAddress from "../utils/formatAddress";
 
@@ -21,6 +24,7 @@ const routes = [
 const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
+  const isWalletDeployed = useSelector(selectIsWalletDeployed);
   const window = useWindowDimensions();
   useWalletConnectSubscription();
 
@@ -74,6 +78,8 @@ const HomeScreen = ({ route }) => {
         <IconButton
           icon={<Icon as={Ionicons} name="qr-code-outline" />}
           onPress={() => {
+            if (!isWalletDeployed)
+              return navigation.navigate("SignUpDeployWallet");
             navigation.navigate("QRCodeScan");
           }}
         />
@@ -88,7 +94,11 @@ const HomeScreen = ({ route }) => {
         <Button
           mt="4"
           mb="5"
-          onPress={() => navigation.navigate("SendAddress")}
+          onPress={() => {
+            if (!isWalletDeployed)
+              return navigation.navigate("SignUpDeployWallet");
+            navigation.navigate("SendAddress");
+          }}
         >
           Send
         </Button>

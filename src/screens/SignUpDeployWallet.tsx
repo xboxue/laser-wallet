@@ -6,7 +6,7 @@ import { LaserFactory } from "laser-sdk";
 import { calculateDeploymentCost } from "laser-sdk/dist/utils";
 import { Box, Button, Skeleton, Text } from "native-base";
 import { useMutation, useQuery } from "react-query";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useProvider } from "wagmi";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
 import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
@@ -16,6 +16,7 @@ import {
   selectRecoveryOwnerAddress,
   selectSalt,
   selectWalletAddress,
+  setIsWalletDeployed,
 } from "../features/wallet/walletSlice";
 import { createWallet } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
@@ -53,6 +54,7 @@ const SignUpDeployWallet = () => {
   const salt = useSelector(selectSalt);
   const provider = useProvider({ chainId });
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const { mutate: onCreateWallet, isLoading: isCreating } = useMutation(
     async () => {
@@ -78,6 +80,7 @@ const SignUpDeployWallet = () => {
     },
     {
       onSuccess: () => {
+        dispatch(setIsWalletDeployed(true));
         navigation.navigate("Home");
       },
     }
@@ -148,7 +151,7 @@ const SignUpDeployWallet = () => {
         mt="1"
         onPress={() => navigation.navigate("Home")}
       >
-        Skip
+        Activate later
       </Button>
     </Box>
   );

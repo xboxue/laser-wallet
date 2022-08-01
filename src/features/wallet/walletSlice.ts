@@ -1,9 +1,10 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
 
 type Wallet = {
   address: string;
   chainId: number;
+  isDeployed: boolean;
   // ownerAddress: string;
   // recoveryOwnerAddress: string;
 };
@@ -50,6 +51,13 @@ const walletSlice = createSlice({
     setSalt: (state, action: PayloadAction<number>) => {
       state.salt = action.payload;
     },
+    setIsWalletDeployed: (state, action: PayloadAction<boolean>) => {
+      const wallet = state.wallets.find(
+        (wallet) => wallet.address === state.walletAddress
+      );
+      if (!wallet) throw new Error();
+      wallet.isDeployed = action.payload;
+    },
     addWallet: (state, action: PayloadAction<Wallet>) => {
       state.wallets.push(action.payload);
     },
@@ -67,6 +75,12 @@ export const selectRecoveryOwnerAddress = (state: RootState) =>
 export const selectRecoveryOwnerPrivateKey = (state: RootState) =>
   state.wallet.recoveryOwnerPrivateKey;
 export const selectWallets = (state: RootState) => state.wallet.wallets;
+export const selectIsWalletDeployed = createSelector(
+  [selectWalletAddress, selectWallets],
+  (address, wallets) => {
+    return wallets.find((wallet) => wallet.address === address)?.isDeployed;
+  }
+);
 export const selectSalt = (state: RootState) => state.wallet.salt;
 
 export const {
@@ -77,6 +91,7 @@ export const {
   setRecoveryOwnerPrivateKey,
   addWallet,
   setSalt,
+  setIsWalletDeployed,
 } = walletSlice.actions;
 
 export default walletSlice.reducer;
