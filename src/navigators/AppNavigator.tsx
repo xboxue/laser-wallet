@@ -23,6 +23,7 @@ import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpAuthScreen from "../screens/SignUpAuthScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
 import SignUpBackupScreen from "../screens/SignUpBackupScreen";
+import SignUpDeployWallet from "../screens/SignUpDeployWallet";
 import SignUpEmailScreen from "../screens/SignUpEmailScreen";
 import SignUpGuardianDetailsScreen from "../screens/SignUpGuardianDetailsScreen";
 import SignUpGuardiansScreen from "../screens/SignUpGuardiansScreen";
@@ -88,6 +89,10 @@ const AppNavigator = () => {
             name="Home"
             component={HomeScreen}
             initialParams={{ tab: 0 }}
+          />
+          <Stack.Screen
+            name="SignUpDeployWallet"
+            component={SignUpDeployWallet}
           />
           <Stack.Screen name="SendAddress" component={SendAddressScreen} />
           <Stack.Screen name="SendAsset" component={SendAssetScreen} />

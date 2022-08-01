@@ -13,9 +13,6 @@ const BackupPasswordForm = ({ onSubmit, submitting }: Props) => {
 
   return (
     <Box>
-      <Text variant="subtitle1" mb="4">
-        Create password
-      </Text>
       <FormControl isInvalid={!isValidPassword(password)}>
         <Input
           type="password"

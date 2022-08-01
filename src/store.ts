@@ -19,7 +19,10 @@ export const store = configureStore({
       },
       walletConnectReducer
     ),
-    guardians: guardiansReducer,
+    guardians: persistReducer(
+      { key: "guardians", storage: AsyncStorage },
+      guardiansReducer
+    ),
     transactions: transactionsReducer,
     network: persistReducer(
       { key: "network", storage: AsyncStorage },

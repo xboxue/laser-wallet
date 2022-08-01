@@ -1,9 +1,11 @@
 import {
   createEntityAdapter,
+  createSelector,
   createSlice,
   PayloadAction,
 } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
+import Constants from "expo-constants";
 
 interface Guardian {
   name: string;
@@ -36,6 +38,16 @@ const guardiansSelectors = guardiansAdapter.getSelectors<RootState>(
 export const selectGuardians = guardiansSelectors.selectAll;
 export const selectIsLaserGuardianEnabled = (state: RootState) =>
   state.guardians.isLaserGuardianEnabled;
+export const selectGuardianAddresses = createSelector(
+  [selectGuardians, selectIsLaserGuardianEnabled],
+  (guardians, isLaserGuardianEnabled) => {
+    const addresses = guardians.map((guardian) => guardian.address);
+    if (isLaserGuardianEnabled) {
+      addresses.push(Constants.manifest?.extra?.laserGuardianAddress);
+    }
+    return addresses;
+  }
+);
 
 export const {
   addGuardian,

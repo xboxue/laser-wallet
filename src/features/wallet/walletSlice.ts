@@ -15,6 +15,7 @@ interface WalletState {
   recoveryOwnerAddress: string | null;
   recoveryOwnerPrivateKey: string | null;
   wallets: Wallet[];
+  salt: number | null;
 }
 
 const initialState: WalletState = {
@@ -24,6 +25,7 @@ const initialState: WalletState = {
   recoveryOwnerAddress: null,
   recoveryOwnerPrivateKey: null,
   wallets: [],
+  salt: null,
 };
 
 const walletSlice = createSlice({
@@ -45,6 +47,9 @@ const walletSlice = createSlice({
     setRecoveryOwnerPrivateKey: (state, action: PayloadAction<string>) => {
       state.recoveryOwnerPrivateKey = action.payload;
     },
+    setSalt: (state, action: PayloadAction<number>) => {
+      state.salt = action.payload;
+    },
     addWallet: (state, action: PayloadAction<Wallet>) => {
       state.wallets.push(action.payload);
     },
@@ -62,6 +67,7 @@ export const selectRecoveryOwnerAddress = (state: RootState) =>
 export const selectRecoveryOwnerPrivateKey = (state: RootState) =>
   state.wallet.recoveryOwnerPrivateKey;
 export const selectWallets = (state: RootState) => state.wallet.wallets;
+export const selectSalt = (state: RootState) => state.wallet.salt;
 
 export const {
   setOwnerAddress,
@@ -70,6 +76,7 @@ export const {
   setRecoveryOwnerAddress,
   setRecoveryOwnerPrivateKey,
   addWallet,
+  setSalt,
 } = walletSlice.actions;
 
 export default walletSlice.reducer;
