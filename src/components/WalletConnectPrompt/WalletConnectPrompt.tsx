@@ -1,8 +1,9 @@
 import { signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
 import { ethers, utils } from "ethers";
+import Constants from "expo-constants";
 import { useState } from "react";
+import { useMutation } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
-import { useProvider } from "wagmi";
 import { REQUEST_TYPES } from "../../constants/walletConnect";
 import { selectChainId } from "../../features/network/networkSlice";
 import { addPendingTransaction } from "../../features/transactions/transactionsSlice";
@@ -24,6 +25,8 @@ interface Props {
   walletAddress: string;
 }
 
+const GAS_LIMIT = 300000;
+
 const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const dispatch = useDispatch();
 
@@ -33,98 +36,95 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
   const isConnecting = useSelector(selectIsConnecting);
   const chainId = useSelector(selectChainId);
-  const provider = useProvider({ chainId });
   const laser = useLaser();
-  const [loading, setLoading] = useState(false);
 
   const getConnector = (peerId: string) => {
     return connectors.find((connector) => connector.peerId === peerId);
   };
 
-  const approveCallRequest = async () => {
-    if (!ownerPrivateKey || !callRequest) return;
-    const connector = getConnector(callRequest.peerId);
-    if (!connector) return;
+  const { mutate: approveCallRequest, isLoading } = useMutation(
+    async () => {
+      if (!ownerPrivateKey || !callRequest) throw new Error("No call request");
+      const connector = getConnector(callRequest.peerId);
+      if (!connector) throw new Error("No connector");
 
-    const owner = new ethers.Wallet(ownerPrivateKey);
+      const owner = new ethers.Wallet(ownerPrivateKey);
+      let result;
 
-    if (
-      callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
-      callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4
-    ) {
-      const result = signTypedData({
-        privateKey: ethers.utils.arrayify(ownerPrivateKey),
-        version: SignTypedDataVersion.V4,
-        data: JSON.parse(callRequest.params[1]),
-      });
-
-      connector.approveRequest({
-        id: callRequest.id,
-        result,
-      });
-      dispatch(setCallRequest(null));
-    }
-
-    if (callRequest.method === REQUEST_TYPES.PERSONAL_SIGN) {
-      const result = await owner.signMessage(
-        utils.arrayify(callRequest.params[0])
-      );
-
-      connector.approveRequest({
-        id: callRequest.id,
-        result,
-      });
-      dispatch(setCallRequest(null));
-    }
-
-    if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
-      setLoading(true);
-      const { to, value = 0, data } = callRequest.params[0];
-
-      const feeData = await provider.getFeeData();
-      try {
-        const transaction = await laser.sendTransaction(to, data, value, {
-          maxFeePerGas: feeData.maxFeePerGas,
-          maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-          gasTip: 30000,
+      if (
+        callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
+        callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4
+      ) {
+        result = signTypedData({
+          privateKey: ethers.utils.arrayify(ownerPrivateKey),
+          version: SignTypedDataVersion.V4,
+          data: JSON.parse(callRequest.params[1]),
         });
-        const { hash } = await sendTransaction({
+      }
+
+      if (callRequest.method === REQUEST_TYPES.PERSONAL_SIGN) {
+        result = await owner.signMessage(utils.arrayify(callRequest.params[0]));
+      }
+
+      if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
+        const { to, value = 0, data } = callRequest.params[0];
+
+        const { nonce } = await laser.getWalletState();
+        const transaction = await laser.signTransaction(
+          {
+            to,
+            callData: data,
+            value,
+            txInfo: {
+              maxFeePerGas: 0,
+              maxPriorityFeePerGas: 0,
+              gasLimit: GAS_LIMIT,
+              relayer: Constants.manifest?.extra?.relayerAddress,
+            },
+          },
+          nonce
+        );
+        const hash = await sendTransaction({
           sender: walletAddress,
           transaction,
           chainId,
         });
         dispatch(addPendingTransaction({ ...transaction, hash }));
-        connector.approveRequest({
-          id: callRequest.id,
-          result: hash,
-        });
-        dispatch(setCallRequest(null));
-      } finally {
-        setLoading(false);
+        result = hash;
       }
-    }
 
-    if (callRequest.method === REQUEST_TYPES.SIGN_TRANSACTION) {
-      setLoading(true);
-      const { to, value = 0, data } = callRequest.params[0];
-      const feeData = await provider.getFeeData();
+      if (callRequest.method === REQUEST_TYPES.SIGN_TRANSACTION) {
+        const { to, value = 0, data } = callRequest.params[0];
 
-      try {
-        const transaction = await laser.sendTransaction(to, data, value, {
-          maxFeePerGas: feeData.maxFeePerGas,
-          maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-          gasTip: 30000,
-        });
-        connector.approveRequest({
-          id: callRequest.id,
-          result: transaction,
-        });
-        dispatch(setCallRequest(null));
-      } finally {
-        setLoading(false);
+        const { nonce } = await laser.getWalletState();
+        result = await laser.signTransaction(
+          {
+            to,
+            callData: data,
+            value,
+            txInfo: {
+              maxFeePerGas: 0,
+              maxPriorityFeePerGas: 0,
+              gasLimit: GAS_LIMIT,
+              relayer: Constants.manifest?.extra?.relayerAddress,
+            },
+          },
+          nonce
+        );
       }
+
+      if (!result) throw new Error("Unsupported method");
+      connector.approveRequest({
+        id: callRequest.id,
+        result,
+      });
+    },
+    {
+      onSuccess: () => {
+        dispatch(setCallRequest(null));
+      },
     }
-  };
+  );
 
   const rejectCallRequest = () => {
     if (!callRequest) return;
@@ -184,7 +184,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           onClose={rejectCallRequest}
           peerMeta={callRequest.peerMeta}
           callRequest={callRequest}
-          loading={loading}
+          loading={isLoading}
         />
       )}
     </>

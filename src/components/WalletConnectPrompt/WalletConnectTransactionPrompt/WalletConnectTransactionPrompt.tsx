@@ -23,6 +23,8 @@ interface Props {
   loading?: boolean;
 }
 
+const GAS_LIMIT = 300000;
+
 const WalletConnectTransactionPrompt = ({
   onClose,
   onApprove,
@@ -35,17 +37,37 @@ const WalletConnectTransactionPrompt = ({
   const laser = useLaser();
 
   const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
-  const { data: callGas, isLoading: callGasLoading } = useQuery(
-    "callGas",
-    async () => {
-      const transaction = await laser.sendTransaction(to, data, value, {
-        maxFeePerGas: 0,
-        maxPriorityFeePerGas: 0,
-        gasTip: 0,
-      });
-      return laser.simulateTransaction(transaction);
+  // const { data: callGas, isLoading: callGasLoading } = useQuery(
+  //   "callGas",
+  //   async () => {
+  //     const transaction = await laser.sendTransaction(to, data, value, {
+  //       maxFeePerGas: 0,
+  //       maxPriorityFeePerGas: 0,
+  //       gasTip: 0,
+  //     });
+  //     return laser.simulateTransaction(transaction);
+  //   }
+  // );
+
+  const renderGasEstimate = () => {
+    if (
+      loadingFeeData ||
+      !feeData?.maxFeePerGas ||
+      !feeData?.maxPriorityFeePerGas
+    ) {
+      return <Skeleton w="16" />;
     }
-  );
+
+    const gasEstimate = feeData.maxFeePerGas
+      .add(feeData.maxPriorityFeePerGas)
+      .mul(GAS_LIMIT);
+
+    return (
+      <Text variant="subtitle2">
+        {formatAmount(gasEstimate, { precision: 6 })} ETH
+      </Text>
+    );
+  };
 
   return (
     <Actionsheet isOpen onClose={onClose}>
@@ -67,23 +89,7 @@ const WalletConnectTransactionPrompt = ({
           </Box>
           <Box flexDirection="row" justifyContent="space-between">
             <Text variant="subtitle2">Gas (estimate)</Text>
-            {!loadingFeeData &&
-            !callGasLoading &&
-            callGas &&
-            feeData?.maxFeePerGas &&
-            feeData?.maxPriorityFeePerGas ? (
-              <Text variant="subtitle2">
-                {formatAmount(
-                  feeData.maxFeePerGas
-                    .add(feeData.maxPriorityFeePerGas)
-                    .mul(callGas),
-                  { precision: 6 }
-                )}{" "}
-                ETH
-              </Text>
-            ) : (
-              <Skeleton />
-            )}
+            {renderGasEstimate()}
           </Box>
           <Stack space="1">
             <Button isLoading={loading} onPress={onApprove}>

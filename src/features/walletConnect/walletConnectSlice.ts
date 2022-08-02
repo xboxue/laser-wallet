@@ -7,12 +7,12 @@ import {
 } from "@walletconnect/types";
 import { RootState } from "../../store";
 
-type SessionRequest = {
+export type SessionRequest = {
   peerId: string;
   peerMeta: IClientMeta;
 };
 
-type CallRequest = {
+export type CallRequest = {
   peerId: string;
   peerMeta: IClientMeta;
 } & IJsonRpcRequest;
