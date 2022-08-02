@@ -43,13 +43,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   // Only has transactions where ETH is sent to the wallet
   // Filter out exec transactions from relayer
   const selectTransactions = (result: Transaction[]) =>
-    result.filter(
-      (transaction) =>
-        !isEqualCaseInsensitive(
-          transaction.from,
-          Constants.manifest?.extra?.relayerAddress
-        )
-    );
+    result.filter((transaction) => !transaction.functionName.includes("exec"));
 
   // Has all the transactions to and from the wallet
   // Filter out transactions to and from relayer
@@ -57,10 +51,10 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     result.filter(
       (transaction) =>
         transaction.type === "call" &&
-        !isEqualCaseInsensitive(
-          transaction.from,
-          Constants.manifest?.extra?.relayerAddress
-        ) &&
+        // !isEqualCaseInsensitive(
+        //   transaction.from,
+        //   Constants.manifest?.extra?.relayerAddress
+        // ) &&
         !isEqualCaseInsensitive(
           transaction.to,
           Constants.manifest?.extra?.relayerAddress

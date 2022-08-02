@@ -18,6 +18,7 @@ export interface Transaction {
   to: string;
   type: string;
   value: string;
+  functionName: string;
 }
 
 export interface TransactionERC20 extends Transaction {

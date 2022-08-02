@@ -1,93 +1,111 @@
 import { useNavigation } from "@react-navigation/native";
+import Constants from "expo-constants";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
-import { useState } from "react";
-import { useQuery } from "react-query";
+import { useMutation } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
-import { useFeeData, useProvider } from "wagmi";
-import { selectWalletAddress } from "../features/wallet/walletSlice";
+import { useFeeData } from "wagmi";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
+import { selectWalletAddress } from "../features/wallet/walletSlice";
 import useLaser from "../hooks/useLaser";
 import { sendTransaction } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
 
+// TODO: Estimate this with simulation
+const GAS_LIMIT = 300000;
+
 const SendConfirmScreen = ({ route }) => {
   const chainId = useSelector(selectChainId);
   const walletAddress = useSelector(selectWalletAddress);
-  const provider = useProvider({ chainId });
   const laser = useLaser();
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const [sending, setSending] = useState(false);
-
   const { amount, address: to, ensName, token } = route.params;
 
-  const { data: callGas, isLoading: callGasLoading } = useQuery(
-    "callGas",
-    async () => {
-      const transactionInfo = {
-        maxFeePerGas: 0,
-        maxPriorityFeePerGas: 0,
-        gasTip: 0,
-      };
+  // const { data: callGas, isLoading: callGasLoading } = useQuery(
+  //   "callGas",
+  //   async () => {
+  //     const transactionInfo = {
+  //       maxFeePerGas: 0,
+  //       maxPriorityFeePerGas: 0,
+  //       gasTip: 0,
+  //     };
 
-      const transaction = await (token.isToken
-        ? laser.transferERC20(token.address, to, amount, transactionInfo)
-        : laser.sendEth(to, amount, transactionInfo));
-      return laser.simulateTransaction(transaction);
-    }
-  );
+  //     const transaction = await (token.isToken
+  //       ? laser.transferERC20(token.address, to, amount, transactionInfo)
+  //       : laser.sendEth(to, amount, transactionInfo));
+  //     return laser.simulateTransaction(transaction);
+  //   }
+  // );
 
   const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
 
-  const transferTokens = async () => {
-    try {
-      setSending(true);
-      const feeData = await provider.getFeeData();
-
+  const { mutate: transferTokens, isLoading: sendingTokens } = useMutation(
+    async () => {
       const transaction = await laser.transferERC20(token.address, to, amount, {
-        maxFeePerGas: feeData.maxFeePerGas,
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-        gasTip: 30000,
+        maxFeePerGas: 0,
+        maxPriorityFeePerGas: 0,
+        gasLimit: GAS_LIMIT,
+        relayer: Constants.manifest?.extra?.relayerAddress,
       });
-
-      const { hash } = await sendTransaction({
+      const hash = await sendTransaction({
         transaction,
         sender: walletAddress,
         chainId,
       });
-      dispatch(addPendingTransaction({ ...transaction, hash }));
-
-      navigation.navigate("Home", { tab: 1 });
-    } finally {
-      setSending(false);
+      return { ...transaction, hash };
+    },
+    {
+      onSuccess: (transaction) => {
+        dispatch(addPendingTransaction(transaction));
+        navigation.navigate("Home", { tab: 1 });
+      },
     }
-  };
+  );
 
-  const sendEth = async () => {
-    try {
-      setSending(true);
-      const feeData = await provider.getFeeData();
-
+  const { mutate: sendEth, isLoading: sendingEth } = useMutation(
+    async () => {
       const transaction = await laser.sendEth(to, amount, {
-        maxFeePerGas: feeData.maxFeePerGas,
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-        gasTip: 30000,
+        maxFeePerGas: 0,
+        maxPriorityFeePerGas: 0,
+        gasLimit: GAS_LIMIT,
+        relayer: Constants.manifest?.extra?.relayerAddress,
       });
-
-      const { hash } = await sendTransaction({
+      const hash = await sendTransaction({
         sender: walletAddress,
         transaction,
         chainId,
       });
-      dispatch(addPendingTransaction({ ...transaction, hash }));
-
-      navigation.navigate("Home", { tab: 1 });
-    } finally {
-      setSending(false);
+      return { ...transaction, hash };
+    },
+    {
+      onSuccess: (transaction) => {
+        dispatch(addPendingTransaction(transaction));
+        navigation.navigate("Home", { tab: 1 });
+      },
     }
+  );
+
+  const renderGasEstimate = () => {
+    if (
+      loadingFeeData ||
+      !feeData?.maxFeePerGas ||
+      !feeData?.maxPriorityFeePerGas
+    ) {
+      return <Skeleton w="16" />;
+    }
+
+    const gasEstimate = feeData.maxFeePerGas
+      .add(feeData.maxPriorityFeePerGas)
+      .mul(GAS_LIMIT);
+
+    return (
+      <Text variant="subtitle2">
+        {formatAmount(gasEstimate, { precision: 6 })} ETH
+      </Text>
+    );
   };
 
   return (
@@ -108,27 +126,11 @@ const SendConfirmScreen = ({ route }) => {
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">Gas (estimate)</Text>
-          {!loadingFeeData &&
-          !callGasLoading &&
-          callGas &&
-          feeData?.maxFeePerGas &&
-          feeData?.maxPriorityFeePerGas ? (
-            <Text variant="subtitle2">
-              {formatAmount(
-                feeData.maxFeePerGas
-                  .add(feeData.maxPriorityFeePerGas)
-                  .mul(callGas),
-                { precision: 6 }
-              )}{" "}
-              ETH
-            </Text>
-          ) : (
-            <Skeleton w="16" />
-          )}
+          {renderGasEstimate()}
         </Box>
         <Button
           onPress={token.isToken ? transferTokens : sendEth}
-          isLoading={sending}
+          isLoading={sendingEth || sendingTokens}
         >
           Confirm
         </Button>

@@ -4,7 +4,7 @@ import { parseEther } from "ethers/lib/utils";
 import Constants from "expo-constants";
 import { LaserFactory } from "laser-sdk";
 import { calculateDeploymentCost } from "laser-sdk/dist/utils";
-import { Box, Button, Skeleton, Text } from "native-base";
+import { Box, Button, Text } from "native-base";
 import { useMutation, useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useProvider } from "wagmi";
@@ -21,24 +21,7 @@ import {
 import { createWallet } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
-
-const waitForTransaction = async (
-  provider: providers.InfuraProvider,
-  hash: string
-) => {
-  while (true) {
-    const { broadcasts } = await provider.send("relay_getTransactionStatus", [
-      hash,
-    ]);
-
-    if (!broadcasts) continue;
-    for (const broadcast of broadcasts) {
-      const receipt = await provider.getTransactionReceipt(broadcast.ethTxHash);
-      if (receipt?.confirmations > 1) return receipt;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-};
+import waitForTransaction from "../utils/waitForTransaction";
 
 const SignUpDeployWallet = () => {
   const walletAddress = useSelector(selectWalletAddress);
@@ -76,7 +59,7 @@ const SignUpDeployWallet = () => {
         Constants.manifest?.extra?.relayerAddress
       );
       const hash = await createWallet({ chainId, transaction });
-      return waitForTransaction(provider, hash);
+      return waitForTransaction(hash, chainId);
     },
     {
       onSuccess: () => {

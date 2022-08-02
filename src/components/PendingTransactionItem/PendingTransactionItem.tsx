@@ -1,9 +1,10 @@
 import { Box, Image, Pressable, Text } from "native-base";
 import { useSelector } from "react-redux";
-import { useEnsName, useWaitForTransaction } from "wagmi";
+import { useEnsName } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
 import { selectChainId } from "../../features/network/networkSlice";
 import { PendingTransaction } from "../../features/transactions/transactionsSlice";
+import useWaitForTransaction from "../../hooks/useWaitForTransaction";
 import formatAddress from "../../utils/formatAddress";
 import formatAmount from "../../utils/formatAmount";
 
