@@ -10,22 +10,21 @@ export default {
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#000000",
   },
   updates: {
     fallbackToCacheTimeout: 0,
   },
   assetBundlePatterns: ["**/*"],
   ios: {
-    supportsTablet: true,
-    googleServicesFile: "./GoogleService-Info.plist",
+    supportsTablet: false,
     buildNumber: "2",
     bundleIdentifier: "com.laser.wallet",
   },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#FFFFFF",
+      backgroundColor: "#000000",
     },
     package: "com.laser.wallet",
   },
