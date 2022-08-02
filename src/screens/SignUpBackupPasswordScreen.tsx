@@ -23,6 +23,7 @@ import {
   setSalt,
   setWalletAddress,
 } from "../features/wallet/walletSlice";
+import { createBackup } from "../services/cloudBackup";
 
 const SignUpBackupPasswordScreen = () => {
   const dispatch = useDispatch();

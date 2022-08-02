@@ -4,7 +4,7 @@ import { parseEther } from "ethers/lib/utils";
 import Constants from "expo-constants";
 import { LaserFactory } from "laser-sdk";
 import { calculateDeploymentCost } from "laser-sdk/dist/utils";
-import { Box, Button, Text } from "native-base";
+import { Box, Button, Skeleton, Text } from "native-base";
 import { useMutation, useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useProvider } from "wagmi";
