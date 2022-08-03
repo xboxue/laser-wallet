@@ -44,8 +44,8 @@ const SignUpAuthScreen = () => {
           </Button>
         )}
       <Button
-        mt="4"
-        variant="outline"
+        mt="2"
+        variant="subtle"
         onPress={() => navigation.navigate("SignUpPasscode")}
       >
         Create passcode

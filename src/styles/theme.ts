@@ -4,6 +4,10 @@ const theme = extendTheme({
   components: {
     Text: {
       variants: {
+        h3: {
+          fontSize: "3xl",
+          fontWeight: 700,
+        },
         h4: {
           fontSize: "2xl",
           fontWeight: 700,
@@ -40,6 +44,20 @@ const theme = extendTheme({
     Button: {
       baseStyle: {
         borderRadius: "3",
+      },
+      variants: {
+        solid: {
+          bgColor: "black",
+          _pressed: {
+            bgColor: "gray.700",
+          },
+        },
+        subtle: {
+          bgColor: "gray.100",
+          _pressed: {
+            bgColor: "gray.200",
+          },
+        },
       },
     },
   },

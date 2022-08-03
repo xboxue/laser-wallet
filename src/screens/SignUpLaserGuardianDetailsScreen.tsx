@@ -21,7 +21,7 @@ const SignUpLaserGuardianDetailsScreen = () => {
       </Text>
       <Button
         mt="4"
-        variant={isLaserGuardianEnabled ? "outline" : "solid"}
+        variant={isLaserGuardianEnabled ? "subtle" : "solid"}
         onPress={() => {
           if (!isSignedIn) return navigation.navigate("SignUpEmail");
           dispatch(setIsLaserGuardianEnabled(!isLaserGuardianEnabled));

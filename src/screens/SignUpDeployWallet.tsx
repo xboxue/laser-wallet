@@ -130,8 +130,8 @@ const SignUpDeployWallet = () => {
         Activate
       </Button>
       <Button
-        variant="ghost"
-        mt="1"
+        variant="subtle"
+        mt="2"
         onPress={() => navigation.navigate("Home")}
       >
         Activate later

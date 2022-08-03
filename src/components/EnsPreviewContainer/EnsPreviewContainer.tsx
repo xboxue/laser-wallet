@@ -6,7 +6,7 @@ import AddressOrEnsPreviewItem from "../AddressOrEnsPreviewItem/AddressOrEnsPrev
 interface Props {
   ensName: string;
   onPress?: (address: string, ensName?: string) => void;
-  errorComponent: React.ReactNode;
+  errorComponent?: React.ReactNode;
 }
 
 const EnsPreviewContainer = ({ ensName, onPress, errorComponent }: Props) => {

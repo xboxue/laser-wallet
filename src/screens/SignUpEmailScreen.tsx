@@ -1,7 +1,7 @@
 import { useAuth, useSignUp } from "@clerk/clerk-expo";
 import { useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
-import { Box, Button, Input, Text } from "native-base";
+import { Box, Button, FormControl, Input, Text } from "native-base";
 import { useMutation } from "react-query";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
@@ -43,7 +43,6 @@ const SignUpEmailScreen = () => {
       email: yup.string().email("Invalid email").required("Required"),
     }),
     validateOnChange: false,
-    validateOnBlur: false,
   });
 
   return (
@@ -52,23 +51,27 @@ const SignUpEmailScreen = () => {
       <Text mb="4">
         You'll be able to easily recover your wallet using your account.
       </Text>
-      <Input
-        placeholder="Email"
-        value={formik.values.email}
-        onChangeText={formik.handleChange("email")}
-        onBlur={formik.handleBlur("email")}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoFocus
-        size="lg"
-      />
-      {formik.errors.email && <Text mt="1">{formik.errors.email}</Text>}
+      <FormControl isInvalid={!!formik.errors.email}>
+        <Input
+          placeholder="Email"
+          value={formik.values.email}
+          onChangeText={formik.handleChange("email")}
+          onBlur={formik.handleBlur("email")}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoFocus
+          size="lg"
+        />
+        <FormControl.ErrorMessage>
+          {formik.errors.email}
+        </FormControl.ErrorMessage>
+      </FormControl>
       <Button mt="4" onPress={formik.handleSubmit} isLoading={isLoading}>
         Next
       </Button>
       <Button
-        variant="ghost"
-        mt="1"
+        variant="subtle"
+        mt="2"
         onPress={() => {
           dispatch(setIsLaserGuardianEnabled(false));
           navigation.navigate("SignUpGuardians");

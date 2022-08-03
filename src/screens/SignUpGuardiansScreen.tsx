@@ -50,7 +50,7 @@ const SignUpGuardiansScreen = () => {
             onPress={() =>
               navigation.navigate("SignUpGuardianDetails", { guardian })
             }
-            key={guardian.address}
+            key={guardian.id}
           >
             {({ isPressed }) => (
               <Box
@@ -70,11 +70,15 @@ const SignUpGuardiansScreen = () => {
             )}
           </Pressable>
         ))}
-        <Button mt="4" onPress={() => navigation.navigate("SignUpAddGuardian")}>
+        <Button
+          mt="4"
+          variant="subtle"
+          onPress={() => navigation.navigate("SignUpAddGuardian")}
+        >
           Add guardian
         </Button>
         <Button
-          mt="4"
+          mt="2"
           onPress={() => navigation.navigate("SignUpBackup")}
           isDisabled={!guardians.length && !isLaserGuardianEnabled}
         >
