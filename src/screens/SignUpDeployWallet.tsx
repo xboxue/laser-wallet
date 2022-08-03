@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import { providers, Wallet } from "ethers";
+import { BigNumber, providers, Wallet } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import Constants from "expo-constants";
 import { LaserFactory } from "laser-sdk";
@@ -54,12 +54,12 @@ const SignUpDeployWallet = () => {
         guardianAddresses,
         0,
         0,
-        deployFee?.gas + 50000,
+        BigNumber.from(deployFee?.gas).add(50000),
         salt,
         Constants.manifest?.extra?.relayerAddress
       );
       const hash = await createWallet({ chainId, transaction });
-      return waitForTransaction(hash, chainId);
+      return waitForTransaction({ hash, chainId });
     },
     {
       onSuccess: () => {
