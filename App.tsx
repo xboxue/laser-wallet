@@ -73,7 +73,13 @@ Sentry.init({
   dsn: Constants.manifest?.extra?.sentryDsn,
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  logger: {
+    log: Sentry.Native.captureMessage,
+    warn: Sentry.Native.captureMessage,
+    error: Sentry.Native.captureException,
+  },
+});
 
 const App = () => {
   const [loaded] = useFonts({
