@@ -53,11 +53,11 @@ const SignUpBackupPasswordScreen = () => {
         salt
       );
 
-      // await createBackup(
-      //   recoveryOwner.getPrivateKeyString(),
-      //   password,
-      //   recoveryOwner.getAddressString()
-      // );
+      await createBackup(
+        recoveryOwner.getPrivateKeyString(),
+        password,
+        recoveryOwner.getAddressString()
+      );
 
       dispatch(setBackupPassword(password));
       dispatch(setIsAuthenticated(true));

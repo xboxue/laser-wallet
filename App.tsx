@@ -1,6 +1,7 @@
 import "./src/global";
 import "react-native-get-random-values";
 import "@ethersproject/shims";
+import { ClerkProvider } from "@clerk/clerk-expo";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -10,35 +11,23 @@ import {
 } from "@expo-google-fonts/inter";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
+import { QueryClientProvider } from "@tanstack/react-query";
 import AppLoading from "expo-app-loading";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
-import { NativeBaseProvider } from "native-base";
+import { NativeBaseProvider, useToast } from "native-base";
 import { useEffect } from "react";
-import { MMKV } from "react-native-mmkv";
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import * as Sentry from "sentry-expo";
-import {
-  configureChains,
-  createClient,
-  createStorage,
-  defaultChains,
-  WagmiConfig,
-} from "wagmi";
-import { alchemyProvider } from "wagmi/providers/alchemy";
-import { infuraProvider } from "wagmi/providers/infura";
-import { publicProvider } from "wagmi/providers/public";
+import { WagmiConfig } from "wagmi";
+import ToastAlert from "./src/components/ToastAlert/ToastAlert";
 import AppNavigator from "./src/navigators/AppNavigator";
+import getQueryClient from "./src/services/queryClient";
+import storage from "./src/services/mmkvStorage";
+import wagmiClient from "./src/services/wagmiClient";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
-import { ClerkProvider } from "@clerk/clerk-expo";
 
 Promise.allSettled = (promises: Promise<any>[]) => {
   return Promise.all(
@@ -50,46 +39,39 @@ Promise.allSettled = (promises: Promise<any>[]) => {
   );
 };
 
-const storage = new MMKV();
-
 const tokenCache = {
   getToken: (key: string) => storage.getString(key),
   saveToken: (key: string, value: string) => storage.set(key, value),
 };
 
-const { provider, webSocketProvider } = configureChains(defaultChains, [
-  infuraProvider({ infuraId: Constants.manifest?.extra?.infuraApiKey }),
-  alchemyProvider({ alchemyId: Constants.manifest?.extra?.alchemyApiKey }),
-  publicProvider(),
-]);
-
-const wagmiClient = createClient({
-  provider,
-  webSocketProvider,
-  storage: createStorage({
-    storage: {
-      setItem: (key, value) => storage.set(key, value),
-      getItem: (key) => storage.getString(key) || null,
-      removeItem: (key) => storage.delete(key),
-    },
-  }),
-});
 Sentry.init({
   dsn: Constants.manifest?.extra?.sentryDsn,
 });
 
-const queryClient = new QueryClient({
-  queryCache: new QueryCache({
-    onError: (error) => {
-      Sentry.Native.captureException(error);
-    },
-  }),
-  mutationCache: new MutationCache({
-    onError: (error) => {
-      Sentry.Native.captureException(error);
-    },
-  }),
-});
+const AppWithQueryClient = () => {
+  const toast = useToast();
+
+  const onError = (error: unknown) => {
+    toast.show({
+      render: ({ id }) => (
+        <ToastAlert
+          onClose={toast.close(id)}
+          title={"Oops, something went wrong. Please try again."}
+          description={error?.message}
+        />
+      ),
+    });
+    Sentry.Native.captureException(error);
+  };
+
+  return (
+    <QueryClientProvider client={getQueryClient(onError)}>
+      <NavigationContainer theme={{ colors: { background: "white" } }}>
+        <AppNavigator />
+      </NavigationContainer>
+    </QueryClientProvider>
+  );
+};
 
 const App = () => {
   const [loaded] = useFonts({
@@ -117,20 +99,14 @@ const App = () => {
     <Provider store={store}>
       <PersistGate loading={null} persistor={getPersistor()}>
         <WagmiConfig client={wagmiClient}>
-          <QueryClientProvider client={queryClient}>
+          <ClerkProvider
+            frontendApi="clerk.eager.panda-0.lcl.dev"
+            tokenCache={tokenCache}
+          >
             <NativeBaseProvider theme={theme}>
-              <ClerkProvider
-                frontendApi="clerk.eager.panda-0.lcl.dev"
-                tokenCache={tokenCache}
-              >
-                <NavigationContainer
-                  theme={{ colors: { background: "white" } }}
-                >
-                  <AppNavigator />
-                </NavigationContainer>
-              </ClerkProvider>
+              <AppWithQueryClient />
             </NativeBaseProvider>
-          </QueryClientProvider>
+          </ClerkProvider>
         </WagmiConfig>
       </PersistGate>
     </Provider>
