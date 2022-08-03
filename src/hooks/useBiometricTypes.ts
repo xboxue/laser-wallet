@@ -1,9 +1,9 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import * as LocalAuthentication from "expo-local-authentication";
 
 const useBiometricTypes = (enabled = true) => {
   return useQuery(
-    "biometricTypes",
+    ["biometricTypes"],
     () => LocalAuthentication.supportedAuthenticationTypesAsync(),
     { enabled }
   );

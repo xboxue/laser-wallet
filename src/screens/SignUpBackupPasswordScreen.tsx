@@ -5,7 +5,7 @@ import { LaserFactory } from "laser-sdk";
 import { random } from "lodash";
 import { Box, Text } from "native-base";
 import { useState } from "react";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordForm";
@@ -53,11 +53,11 @@ const SignUpBackupPasswordScreen = () => {
         salt
       );
 
-      await createBackup(
-        recoveryOwner.getPrivateKeyString(),
-        password,
-        recoveryOwner.getAddressString()
-      );
+      // await createBackup(
+      //   recoveryOwner.getPrivateKeyString(),
+      //   password,
+      //   recoveryOwner.getAddressString()
+      // );
 
       dispatch(setBackupPassword(password));
       dispatch(setIsAuthenticated(true));

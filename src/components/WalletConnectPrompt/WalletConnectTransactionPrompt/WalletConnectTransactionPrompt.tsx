@@ -8,7 +8,7 @@ import {
   Stack,
   Text,
 } from "native-base";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useFeeData } from "wagmi";
 import useLaser from "../../../hooks/useLaser";
 import formatAddress from "../../../utils/formatAddress";

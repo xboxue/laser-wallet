@@ -2,7 +2,7 @@ import { signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
 import { ethers, utils } from "ethers";
 import Constants from "expo-constants";
 import { useState } from "react";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { REQUEST_TYPES } from "../../constants/walletConnect";
 import { selectChainId } from "../../features/network/networkSlice";

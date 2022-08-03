@@ -2,7 +2,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as LocalAuthentication from "expo-local-authentication";
 import { Box, Button, Icon, Text } from "native-base";
 import { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import FaceIdIcon from "../../assets/face-id.svg";
 import PasscodeNumberPad from "../components/PasscodeNumberPad/PasscodeNumberPad";

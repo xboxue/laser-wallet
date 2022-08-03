@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import { Box, Button, Icon, Pressable, Spinner, Text } from "native-base";
 import { Platform } from "react-native";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { selectBackupPassword } from "../features/auth/authSlice";
 import {
@@ -20,7 +20,7 @@ const SettingsWalletRecoveryScreen = () => {
 
   const backupPassword = useSelector(selectBackupPassword);
 
-  const { data, isLoading, refetch } = useQuery("backup", () => {
+  const { data, isLoading, refetch } = useQuery(["backup"], () => {
     if (!backupPassword || !recoveryOwnerAddress)
       throw new Error("No backup password");
     return getBackup(backupPassword, recoveryOwnerAddress);

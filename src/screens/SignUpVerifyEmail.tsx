@@ -2,7 +2,7 @@ import { useClerk, useSignUp } from "@clerk/clerk-expo";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
 import { Box, Button, Input, Text } from "native-base";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import * as yup from "yup";
 
 const SignUpVerifyEmailScreen = () => {

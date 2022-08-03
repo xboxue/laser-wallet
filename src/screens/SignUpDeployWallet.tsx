@@ -5,7 +5,7 @@ import Constants from "expo-constants";
 import { LaserFactory } from "laser-sdk";
 import { calculateDeploymentCost } from "laser-sdk/dist/utils";
 import { Box, Button, Skeleton, Text } from "native-base";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useProvider } from "wagmi";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
@@ -72,7 +72,7 @@ const SignUpDeployWallet = () => {
   );
 
   const { data: deployFee, isLoading: deployFeeLoading } = useQuery(
-    "deployFee",
+    ["deployFee"],
     () =>
       calculateDeploymentCost(provider, guardianAddresses, [
         recoveryOwnerAddress,

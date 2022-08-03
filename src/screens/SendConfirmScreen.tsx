@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import { Box, Button, Skeleton, Stack, Text } from "native-base";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useFeeData } from "wagmi";
 import { selectChainId } from "../features/network/networkSlice";

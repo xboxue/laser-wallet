@@ -3,7 +3,7 @@ import { keyBy, orderBy } from "lodash";
 import { SectionList } from "native-base";
 import { useMemo } from "react";
 import { RefreshControl } from "react-native";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useProvider } from "wagmi";
 import { selectChainId } from "../../features/network/networkSlice";
@@ -66,7 +66,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     isLoading: txsLoading,
     refetch: refetchTxs,
   } = useQuery<Transaction[]>(
-    "transactions",
+    ["transactions"],
     () => getTransactions(walletAddress, chainId),
     { select: selectTransactions }
   );
@@ -76,7 +76,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     data: internalTxs = [],
     isLoading: internalTxsLoading,
     refetch: refetchInternalTxs,
-  } = useQuery<Transaction[]>("internalTxs", () =>
+  } = useQuery<Transaction[]>(["internalTxs"], () =>
     getTransactions(walletAddress, chainId, true)
       .then(selectInternalTxs)
       .then((transactions) =>
@@ -93,7 +93,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     data: erc20Txs = [],
     isLoading: erc20TxsLoading,
     refetch: refetchERC20Txs,
-  } = useQuery<TransactionERC20[]>("erc20Txs", () =>
+  } = useQuery<TransactionERC20[]>(["erc20Txs"], () =>
     getERC20Transfers(walletAddress, chainId)
   );
 

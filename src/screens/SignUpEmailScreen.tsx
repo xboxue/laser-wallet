@@ -2,7 +2,7 @@ import { useAuth, useSignUp } from "@clerk/clerk-expo";
 import { useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
 import { Box, Button, FormControl, Input, Text } from "native-base";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
 import { setIsLaserGuardianEnabled } from "../features/guardians/guardiansSlice";

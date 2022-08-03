@@ -1,5 +1,5 @@
 import { providers } from "ethers";
-import { useQuery, UseQueryOptions } from "react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import waitForTransaction from "../utils/waitForTransaction";
 
 type WaitForTransactionOptions = {
@@ -17,7 +17,7 @@ const useWaitForTransaction = ({
   enabled = true,
 }: WaitForTransactionOptions) => {
   return useQuery(
-    "transaction",
+    ["transaction"],
     () => waitForTransaction({ hash, chainId, confirmations }),
     {
       enabled: enabled && !!hash,
