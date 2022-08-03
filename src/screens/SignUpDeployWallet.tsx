@@ -54,7 +54,7 @@ const SignUpDeployWallet = () => {
         guardianAddresses,
         0,
         0,
-        BigNumber.from(deployFee?.gas).add(50000),
+        BigNumber.from(deployFee?.gas).add(100000),
         salt,
         Constants.manifest?.extra?.relayerAddress
       );
@@ -62,9 +62,11 @@ const SignUpDeployWallet = () => {
       return waitForTransaction({ hash, chainId });
     },
     {
-      onSuccess: () => {
-        dispatch(setIsWalletDeployed(true));
-        navigation.navigate("Home");
+      onSuccess: (receipt) => {
+        if (receipt.status === 1) {
+          dispatch(setIsWalletDeployed(true));
+          navigation.navigate("Home");
+        }
       },
     }
   );
