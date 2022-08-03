@@ -11,7 +11,10 @@ import { useProvider } from "wagmi";
 import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordForm";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { DEFAULT_CHAIN } from "../constants/chains";
-import { setIsAuthenticated } from "../features/auth/authSlice";
+import {
+  setBackupPassword,
+  setIsAuthenticated,
+} from "../features/auth/authSlice";
 import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import {
@@ -56,6 +59,7 @@ const SignUpBackupPasswordScreen = () => {
         recoveryOwner.getAddressString()
       );
 
+      dispatch(setBackupPassword(password));
       dispatch(setIsAuthenticated(true));
       dispatch(setSalt(salt));
       dispatch(setWalletAddress(walletAddress));
