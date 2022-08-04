@@ -20,6 +20,8 @@ import { sendTransaction } from "../../services/wallet";
 import WalletConnectRequestPrompt from "./WalletConnectRequestPrompt/WalletConnectRequestPrompt";
 import WalletConnectSessionPrompt from "./WalletConnectSessionPrompt/WalletConnectSessionPrompt";
 import WalletConnectTransactionPrompt from "./WalletConnectTransactionPrompt/WalletConnectTransactionPrompt";
+import { useToast } from "native-base";
+import ToastAlert from "../ToastAlert/ToastAlert";
 
 interface Props {
   walletAddress: string;
@@ -37,6 +39,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const isConnecting = useSelector(selectIsConnecting);
   const chainId = useSelector(selectChainId);
   const laser = useLaser();
+  const toast = useToast();
 
   const getConnector = (peerId: string) => {
     return connectors.find((connector) => connector.peerId === peerId);
@@ -121,6 +124,13 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
     },
     {
       onSuccess: () => {
+        if (callRequest?.method === REQUEST_TYPES.SEND_TRANSACTION) {
+          toast.show({
+            render: () => (
+              <ToastAlert status="success" title="Transaction sent" />
+            ),
+          });
+        }
         dispatch(setCallRequest(null));
       },
     }

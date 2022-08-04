@@ -29,10 +29,16 @@ const WalletConnectRequestPrompt = ({
     <Actionsheet isOpen onClose={onClose}>
       <Actionsheet.Content>
         <Stack space="4" width="100%" px="4" py="2">
+          <Image
+            source={{ uri: peerMeta.icons[0] }}
+            alt="logo"
+            size="10"
+            alignSelf="center"
+          />
           <Text variant="subtitle1">
             {peerMeta.name}: {callRequest.method}
           </Text>
-          <ScrollView maxH="400">
+          <ScrollView maxH="300">
             <Text>
               {(callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
                 callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4) &&
@@ -45,10 +51,9 @@ const WalletConnectRequestPrompt = ({
                 hexToAscii(callRequest.params[0])}
             </Text>
           </ScrollView>
-          <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
           <Stack space="1">
             <Button onPress={onApprove}>Approve</Button>
-            <Button variant="ghost" onPress={onReject}>
+            <Button variant="subtle" onPress={onReject}>
               Reject
             </Button>
           </Stack>

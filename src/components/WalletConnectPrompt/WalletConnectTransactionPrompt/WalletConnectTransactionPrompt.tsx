@@ -73,12 +73,15 @@ const WalletConnectTransactionPrompt = ({
     <Actionsheet isOpen onClose={onClose}>
       <Actionsheet.Content>
         <Stack space="4" width="100%" px="4" py="2">
-          <Box>
-            <Text variant="subtitle1">
-              {peerMeta.name}: {callRequest.method}
-            </Text>
-            <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
-          </Box>
+          <Image
+            source={{ uri: peerMeta.icons[0] }}
+            alt="logo"
+            size="10"
+            alignSelf="center"
+          />
+          <Text variant="subtitle1">
+            {peerMeta.name}: {callRequest.method}
+          </Text>
           <Box flexDirection="row" justifyContent="space-between">
             <Text variant="subtitle2">To</Text>
             <Text variant="subtitle2">{formatAddress(to)}</Text>
@@ -91,11 +94,11 @@ const WalletConnectTransactionPrompt = ({
             <Text variant="subtitle2">Gas (estimate)</Text>
             {renderGasEstimate()}
           </Box>
-          <Stack space="1">
+          <Stack space="1" mt="1">
             <Button isLoading={loading} onPress={onApprove}>
               Approve
             </Button>
-            <Button variant="ghost" onPress={onReject}>
+            <Button isDisabled={loading} variant="subtle" onPress={onReject}>
               Reject
             </Button>
           </Stack>

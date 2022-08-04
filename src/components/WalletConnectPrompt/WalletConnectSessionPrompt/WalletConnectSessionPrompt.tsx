@@ -1,5 +1,14 @@
 import { IClientMeta } from "@walletconnect/types";
-import { Actionsheet, Button, Image, Skeleton, Stack, Text } from "native-base";
+import {
+  Actionsheet,
+  Box,
+  Button,
+  Image,
+  Link,
+  Skeleton,
+  Stack,
+  Text,
+} from "native-base";
 
 interface Props {
   onClose: () => void;
@@ -16,20 +25,29 @@ const WalletConnectSessionPrompt = ({
   peerMeta,
   isConnecting,
 }: Props) => {
+  console.log(peerMeta);
   return (
     <Actionsheet isOpen onClose={onClose}>
       <Actionsheet.Content>
         {isConnecting && <Skeleton />}
         {peerMeta && (
-          <>
-            <Text>{peerMeta.name} wants to connect</Text>
-            <Text>{peerMeta.url}</Text>
-            <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
-            <Stack space="3" direction="row" mt="4">
+          <Box w="100%" px="4" py="2">
+            <Image
+              source={{ uri: peerMeta.icons[0] }}
+              alt="logo"
+              size="10"
+              mb="3"
+              alignSelf="center"
+            />
+            <Text variant="subtitle1">{peerMeta.name} wants to connect</Text>
+            <Link href={peerMeta.url}>{peerMeta.url}</Link>
+            <Stack space="1" mt="4">
               <Button onPress={onApprove}>Approve</Button>
-              <Button onPress={onReject}>Reject</Button>
+              <Button variant="subtle" onPress={onReject}>
+                Reject
+              </Button>
             </Stack>
-          </>
+          </Box>
         )}
       </Actionsheet.Content>
     </Actionsheet>
