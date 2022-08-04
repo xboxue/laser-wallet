@@ -37,7 +37,7 @@ export const createBackup = async (
 
   const encryptedData = CryptoJS.AES.encrypt(data, password).toString();
 
-  const path = `${RNFS.DocumentDirectoryPath}${fileName}`;
+  const path = `${RNFS.DocumentDirectoryPath}/${fileName}`;
   const targetPath = `${BACKUP_DIR}/${fileName}`;
   const scope = "hidden";
 

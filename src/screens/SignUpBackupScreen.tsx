@@ -38,7 +38,7 @@ const SignUpBackupScreen = () => {
           navigation.navigate("SignUpBackupPassword");
         }}
       >
-        Back up on Google Drive
+        Back up on {Platform.OS === "ios" ? "iCloud" : "Google Drive"}
       </Button>
     </Box>
   );

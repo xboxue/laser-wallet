@@ -50,7 +50,7 @@ const SettingsWalletRecoveryScreen = () => {
     <Box px="4">
       <Box py="3" flexDir="row" alignItems="center">
         <Text variant="subtitle1">
-          Backup to {Platform.OS === "ios" ? "iCloud" : "Google Drive"}
+          Back up on {Platform.OS === "ios" ? "iCloud" : "Google Drive"}
         </Text>
         <Box ml="auto">{renderButton()}</Box>
       </Box>
