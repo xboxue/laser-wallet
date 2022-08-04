@@ -10,7 +10,7 @@ const SendAssetScreen = ({ route }) => {
 
   return (
     <Box>
-      <Text variant="subtitle1" mb="3" p="4" pb="0">
+      <Text variant="subtitle1" p="4" pb="0">
         Choose asset
       </Text>
       {walletAddress && (

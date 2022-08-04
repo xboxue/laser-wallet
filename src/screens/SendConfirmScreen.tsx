@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
-import { Box, Button, Skeleton, Stack, Text } from "native-base";
+import { Box, Button, Skeleton, Stack, Text, useToast } from "native-base";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useFeeData } from "wagmi";
@@ -11,6 +11,7 @@ import useLaser from "../hooks/useLaser";
 import { sendTransaction } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
+import ToastAlert from "../components/ToastAlert/ToastAlert";
 
 // TODO: Estimate this with simulation
 const GAS_LIMIT = 300000;
@@ -21,6 +22,7 @@ const SendConfirmScreen = ({ route }) => {
   const laser = useLaser();
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const toast = useToast();
 
   const { amount, address: to, ensName, token } = route.params;
 
@@ -59,6 +61,11 @@ const SendConfirmScreen = ({ route }) => {
     },
     {
       onSuccess: (transaction) => {
+        toast.show({
+          render: () => (
+            <ToastAlert status="success" title="Transaction sent" />
+          ),
+        });
         dispatch(addPendingTransaction(transaction));
         navigation.navigate("Home", { tab: 1 });
       },
@@ -82,6 +89,11 @@ const SendConfirmScreen = ({ route }) => {
     },
     {
       onSuccess: (transaction) => {
+        toast.show({
+          render: () => (
+            <ToastAlert status="success" title="Transaction sent" />
+          ),
+        });
         dispatch(addPendingTransaction(transaction));
         navigation.navigate("Home", { tab: 1 });
       },

@@ -55,7 +55,7 @@ const AppWithQueryClient = () => {
     toast.show({
       render: ({ id }) => (
         <ToastAlert
-          onClose={toast.close(id)}
+          status="error"
           title={"Oops, something went wrong. Please try again."}
           description={error?.message}
         />

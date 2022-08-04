@@ -2,6 +2,8 @@ import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
+import { ChevronLeftIcon, Icon } from "native-base";
+import { Platform } from "react-native";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
@@ -133,6 +135,12 @@ const AppNavigator = () => {
       screenOptions={{
         ...TransitionPresets.SlideFromRightIOS,
         headerTitle: "",
+        ...(Platform.OS === "ios" && {
+          headerBackTitleVisible: false,
+          headerBackImage: () => (
+            <ChevronLeftIcon size="5" color="black" ml="4" />
+          ),
+        }),
       }}
       // Fix stale data in wagmi by rerendering app when chain changes
       key={chainId}

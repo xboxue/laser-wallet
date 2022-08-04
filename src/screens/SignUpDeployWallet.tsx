@@ -4,7 +4,7 @@ import { parseEther } from "ethers/lib/utils";
 import Constants from "expo-constants";
 import { LaserFactory } from "laser-sdk";
 import { calculateDeploymentCost } from "laser-sdk/dist/utils";
-import { Box, Button, Skeleton, Text } from "native-base";
+import { Box, Button, Skeleton, Text, useToast } from "native-base";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useProvider } from "wagmi";
@@ -22,6 +22,7 @@ import { createWallet } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
 import waitForTransaction from "../utils/waitForTransaction";
+import ToastAlert from "../components/ToastAlert/ToastAlert";
 
 const SignUpDeployWallet = () => {
   const walletAddress = useSelector(selectWalletAddress);
@@ -38,6 +39,7 @@ const SignUpDeployWallet = () => {
   const provider = useProvider({ chainId });
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const toast = useToast();
 
   const { mutate: onCreateWallet, isLoading: isCreating } = useMutation(
     async () => {
@@ -63,9 +65,23 @@ const SignUpDeployWallet = () => {
     },
     {
       onSuccess: (receipt) => {
-        if (receipt.status === 1) {
+        if (receipt.status === 0) {
+          toast.show({
+            render: () => (
+              <ToastAlert
+                status="error"
+                title="Wallet activation failed. Please try again"
+              />
+            ),
+          });
+        } else if (receipt.status === 1) {
           dispatch(setIsWalletDeployed(true));
           navigation.navigate("Home");
+          toast.show({
+            render: () => (
+              <ToastAlert status="success" title="Wallet activated" />
+            ),
+          });
         }
       },
     }
@@ -124,7 +140,9 @@ const SignUpDeployWallet = () => {
       <Button
         mt="4"
         isDisabled={
-          deployFee && balance && balance.value.lt(parseEther(deployFee.eth))
+          deployFeeLoading ||
+          isLoading ||
+          (deployFee && balance && balance.value.lt(parseEther(deployFee.eth)))
         }
         onPress={() => onCreateWallet()}
         isLoading={isCreating}
@@ -135,6 +153,7 @@ const SignUpDeployWallet = () => {
         variant="subtle"
         mt="2"
         onPress={() => navigation.navigate("Home")}
+        isDisabled={isCreating}
       >
         Activate later
       </Button>

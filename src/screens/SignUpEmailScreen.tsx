@@ -43,6 +43,7 @@ const SignUpEmailScreen = () => {
       email: yup.string().email("Invalid email").required("Required"),
     }),
     validateOnChange: false,
+    validateOnBlur: false,
   });
 
   return (
