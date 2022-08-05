@@ -33,6 +33,7 @@ import SignUpLaserGuardianDetailsScreen from "../screens/SignUpLaserGuardianDeta
 import SignUpPasscodeScreen from "../screens/SignUpPasscodeScreen";
 import SignUpVerifyEmailScreen from "../screens/SignUpVerifyEmail";
 import StartScreen from "../screens/StartScreen";
+import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 
 const Stack = createStackNavigator();
 
@@ -121,6 +122,10 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SettingsBackupPassword"
             component={SettingsBackupPasswordScreen}
+          />
+          <Stack.Screen
+            name="TransactionDetails"
+            component={TransactionDetailsScreen}
           />
         </>
       );
