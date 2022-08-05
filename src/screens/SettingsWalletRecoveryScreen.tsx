@@ -1,13 +1,15 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
+import { isEqual } from "lodash";
 import { Box, Button, Icon, Pressable, Spinner, Text } from "native-base";
 import { Platform } from "react-native";
-import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { selectBackupPassword } from "../features/auth/authSlice";
 import {
   selectRecoveryOwnerAddress,
   selectRecoveryOwnerPrivateKey,
+  selectWallets,
 } from "../features/wallet/walletSlice";
 import useRefreshOnFocus from "../hooks/useRefreshOnFocus";
 import { getBackup } from "../services/cloudBackup";
@@ -17,20 +19,34 @@ const SettingsWalletRecoveryScreen = () => {
 
   const recoveryOwnerAddress = useSelector(selectRecoveryOwnerAddress);
   const recoveryOwnerPrivateKey = useSelector(selectRecoveryOwnerPrivateKey);
+  const wallets = useSelector(selectWallets);
 
   const backupPassword = useSelector(selectBackupPassword);
 
-  const { data, isLoading, refetch } = useQuery(["backup"], () => {
-    if (!backupPassword || !recoveryOwnerAddress)
-      throw new Error("No backup password");
-    return getBackup(backupPassword, recoveryOwnerAddress);
-  });
+  const {
+    data: backupData,
+    isLoading,
+    refetch,
+  } = useQuery(
+    ["backup", wallets],
+    () => {
+      if (!backupPassword || !recoveryOwnerAddress)
+        throw new Error("No backup password");
+      return getBackup(backupPassword, recoveryOwnerAddress);
+    },
+    { select: (data) => JSON.parse(data) }
+  );
 
   useRefreshOnFocus(refetch);
 
+  const isBackupValid =
+    backupData &&
+    backupData.privateKey === recoveryOwnerPrivateKey &&
+    isEqual(backupData.wallets, wallets);
+
   const renderButton = () => {
     if (isLoading) return <Spinner />;
-    if (data === recoveryOwnerPrivateKey)
+    if (isBackupValid)
       return (
         <Icon
           as={<Ionicons name="md-checkmark-circle" />}
@@ -55,7 +71,7 @@ const SettingsWalletRecoveryScreen = () => {
         <Box ml="auto">{renderButton()}</Box>
       </Box>
 
-      {data === recoveryOwnerPrivateKey && (
+      {isBackupValid && (
         <Pressable
           onPress={() => navigation.navigate("SettingsBackupPassword")}
         >

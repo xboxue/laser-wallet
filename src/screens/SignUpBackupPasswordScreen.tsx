@@ -52,7 +52,10 @@ const SignUpBackupPasswordScreen = () => {
       );
 
       await createBackup(
-        recoveryOwner.getPrivateKeyString(),
+        JSON.stringify({
+          privateKey: recoveryOwner.getPrivateKeyString(),
+          wallets: [{ address: walletAddress, chainId }],
+        }),
         password,
         recoveryOwner.getAddressString()
       );

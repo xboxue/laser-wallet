@@ -9,12 +9,14 @@ import { setBackupPassword } from "../features/auth/authSlice";
 import {
   selectRecoveryOwnerAddress,
   selectRecoveryOwnerPrivateKey,
+  selectWallets,
 } from "../features/wallet/walletSlice";
 import { createBackup } from "../services/cloudBackup";
 
 const SettingsBackupPasswordScreen = () => {
   const recoveryOwnerAddress = useSelector(selectRecoveryOwnerAddress);
   const recoveryOwnerPrivateKey = useSelector(selectRecoveryOwnerPrivateKey);
+  const wallets = useSelector(selectWallets);
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
@@ -24,7 +26,7 @@ const SettingsBackupPasswordScreen = () => {
       if (!recoveryOwnerAddress || !recoveryOwnerPrivateKey) throw new Error();
       dispatch(setBackupPassword(password));
       return createBackup(
-        recoveryOwnerPrivateKey,
+        JSON.stringify({ privateKey: recoveryOwnerPrivateKey, wallets }),
         password,
         recoveryOwnerAddress
       );
