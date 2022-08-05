@@ -17,7 +17,7 @@ const useWaitForTransaction = ({
   enabled = true,
 }: WaitForTransactionOptions) => {
   return useQuery(
-    ["transaction"],
+    ["transaction", hash],
     () => waitForTransaction({ hash, chainId, confirmations }),
     {
       enabled: enabled && !!hash,

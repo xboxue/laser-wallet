@@ -84,7 +84,45 @@ const TransactionItemContainer = ({ transaction }: Props) => {
     })} ${txData.tokenSymbol}`;
   };
 
+  const renderTokenIcon = () => {
+    if (transaction.isError === "1")
+      return (
+        <Circle borderColor="red.500" borderWidth="2" size="9">
+          <Icon
+            as={<Ionicons name="ios-arrow-up" />}
+            size="4"
+            color="red.500"
+          />
+        </Circle>
+      );
+
+    const tokenUri = tokensByAddress[txData.contractAddress]?.logoURI?.replace(
+      "ipfs://",
+      "https://cloudflare-ipfs.com/ipfs/"
+    );
+
+    return (
+      <Image
+        source={{ uri: tokenUri }}
+        fallbackSource={ethIcon}
+        size="9"
+        alt="Token icon"
+      />
+    );
+  };
+
   const renderIcon = () => {
+    if (transaction.isError === "1")
+      return (
+        <Circle borderColor="red.500" borderWidth="2" size="9">
+          <Icon
+            as={<Ionicons name="ios-arrow-up" />}
+            size="4"
+            color="red.500"
+          />
+        </Circle>
+      );
+
     if (txData.type === TRANSACTION_TYPES.CONTRACT_INTERACTION)
       return (
         <Circle bg="gray.800" size="9">
@@ -129,24 +167,12 @@ const TransactionItemContainer = ({ transaction }: Props) => {
       txData.type === TRANSACTION_TYPES.TOKEN_TRANSFER) &&
     txData.args
   ) {
-    const tokenUri = tokensByAddress[txData.contractAddress]?.logoURI?.replace(
-      "ipfs://",
-      "https://cloudflare-ipfs.com/ipfs/"
-    );
-
     return (
       <TransactionItem
         onPress={() =>
           navigation.navigate("TransactionDetails", { transaction })
         }
-        icon={
-          <Image
-            source={{ uri: tokenUri }}
-            fallbackSource={ethIcon}
-            size="9"
-            alt="Token icon"
-          />
-        }
+        icon={renderTokenIcon()}
         title={renderTokenTitle()}
         subtitle={renderTokenSubtitle()}
         amount={renderTokenAmount()}

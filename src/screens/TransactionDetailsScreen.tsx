@@ -4,7 +4,7 @@ import { format, fromUnixTime } from "date-fns";
 import { BigNumber } from "ethers";
 import Constants from "expo-constants";
 import * as WebBrowser from "expo-web-browser";
-import { Box, Button, Icon, Stack, Text } from "native-base";
+import { Badge, Box, Button, Icon, Stack, Text } from "native-base";
 import { useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
@@ -52,7 +52,15 @@ const TransactionDetailsScreen = ({ route }) => {
         <Box flexDirection="row" justifyContent="space-between" h="5">
           <Text variant="subtitle2">Status</Text>
           <Text variant="subtitle2">
-            {transaction.isError === "0" ? "Success" : "Fail"}
+            {transaction.isError === "0" ? (
+              <Badge _text={{ fontSize: "sm" }} colorScheme="success">
+                Success
+              </Badge>
+            ) : (
+              <Badge _text={{ fontSize: "sm" }} colorScheme="danger">
+                Fail
+              </Badge>
+            )}
           </Text>
         </Box>
         <Box flexDirection="row" justifyContent="space-between" h="5">

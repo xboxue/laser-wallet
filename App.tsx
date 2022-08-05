@@ -60,6 +60,7 @@ const AppWithQueryClient = () => {
           description={error?.message}
         />
       ),
+      placement: "top",
     });
     Sentry.Native.captureException(error);
   };
