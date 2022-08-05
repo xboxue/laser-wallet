@@ -1,23 +1,23 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
 import {
   Box,
+  Circle,
+  FlatList,
+  Icon,
   Image,
   Pressable,
-  SectionList,
   Text,
-  Circle,
-  Icon,
 } from "native-base";
 import { RefreshControl } from "react-native";
 import { useSelector } from "react-redux";
 import { useBalance } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
 import { selectChainId } from "../../features/network/networkSlice";
+import { selectIsWalletDeployed } from "../../features/wallet/walletSlice";
 import useRefreshOnFocus from "../../hooks/useRefreshOnFocus";
 import useTokenBalances, { TokenBalance } from "../../hooks/useTokenBalances";
 import formatAmount from "../../utils/formatAmount";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
-import { selectIsWalletDeployed } from "../../features/wallet/walletSlice";
 
 const IPFS_GATEWAY_URL = "https://cloudflare-ipfs.com/ipfs/";
 
@@ -48,7 +48,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   });
 
   const {
-    data: tokens,
+    data: tokens = [],
     isLoading: tokensLoading,
     isError,
     refetch: refetchTokens,
@@ -143,12 +143,15 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   };
 
   return (
-    <SectionList
-      sections={[
-        { data: [null], renderItem: renderActivateWallet },
-        { data: [balance], renderItem: renderEth },
-        { data: tokens || [], renderItem: renderToken },
-      ]}
+    <FlatList
+      ListHeaderComponent={
+        <Box>
+          {renderActivateWallet()}
+          {renderEth()}
+        </Box>
+      }
+      data={tokens}
+      renderItem={renderToken}
       contentContainerStyle={{ paddingTop: 8 }}
       refreshControl={
         <RefreshControl
