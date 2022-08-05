@@ -1,10 +1,11 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { tokens } from "@uniswap/default-token-list";
 import { fromUnixTime } from "date-fns";
 import { ethers } from "ethers";
 import { keyBy } from "lodash";
-import { Image } from "native-base";
+import { Circle, Icon, Image } from "native-base";
 import { useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
@@ -83,6 +84,35 @@ const TransactionItemContainer = ({ transaction }: Props) => {
     })} ${txData.tokenSymbol}`;
   };
 
+  const renderIcon = () => {
+    if (txData.type === TRANSACTION_TYPES.CONTRACT_INTERACTION)
+      return (
+        <Circle bg="gray.800" size="9">
+          <Icon as={<Ionicons name="ios-list" />} size="4" color="white" />
+        </Circle>
+      );
+
+    if (txData.type === TRANSACTION_TYPES.SEND) {
+      return (
+        <Circle bg="gray.800" size="9">
+          <Icon
+            as={
+              isEqualCaseInsensitive(txData.from.address, walletAddress) ? (
+                <Ionicons name="ios-arrow-up" />
+              ) : (
+                <Ionicons name="ios-arrow-down" />
+              )
+            }
+            size="4"
+            color="white"
+          />
+        </Circle>
+      );
+    }
+
+    return <Image source={ethIcon} size="9" alt="Ethereum icon" />;
+  };
+
   const renderTitle = () => {
     if (txData.type === TRANSACTION_TYPES.SEND) {
       if (isEqualCaseInsensitive(txData.from.address, walletAddress))
@@ -128,7 +158,7 @@ const TransactionItemContainer = ({ transaction }: Props) => {
   return (
     <TransactionItem
       onPress={() => navigation.navigate("TransactionDetails", { transaction })}
-      icon={<Image source={ethIcon} size="9" alt="Ethereum icon" />}
+      icon={renderIcon()}
       title={renderTitle()}
       subtitle={
         isEqualCaseInsensitive(txData.from.address, walletAddress)

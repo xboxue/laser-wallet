@@ -17,7 +17,7 @@ const SettingsItem = ({ onPress, icon, title }: Props) => {
           alignItems="center"
           opacity={isPressed ? "0.2" : "1"}
         >
-          <Circle bg="black" size="40px">
+          <Circle bg="gray.800" size="10">
             {icon}
           </Circle>
           <Text variant="subtitle1" ml="3">

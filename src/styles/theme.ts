@@ -47,7 +47,7 @@ const theme = extendTheme({
       },
       variants: {
         solid: {
-          bgColor: "black",
+          bgColor: "gray.900",
           _pressed: {
             bgColor: "gray.700",
           },
