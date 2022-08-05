@@ -5,6 +5,7 @@ import {
 import { ChevronLeftIcon, Icon } from "native-base";
 import { Platform } from "react-native";
 import { useSelector } from "react-redux";
+import { DEFAULT_CHAIN } from "../constants/chains";
 import { selectIsAuthenticated } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import { selectOwnerAddress } from "../features/wallet/walletSlice";
@@ -25,7 +26,7 @@ import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpAuthScreen from "../screens/SignUpAuthScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
 import SignUpBackupScreen from "../screens/SignUpBackupScreen";
-import SignUpDeployWallet from "../screens/SignUpDeployWallet";
+import SignUpDeployWalletScreen from "../screens/SignUpDeployWalletScreen";
 import SignUpEmailScreen from "../screens/SignUpEmailScreen";
 import SignUpGuardianDetailsScreen from "../screens/SignUpGuardianDetailsScreen";
 import SignUpGuardiansScreen from "../screens/SignUpGuardiansScreen";
@@ -95,7 +96,8 @@ const AppNavigator = () => {
           />
           <Stack.Screen
             name="SignUpDeployWallet"
-            component={SignUpDeployWallet}
+            component={SignUpDeployWalletScreen}
+            initialParams={{ chainId: DEFAULT_CHAIN }}
           />
           <Stack.Screen name="SendAddress" component={SendAddressScreen} />
           <Stack.Screen name="SendAsset" component={SendAssetScreen} />

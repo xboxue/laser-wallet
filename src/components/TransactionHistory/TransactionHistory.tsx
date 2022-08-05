@@ -35,7 +35,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     data: txs = [],
     isLoading: txsLoading,
     refetch: refetchTxs,
-  } = useQuery(["transactions"], () =>
+  } = useQuery(["transactions", walletAddress, chainId], () =>
     getTransactions({ address: walletAddress, chainId })
   );
 

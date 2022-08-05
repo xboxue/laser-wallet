@@ -1,57 +1,61 @@
 import { useNavigation } from "@react-navigation/native";
-import { BigNumber, providers, Wallet } from "ethers";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { BigNumber } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import Constants from "expo-constants";
-import { LaserFactory } from "laser-sdk";
 import { calculateDeploymentCost } from "laser-sdk/dist/utils";
 import { Box, Button, Skeleton, Text, useToast } from "native-base";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useProvider } from "wagmi";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
+import ToastAlert from "../components/ToastAlert/ToastAlert";
 import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
-import { selectChainId } from "../features/network/networkSlice";
 import {
-  selectOwnerPrivateKey,
+  addWallet,
+  selectOwnerAddress,
   selectRecoveryOwnerAddress,
   selectSalt,
-  selectWalletAddress,
-  setIsWalletDeployed,
 } from "../features/wallet/walletSlice";
+import useLaserFactory from "../hooks/useLaserFactory";
 import { createWallet } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
 import waitForTransaction from "../utils/waitForTransaction";
-import ToastAlert from "../components/ToastAlert/ToastAlert";
 
-const SignUpDeployWallet = () => {
-  const walletAddress = useSelector(selectWalletAddress);
-  const chainId = useSelector(selectChainId);
-  const { data: balance, isLoading } = useBalance({
-    addressOrName: walletAddress,
-    chainId,
-    watch: true,
-  });
-  const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
-  const recoveryOwnerAddress = useSelector(selectRecoveryOwnerAddress);
-  const guardianAddresses = useSelector(selectGuardianAddresses);
-  const salt = useSelector(selectSalt);
+const SignUpDeployWalletScreen = ({ route }) => {
+  const { chainId } = route.params;
   const provider = useProvider({ chainId });
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const toast = useToast();
 
+  const factory = useLaserFactory(chainId);
+  const ownerAddress = useSelector(selectOwnerAddress);
+  const recoveryOwnerAddress = useSelector(selectRecoveryOwnerAddress);
+  const guardianAddresses = useSelector(selectGuardianAddresses);
+  const salt = useSelector(selectSalt);
+
+  const { data: walletAddress, isLoading: walletAddressLoading } = useQuery(
+    ["walletAddress", chainId],
+    () =>
+      factory.preComputeAddress(
+        ownerAddress,
+        [recoveryOwnerAddress],
+        guardianAddresses,
+        salt
+      )
+  );
+
+  const { data: balance, isLoading } = useBalance({
+    addressOrName: walletAddress,
+    chainId,
+    watch: true,
+  });
+
   const { mutate: onCreateWallet, isLoading: isCreating } = useMutation(
     async () => {
-      const provider = new providers.InfuraProvider(
-        chainId,
-        Constants.manifest?.extra?.infuraApiKey
-      );
-      const owner = new Wallet(ownerPrivateKey);
-      const factory = new LaserFactory(provider, owner);
-
       const transaction = await factory.createWallet(
-        owner.address,
+        ownerAddress,
         [recoveryOwnerAddress],
         guardianAddresses,
         0,
@@ -75,7 +79,7 @@ const SignUpDeployWallet = () => {
             ),
           });
         } else if (receipt.status === 1) {
-          dispatch(setIsWalletDeployed(true));
+          dispatch(addWallet({ address: walletAddress, chainId }));
           navigation.navigate("Home");
           toast.show({
             render: () => (
@@ -125,10 +129,14 @@ const SignUpDeployWallet = () => {
         changes.
       </Text>
       <Text variant="subtitle2">Wallet address:</Text>
-      <Box flexDir="row" alignItems="center">
-        <Text variant="subtitle1">{formatAddress(walletAddress)}</Text>
-        <CopyIconButton value={walletAddress} />
-      </Box>
+      {walletAddressLoading || !walletAddress ? (
+        <Skeleton />
+      ) : (
+        <Box flexDir="row" alignItems="center">
+          <Text variant="subtitle1">{formatAddress(walletAddress)}</Text>
+          <CopyIconButton value={walletAddress} />
+        </Box>
+      )}
       <Text variant="subtitle2" mt="2">
         Current activation fee:{" "}
       </Text>
@@ -161,4 +169,4 @@ const SignUpDeployWallet = () => {
   );
 };
 
-export default SignUpDeployWallet;
+export default SignUpDeployWalletScreen;
