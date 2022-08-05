@@ -4,6 +4,7 @@ import { format, fromUnixTime } from "date-fns";
 import { BigNumber } from "ethers";
 import Constants from "expo-constants";
 import * as WebBrowser from "expo-web-browser";
+import { findLast } from "lodash";
 import { Badge, Box, Button, Icon, Stack, Text } from "native-base";
 import { useSelector } from "react-redux";
 import { useProvider } from "wagmi";
@@ -37,7 +38,8 @@ const TransactionDetailsScreen = ({ route }) => {
     decodeTransactionData(provider, transaction)
   );
 
-  const gasFee = internalTxs?.find(
+  const gasFee = findLast(
+    internalTxs,
     (tx) =>
       tx.type === "call" &&
       isEqualCaseInsensitive(tx.to, Constants.manifest?.extra?.relayerAddress)
@@ -69,7 +71,7 @@ const TransactionDetailsScreen = ({ route }) => {
             <Text mr="0.5" variant="subtitle2">
               {txData?.from.ensName || formatAddress(txData.from.address)}
             </Text>
-            <CopyIconButton value={transaction.from} />
+            <CopyIconButton value={txData.from.address} />
           </Box>
         </Box>
         <Box flexDirection="row" justifyContent="space-between" h="5">
@@ -78,7 +80,7 @@ const TransactionDetailsScreen = ({ route }) => {
             <Text mr="0.5" variant="subtitle2">
               {txData?.to.ensName || formatAddress(txData.to.address)}
             </Text>
-            <CopyIconButton value={transaction.to} />
+            <CopyIconButton value={txData.to.address} />
           </Box>
         </Box>
         <Box flexDirection="row" justifyContent="space-between" h="5">
@@ -92,7 +94,7 @@ const TransactionDetailsScreen = ({ route }) => {
         </Box>
         <Box flexDirection="row" justifyContent="space-between" h="5">
           <Text variant="subtitle2">Amount</Text>
-          <Text variant="subtitle2">{formatAmount(transaction.value)} ETH</Text>
+          <Text variant="subtitle2">{formatAmount(txData.value)} ETH</Text>
         </Box>
         <Box flexDirection="row" justifyContent="space-between" h="5">
           <Text variant="subtitle2">Network fee</Text>
