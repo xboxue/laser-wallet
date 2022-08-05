@@ -97,7 +97,6 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SignUpDeployWallet"
             component={SignUpDeployWalletScreen}
-            initialParams={{ chainId: DEFAULT_CHAIN }}
           />
           <Stack.Screen name="SendAddress" component={SendAddressScreen} />
           <Stack.Screen name="SendAsset" component={SendAssetScreen} />

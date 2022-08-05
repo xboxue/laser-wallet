@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useProvider } from "wagmi";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
 import ToastAlert from "../components/ToastAlert/ToastAlert";
+import { DEFAULT_CHAIN } from "../constants/chains";
 import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
 import {
   addWallet,
@@ -23,7 +24,7 @@ import formatAmount from "../utils/formatAmount";
 import waitForTransaction from "../utils/waitForTransaction";
 
 const SignUpDeployWalletScreen = ({ route }) => {
-  const { chainId } = route.params;
+  const chainId = route.params?.chainId || DEFAULT_CHAIN;
   const provider = useProvider({ chainId });
   const navigation = useNavigation();
   const dispatch = useDispatch();
