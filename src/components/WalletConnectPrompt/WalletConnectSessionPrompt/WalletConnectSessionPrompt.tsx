@@ -25,7 +25,6 @@ const WalletConnectSessionPrompt = ({
   peerMeta,
   isConnecting,
 }: Props) => {
-  console.log(peerMeta);
   return (
     <Actionsheet isOpen onClose={onClose}>
       <Actionsheet.Content>

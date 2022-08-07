@@ -1,13 +1,19 @@
 import { signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
+import { useNavigation } from "@react-navigation/native";
+import { useMutation } from "@tanstack/react-query";
 import { ethers, utils } from "ethers";
 import Constants from "expo-constants";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { keyBy } from "lodash";
+import { useToast } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { REQUEST_TYPES } from "../../constants/walletConnect";
-import { selectChainId } from "../../features/network/networkSlice";
+import { selectChainId, setChainId } from "../../features/network/networkSlice";
 import { addPendingTransaction } from "../../features/transactions/transactionsSlice";
-import { selectOwnerPrivateKey } from "../../features/wallet/walletSlice";
+import {
+  selectOwnerPrivateKey,
+  selectWallets,
+  setWalletAddress,
+} from "../../features/wallet/walletSlice";
 import {
   selectCallRequest,
   selectConnectors,
@@ -17,11 +23,10 @@ import {
 } from "../../features/walletConnect/walletConnectSlice";
 import useLaser from "../../hooks/useLaser";
 import { sendTransaction } from "../../services/wallet";
+import ToastAlert from "../ToastAlert/ToastAlert";
 import WalletConnectRequestPrompt from "./WalletConnectRequestPrompt/WalletConnectRequestPrompt";
 import WalletConnectSessionPrompt from "./WalletConnectSessionPrompt/WalletConnectSessionPrompt";
 import WalletConnectTransactionPrompt from "./WalletConnectTransactionPrompt/WalletConnectTransactionPrompt";
-import { useToast } from "native-base";
-import ToastAlert from "../ToastAlert/ToastAlert";
 
 interface Props {
   walletAddress: string;
@@ -38,8 +43,10 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
   const isConnecting = useSelector(selectIsConnecting);
   const chainId = useSelector(selectChainId);
+  const wallets = useSelector(selectWallets);
   const laser = useLaser();
   const toast = useToast();
+  const navigation = useNavigation();
 
   const getConnector = (peerId: string) => {
     return connectors.find((connector) => connector.peerId === peerId);
@@ -52,13 +59,12 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
       if (!connector) throw new Error("No connector");
 
       const owner = new ethers.Wallet(ownerPrivateKey);
-      let result;
 
       if (
         callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
         callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4
       ) {
-        result = signTypedData({
+        return signTypedData({
           privateKey: ethers.utils.arrayify(ownerPrivateKey),
           version: SignTypedDataVersion.V4,
           data: JSON.parse(callRequest.params[1]),
@@ -66,7 +72,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
       }
 
       if (callRequest.method === REQUEST_TYPES.PERSONAL_SIGN) {
-        result = await owner.signMessage(utils.arrayify(callRequest.params[0]));
+        return owner.signMessage(utils.arrayify(callRequest.params[0]));
       }
 
       if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
@@ -93,14 +99,14 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           chainId,
         });
         dispatch(addPendingTransaction({ ...transaction, hash }));
-        result = hash;
+        return hash;
       }
 
       if (callRequest.method === REQUEST_TYPES.SIGN_TRANSACTION) {
         const { to, value = 0, data } = callRequest.params[0];
 
         const { nonce } = await laser.getWalletState();
-        result = await laser.signTransaction(
+        return laser.signTransaction(
           {
             to,
             callData: data,
@@ -116,14 +122,33 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
         );
       }
 
-      if (!result) throw new Error("Unsupported method");
-      connector.approveRequest({
-        id: callRequest.id,
-        result,
-      });
+      if (callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN) {
+        const id = parseInt(callRequest.params[0].chainId, 16);
+
+        const walletsByChain = keyBy(wallets, "chainId");
+        if (walletsByChain[id]) {
+          dispatch(setWalletAddress(walletsByChain[id].address));
+          dispatch(setChainId(id));
+        } else {
+          navigation.navigate("SignUpDeployWallet", { chainId: id });
+        }
+        return null;
+      }
+
+      throw new Error("Unsupported method");
     },
     {
-      onSuccess: () => {
+      onSuccess: (result) => {
+        if (!callRequest) throw new Error("No call request");
+        const connector = getConnector(callRequest.peerId);
+        if (!connector) throw new Error("No connector");
+
+        connector.approveRequest({
+          id: callRequest.id,
+          result,
+        });
+        dispatch(setCallRequest(null));
+
         if (callRequest?.method === REQUEST_TYPES.SEND_TRANSACTION) {
           toast.show({
             render: () => (
@@ -131,7 +156,6 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
             ),
           });
         }
-        dispatch(setCallRequest(null));
       },
     }
   );
@@ -139,7 +163,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const rejectCallRequest = () => {
     if (!callRequest) return;
     const connector = getConnector(callRequest.peerId);
-    if (!connector) return;
+    if (!connector) return dispatch(setCallRequest(null));
 
     connector.rejectRequest({
       id: callRequest.id,

@@ -6,4 +6,5 @@ export const REQUEST_TYPES = {
   SEND_TRANSACTION: "eth_sendTransaction",
   SIGN_TRANSACTION: "eth_signTransaction",
   SEND_RAW_TRANSACTION: "eth_sendRawTransaction",
+  SWITCH_ETHEREUM_CHAIN: "wallet_switchEthereumChain",
 };

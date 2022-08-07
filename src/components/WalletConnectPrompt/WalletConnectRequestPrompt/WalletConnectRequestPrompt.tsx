@@ -9,6 +9,9 @@ import {
 import { IClientMeta, IJsonRpcRequest } from "@walletconnect/types";
 import hexToAscii from "../../../utils/hexToAscii";
 import { REQUEST_TYPES } from "../../../constants/walletConnect";
+import { allChains, useProvider } from "wagmi";
+import { useSelector } from "react-redux";
+import { selectChainId } from "../../../features/network/networkSlice";
 
 interface Props {
   onClose: () => void;
@@ -25,6 +28,9 @@ const WalletConnectRequestPrompt = ({
   peerMeta,
   callRequest,
 }: Props) => {
+  const chainId = useSelector(selectChainId);
+  const provider = useProvider({ chainId });
+
   return (
     <Actionsheet isOpen onClose={onClose}>
       <Actionsheet.Content>
@@ -49,6 +55,13 @@ const WalletConnectRequestPrompt = ({
                 )}
               {callRequest.method === REQUEST_TYPES.PERSONAL_SIGN &&
                 hexToAscii(callRequest.params[0])}
+              {callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN &&
+                `Chain: ${
+                  allChains.find(
+                    (chain) =>
+                      chain.id === parseInt(callRequest.params[0].chainId, 16)
+                  )?.name
+                }`}
             </Text>
           </ScrollView>
           <Stack space="1">
