@@ -29,9 +29,21 @@
         "SENTRY_PROJECT": "react-native"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "RELAYER_URL": "https://laser-relayer.herokuapp.com",
+        "LASER_GUARDIAN_ADDRESS": "0xcC9d02aBe5487dd64A890bBfFd0b05cF7901043c",
+        "RELAYER_ADDRESS": "0xcC9d02aBe5487dd64A890bBfFd0b05cF7901043c",
+        "SENTRY_ORG": "laser",
+        "SENTRY_PROJECT": "react-native"
+      }
+    }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appName": "Laser Wallet"
+      }
+    }
   }
 }
