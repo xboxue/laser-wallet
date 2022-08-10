@@ -96,14 +96,13 @@ const TransactionItemContainer = ({ transaction }: Props) => {
         </Circle>
       );
 
-    const tokenUri = tokensByAddress[txData.contractAddress]?.logoURI?.replace(
-      "ipfs://",
-      "https://cloudflare-ipfs.com/ipfs/"
-    );
+    const tokenUri = tokensByAddress[
+      txData.contractAddress.toLowerCase()
+    ]?.logoURI?.replace("ipfs://", "https://cloudflare-ipfs.com/ipfs/");
 
     return (
       <Image
-        source={{ uri: tokenUri }}
+        source={tokenUri ? { uri: tokenUri } : ethIcon}
         fallbackSource={ethIcon}
         size="9"
         alt="Token icon"
