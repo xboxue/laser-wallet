@@ -1,6 +1,3 @@
-import "./src/global";
-import "react-native-get-random-values";
-import "@ethersproject/shims";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import {
   Inter_400Regular,
@@ -29,16 +26,6 @@ import wagmiClient from "./src/services/wagmiClient";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
 
-Promise.allSettled = (promises: Promise<any>[]) => {
-  return Promise.all(
-    promises.map((promise) =>
-      promise
-        .then((value) => ({ status: "fulfilled", value }))
-        .catch((reason) => ({ status: "rejected", reason }))
-    )
-  );
-};
-
 const tokenCache = {
   getToken: (key: string) => storage.getString(key),
   saveToken: (key: string, value: string) => storage.set(key, value),
@@ -62,6 +49,7 @@ const AppWithQueryClient = () => {
       ),
       placement: "top",
     });
+    console.error(error);
     Sentry.Native.captureException(error);
   };
 
