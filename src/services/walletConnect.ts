@@ -20,10 +20,11 @@ export const connect = ({ uri, session }: ConnectOptions) => {
     uri,
     session,
     clientMeta: {
-      description: "WalletConnect Developer App",
-      url: "https://walletconnect.org",
-      icons: ["https://walletconnect.org/walletconnect-logo.png"],
-      name: "WalletConnect",
+      name: "Laser",
+      description:
+        "Laser is a security focused smart contract wallet for the EVM",
+      url: "https://www.laserwallet.io/",
+      icons: ["https://avatars.githubusercontent.com/u/100796615?s=200&v=4"],
     },
   });
 };
