@@ -149,7 +149,16 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
         });
         dispatch(setCallRequest(null));
 
-        if (callRequest?.method === REQUEST_TYPES.SEND_TRANSACTION) {
+        if (callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN) {
+          const id = parseInt(callRequest.params[0].chainId, 16);
+          const walletsByChain = keyBy(wallets, "chainId");
+          connector.updateSession({
+            accounts: [walletsByChain[id].address],
+            chainId: id,
+          });
+        }
+
+        if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
           toast.show({
             render: () => (
               <ToastAlert status="success" title="Transaction sent" />
