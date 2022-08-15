@@ -3,7 +3,7 @@ import "dotenv/config";
 export default {
   name: "Laser",
   slug: "laser-wallet",
-  version: "1.0.0",
+  version: "1.0.1",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -18,7 +18,7 @@ export default {
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: false,
-    buildNumber: "2",
+    buildNumber: "1",
     bundleIdentifier: "com.laser.wallet",
   },
   android: {
