@@ -1,6 +1,6 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import Constants from "expo-constants";
-import { Avatar, Box, Button, Pressable, Text } from "native-base";
+import { Badge, Box, Button, Circle, Icon, Pressable, Text } from "native-base";
 import { useSelector } from "react-redux";
 import {
   selectGuardians,
@@ -18,8 +18,8 @@ const SignUpGuardiansScreen = () => {
       <Box p="4">
         <Text variant="subtitle1">Choose your guardians</Text>
         <Text mb="4">
-          Guardians ensure you can recover your wallet in case your device is
-          lost.
+          Guardians are wallets that can start your wallet recovery in case your
+          device is lost.
         </Text>
         <Pressable
           onPress={() => navigation.navigate("SignUpLaserGuardianDetails")}
@@ -28,19 +28,40 @@ const SignUpGuardiansScreen = () => {
             <Box
               flexDirection="row"
               alignItems="center"
-              mb="2"
+              mb="1"
               opacity={isPressed ? 0.3 : 1}
             >
-              <Avatar>L</Avatar>
+              <Circle bg="gray.800" size="9">
+                <Icon
+                  as={<Ionicons name="mail-outline" />}
+                  size="4"
+                  color="white"
+                />
+              </Circle>
               <Box ml="3">
-                <Text variant="subtitle1">
-                  Laser Guardian {!isLaserGuardianEnabled && "(Disabled)"}
-                </Text>
-                <Text>
-                  {formatAddress(
-                    Constants.manifest?.extra?.laserGuardianAddress
+                <Box flexDir="row" alignItems="center">
+                  <Text variant="subtitle1" mr="2">
+                    Email
+                  </Text>
+                  {isLaserGuardianEnabled ? (
+                    <Badge
+                      _text={{ fontSize: "xs" }}
+                      colorScheme="success"
+                      rounded="md"
+                    >
+                      Enabled
+                    </Badge>
+                  ) : (
+                    <Badge
+                      _text={{ fontSize: "xs" }}
+                      colorScheme="danger"
+                      rounded="md"
+                    >
+                      Disabled
+                    </Badge>
                   )}
-                </Text>
+                </Box>
+                <Text>Recover your wallet with your email</Text>
               </Box>
             </Box>
           )}
@@ -56,10 +77,16 @@ const SignUpGuardiansScreen = () => {
               <Box
                 flexDirection="row"
                 alignItems="center"
-                mb="2"
+                py="1"
                 opacity={isPressed ? 0.3 : 1}
               >
-                <Avatar>{guardian.name[0]}</Avatar>
+                <Circle bg="gray.800" size="9">
+                  <Icon
+                    as={<Ionicons name="person-outline" />}
+                    size="4"
+                    color="white"
+                  />
+                </Circle>
                 <Box ml="3">
                   <Text variant="subtitle1">{guardian.name}</Text>
                   <Text>

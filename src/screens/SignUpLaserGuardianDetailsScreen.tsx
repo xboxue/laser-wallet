@@ -17,7 +17,8 @@ const SignUpLaserGuardianDetailsScreen = () => {
     <Box p="4">
       <Text variant="subtitle1">Laser Guardian</Text>
       <Text>
-        You'll be able to easily recover your wallet using your account.
+        Laser provides a service for you to easily start your wallet recovery
+        with your email.
       </Text>
       <Button
         mt="4"
