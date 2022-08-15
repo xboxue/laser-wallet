@@ -1,11 +1,21 @@
-import { Actionsheet, Button, Image, Stack, Text } from "native-base";
 import { IClientMeta } from "@walletconnect/types";
+import {
+  Actionsheet,
+  Box,
+  Button,
+  Image,
+  Link,
+  Skeleton,
+  Stack,
+  Text,
+} from "native-base";
 
 interface Props {
   onClose: () => void;
   onReject: () => void;
   onApprove: () => void;
-  peerMeta: IClientMeta;
+  peerMeta?: IClientMeta;
+  isConnecting: boolean;
 }
 
 const WalletConnectSessionPrompt = ({
@@ -13,17 +23,31 @@ const WalletConnectSessionPrompt = ({
   onApprove,
   onReject,
   peerMeta,
+  isConnecting,
 }: Props) => {
   return (
     <Actionsheet isOpen onClose={onClose}>
       <Actionsheet.Content>
-        <Text>{peerMeta.name} wants to connect</Text>
-        <Text>{peerMeta.url}</Text>
-        <Image source={{ uri: peerMeta.icons[0] }} alt="logo" />
-        <Stack space="3" direction="row" mt="4">
-          <Button onPress={onApprove}>Approve</Button>
-          <Button onPress={onReject}>Reject</Button>
-        </Stack>
+        {isConnecting && <Skeleton />}
+        {peerMeta && (
+          <Box w="100%" px="4" py="2">
+            <Image
+              source={{ uri: peerMeta.icons[0] }}
+              alt="logo"
+              size="10"
+              mb="3"
+              alignSelf="center"
+            />
+            <Text variant="subtitle1">{peerMeta.name} wants to connect</Text>
+            <Link href={peerMeta.url}>{peerMeta.url}</Link>
+            <Stack space="1" mt="4">
+              <Button onPress={onApprove}>Approve</Button>
+              <Button variant="subtle" onPress={onReject}>
+                Reject
+              </Button>
+            </Stack>
+          </Box>
+        )}
       </Actionsheet.Content>
     </Actionsheet>
   );

@@ -1,7 +1,13 @@
 import WalletConnect from "@walletconnect/client";
+import { IWalletConnectSession } from "@walletconnect/types";
 
 interface ConnectOptions {
-  uri: string;
+  uri?: string;
+  session?: IWalletConnectSession;
+}
+
+interface SubscribeOptions {
+  connector: WalletConnect;
   onSessionRequest: (payload: any) => void;
   onSessionUpdate: (payload: any) => void;
   onCallRequest: (payload: any) => void;
@@ -9,32 +15,31 @@ interface ConnectOptions {
   onDisconnect: (payload: any) => void;
 }
 
-export const connect = async ({
-  uri,
+export const connect = ({ uri, session }: ConnectOptions) => {
+  return new WalletConnect({
+    uri,
+    session,
+    clientMeta: {
+      name: "Laser",
+      description:
+        "Laser is a security focused smart contract wallet for the EVM",
+      url: "https://www.laserwallet.io/",
+      icons: ["https://avatars.githubusercontent.com/u/100796615?s=200&v=4"],
+    },
+  });
+};
+
+export const subscribe = ({
+  connector,
   onSessionRequest,
   onSessionUpdate,
   onCallRequest,
   onConnect,
   onDisconnect,
-}: ConnectOptions) => {
-  const connector = new WalletConnect({
-    uri,
-    clientMeta: {
-      description: "WalletConnect Developer App",
-      url: "https://walletconnect.org",
-      icons: ["https://walletconnect.org/walletconnect-logo.png"],
-      name: "WalletConnect",
-    },
-  });
-
-  await connector.createSession();
-
-  await new Promise<void>((resolve, reject) => {
-    connector.on("session_request", (error, payload) => {
-      if (error) reject(error);
-      onSessionRequest(payload);
-      resolve();
-    });
+}: SubscribeOptions) => {
+  connector.on("session_request", (error, payload) => {
+    if (error) throw error;
+    onSessionRequest(payload);
   });
 
   connector.on("session_update", (error, payload) => {
@@ -56,6 +61,5 @@ export const connect = async ({
     if (error) throw error;
     onDisconnect(payload);
   });
-
   return connector;
 };

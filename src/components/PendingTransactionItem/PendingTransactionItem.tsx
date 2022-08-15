@@ -1,9 +1,9 @@
-import { Box, Image, Pressable, Text } from "native-base";
+import { Box, Circle, Pressable, Spinner, Text } from "native-base";
 import { useSelector } from "react-redux";
-import { useWaitForTransaction } from "wagmi";
-import ethIcon from "../../../assets/eth-icon.png";
+import { useEnsName } from "wagmi";
 import { selectChainId } from "../../features/network/networkSlice";
 import { PendingTransaction } from "../../features/transactions/transactionsSlice";
+import useWaitForTransaction from "../../hooks/useWaitForTransaction";
 import formatAddress from "../../utils/formatAddress";
 import formatAmount from "../../utils/formatAmount";
 
@@ -21,13 +21,20 @@ const PendingTransactionItem = ({ transaction, onSuccess }: Props) => {
     onSuccess,
   });
 
+  const { data: ensName } = useEnsName({
+    address: transaction.to,
+    chainId,
+  });
+
   return (
     <Pressable>
       <Box flexDirection="row" alignItems="center" py="2">
-        <Image source={ethIcon} size="9" alt="Ethereum icon" />
+        <Circle bg="gray.800" size="9">
+          <Spinner color="white" />
+        </Circle>
         <Box ml="3">
           <Text variant="subtitle1">Pending</Text>
-          <Text>To: {formatAddress(transaction.to)}</Text>
+          <Text>To: {ensName || formatAddress(transaction.to)}</Text>
         </Box>
         <Text variant="subtitle1" ml="auto">
           {formatAmount(transaction.value)} ETH

@@ -1,5 +1,5 @@
 diff --git a/node_modules/wagmi/dist/wagmi.cjs.dev.js b/node_modules/wagmi/dist/wagmi.cjs.dev.js
-index 60151d3..4d01578 100644
+index 909d868..8b79cf8 100644
 --- a/node_modules/wagmi/dist/wagmi.cjs.dev.js
 +++ b/node_modules/wagmi/dist/wagmi.cjs.dev.js
 @@ -8,7 +8,7 @@ var reactQuery = require('react-query');
@@ -12,7 +12,7 @@ index 60151d3..4d01578 100644
  
  function _interopNamespace(e) {
 diff --git a/node_modules/wagmi/dist/wagmi.cjs.prod.js b/node_modules/wagmi/dist/wagmi.cjs.prod.js
-index 60151d3..4d01578 100644
+index 909d868..8b79cf8 100644
 --- a/node_modules/wagmi/dist/wagmi.cjs.prod.js
 +++ b/node_modules/wagmi/dist/wagmi.cjs.prod.js
 @@ -8,7 +8,7 @@ var reactQuery = require('react-query');
@@ -25,7 +25,7 @@ index 60151d3..4d01578 100644
  
  function _interopNamespace(e) {
 diff --git a/node_modules/wagmi/dist/wagmi.esm.js b/node_modules/wagmi/dist/wagmi.esm.js
-index 53f4e9b..deb105e 100644
+index eb3e237..892e51e 100644
 --- a/node_modules/wagmi/dist/wagmi.esm.js
 +++ b/node_modules/wagmi/dist/wagmi.esm.js
 @@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider, useQueryClient, useIsRestoring, useQu

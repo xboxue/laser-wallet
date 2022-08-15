@@ -1,43 +1,31 @@
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import QRCodeScanner from "../components/QRCodeScanner/QRCodeScanner";
 import {
-  setCallRequest,
-  setConnector,
-  setPeerMeta,
-  setPending,
+  addConnector,
+  selectIsConnecting,
+  setIsConnecting,
 } from "../features/walletConnect/walletConnectSlice";
+import useWalletConnectSubscription from "../hooks/useWalletConnectSubscription";
 import { connect } from "../services/walletConnect";
 
 const QRCodeScanScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const [connecting, setConnecting] = useState(false);
+  const isConnecting = useSelector(selectIsConnecting);
+  const { subscribe } = useWalletConnectSubscription(false);
 
   const handleScan = async (uri: string) => {
-    if (connecting) return;
-    setConnecting(true);
+    if (isConnecting) return;
+    dispatch(setIsConnecting(true));
 
-    const connector = await connect({
-      uri,
-      onSessionRequest: (payload) => dispatch(setPending(true)),
-      onCallRequest: (payload) => dispatch(setCallRequest(payload)),
-      onConnect: () => dispatch(setPending(false)),
-      onDisconnect: () => {
-        dispatch(setConnector(null));
-        dispatch(setPending(false));
-      },
-      onSessionUpdate: () => {},
-    });
-
-    dispatch(setConnector(connector));
-
+    const connector = connect({ uri });
+    subscribe(connector);
+    dispatch(addConnector(connector));
     navigation.goBack();
-    setConnecting(false);
   };
 
-  return <QRCodeScanner onScan={handleScan} connecting={connecting} />;
+  return <QRCodeScanner onScan={handleScan} connecting={isConnecting} />;
 };
 
 export default QRCodeScanScreen;

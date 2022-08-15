@@ -1,36 +1,59 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createEntityAdapter,
+  createSelector,
+  createSlice,
+  PayloadAction,
+} from "@reduxjs/toolkit";
 import { RootState } from "../../store";
 import Constants from "expo-constants";
+
 interface Guardian {
   name: string;
   address: string;
+  ensName?: string;
+  id: string;
 }
 
-interface GuardiansState {
-  guardians: Guardian[];
-}
-
-const initialState: GuardiansState = {
-  guardians: [
-    {
-      name: "Laser Guardian",
-      address: Constants.manifest?.extra?.laserGuardianAddress,
-    },
-  ],
-};
+const guardiansAdapter = createEntityAdapter<Guardian>();
 
 const guardiansSlice = createSlice({
   name: "guardians",
-  initialState,
+  initialState: guardiansAdapter.getInitialState({
+    isLaserGuardianEnabled: false,
+  }),
   reducers: {
-    addGuardian: (state, action: PayloadAction<Guardian>) => {
-      state.guardians.push(action.payload);
+    addGuardian: guardiansAdapter.addOne,
+    updateGuardian: guardiansAdapter.updateOne,
+    removeGuardian: guardiansAdapter.removeOne,
+    setIsLaserGuardianEnabled: (state, action: PayloadAction<boolean>) => {
+      state.isLaserGuardianEnabled = action.payload;
     },
   },
 });
 
-export const selectGuardians = (state: RootState) => state.guardians.guardians;
+const guardiansSelectors = guardiansAdapter.getSelectors<RootState>(
+  (state) => state.guardians
+);
 
-export const { addGuardian } = guardiansSlice.actions;
+export const selectGuardians = guardiansSelectors.selectAll;
+export const selectIsLaserGuardianEnabled = (state: RootState) =>
+  state.guardians.isLaserGuardianEnabled;
+export const selectGuardianAddresses = createSelector(
+  [selectGuardians, selectIsLaserGuardianEnabled],
+  (guardians, isLaserGuardianEnabled) => {
+    const addresses = guardians.map((guardian) => guardian.address);
+    if (isLaserGuardianEnabled) {
+      addresses.push(Constants.manifest?.extra?.laserGuardianAddress);
+    }
+    return addresses;
+  }
+);
+
+export const {
+  addGuardian,
+  removeGuardian,
+  updateGuardian,
+  setIsLaserGuardianEnabled,
+} = guardiansSlice.actions;
 
 export default guardiansSlice.reducer;

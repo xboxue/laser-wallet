@@ -1,106 +1,95 @@
 import { useNavigation } from "@react-navigation/native";
+import { useMutation } from "@tanstack/react-query";
 import Wallet from "ethereumjs-wallet";
-import { Box, Button, FormControl, Input, Text } from "native-base";
+import { ethers } from "ethers";
+import { LaserFactory } from "laser-sdk";
+import { random } from "lodash";
+import { Box, Text } from "native-base";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { DEFAULT_CHAIN } from "../constants/chains";
+import { useProvider } from "wagmi";
+import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordForm";
+import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import {
-  addWallet,
+  setBackupPassword,
+  setIsAuthenticated,
+} from "../features/auth/authSlice";
+import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
+import { selectChainId } from "../features/network/networkSlice";
+import {
   setOwnerAddress,
   setOwnerPrivateKey,
   setRecoveryOwnerAddress,
+  setRecoveryOwnerPrivateKey,
+  setSalt,
   setWalletAddress,
-} from "../features/auth/authSlice";
-import { selectGuardians } from "../features/guardians/guardiansSlice";
-import { createBackup, isValidPassword } from "../services/cloudBackup";
-import { createWallet } from "../services/wallet";
+} from "../features/wallet/walletSlice";
+import { createBackup } from "../services/cloudBackup";
 
 const SignUpBackupPasswordScreen = () => {
-  const navigation = useNavigation();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const guardians = useSelector(selectGuardians);
   const dispatch = useDispatch();
+  const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
+  const guardianAddresses = useSelector(selectGuardianAddresses);
+  const chainId = useSelector(selectChainId);
+  const provider = useProvider({ chainId });
+  const navigation = useNavigation();
+
+  const { mutate: onBackup, isLoading } = useMutation(
+    async (password: string) => {
+      const owner = Wallet.generate();
+      const recoveryOwner = Wallet.generate();
+      const factory = new LaserFactory(
+        provider,
+        new ethers.Wallet(owner.getPrivateKeyString())
+      );
+      const salt = random(0, 1000000);
+
+      const walletAddress = await factory.preComputeAddress(
+        owner.getAddressString(),
+        [recoveryOwner.getAddressString()],
+        guardianAddresses,
+        salt
+      );
+
+      await createBackup(
+        JSON.stringify({
+          privateKey: recoveryOwner.getPrivateKeyString(),
+          wallets: [{ address: walletAddress, chainId }],
+        }),
+        password,
+        recoveryOwner.getAddressString()
+      );
+
+      dispatch(setBackupPassword(password));
+      dispatch(setIsAuthenticated(true));
+      dispatch(setSalt(salt));
+      dispatch(setWalletAddress(walletAddress));
+      dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
+      dispatch(setRecoveryOwnerAddress(recoveryOwner.getAddressString()));
+      dispatch(setRecoveryOwnerPrivateKey(recoveryOwner.getPrivateKeyString()));
+      dispatch(setOwnerAddress(owner.getAddressString()));
+      navigation.navigate("SignUpDeployWallet");
+    },
+    {
+      onError: (error) => {
+        if (error instanceof Error && error.message === "iCloud not available")
+          setICloudPromptOpen(true);
+      },
+    }
+  );
 
   return (
-    <Box>
-      <Box p="4">
-        <Text variant="subtitle1" mb="4">
-          Create password
-        </Text>
-        <FormControl isInvalid={!isValidPassword(password)}>
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            autoFocus
-            size="lg"
-          />
-          <FormControl.ErrorMessage>
-            {password && password.length < 8 && "Must be at least 8 characters"}
-          </FormControl.ErrorMessage>
-        </FormControl>
-        <FormControl
-          isInvalid={!!confirmPassword && password !== confirmPassword}
-        >
-          <Input
-            isDisabled={!isValidPassword(password)}
-            type="password"
-            mt="3"
-            placeholder="Confirm password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            size="lg"
-          />
-          <FormControl.ErrorMessage>
-            Passwords don't match
-          </FormControl.ErrorMessage>
-        </FormControl>
-        <Button
-          isLoading={loading}
-          isDisabled={
-            !isValidPassword(password) || password !== confirmPassword
-          }
-          mt="4"
-          onPress={async () => {
-            try {
-              setLoading(true);
-              const owner = Wallet.generate();
-              const recoveryOwner = Wallet.generate();
-
-              const walletAddress = await createWallet({
-                chainId: DEFAULT_CHAIN,
-                guardians: guardians.map((guardian) => guardian.address),
-                ownerAddress: owner.getAddressString(),
-                recoveryOwnerAddress: recoveryOwner.getAddressString(),
-              });
-
-              // TODO: Fix
-              // await createBackup(
-              //   recoveryOwner.getPrivateKeyString(),
-              //   password,
-              //   recoveryOwner.getAddressString()
-              // );
-
-              dispatch(setOwnerAddress(owner.getAddressString()));
-              dispatch(setOwnerPrivateKey(owner.getPrivateKeyString()));
-              dispatch(
-                setRecoveryOwnerAddress(recoveryOwner.getAddressString())
-              );
-              dispatch(setWalletAddress(walletAddress));
-              dispatch(
-                addWallet({ address: walletAddress, chainId: DEFAULT_CHAIN })
-              );
-            } finally {
-              setLoading(false);
-            }
-          }}
-        >
-          Create backup
-        </Button>
-      </Box>
+    <Box p="4">
+      <Text variant="subtitle1">Create password</Text>
+      <Text mb="4">
+        We encrypt your backup so that only you can restore your wallet. Do not
+        lose this password.
+      </Text>
+      <EnableICloudPrompt
+        open={iCloudPromptOpen}
+        onClose={() => setICloudPromptOpen(false)}
+      />
+      <BackupPasswordForm onSubmit={onBackup} submitting={isLoading} />
     </Box>
   );
 };

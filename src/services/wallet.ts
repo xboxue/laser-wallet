@@ -1,13 +1,15 @@
 import axios from "axios";
-import { providers } from "ethers";
 import Constants from "expo-constants";
+import { FactoryTransaction } from "laser-sdk/dist/sdk/LaserFactory";
 import { Transaction } from "laser-sdk/dist/types";
+
+type TransactionResponse = {
+  relayTransactionHash: string;
+};
 
 type CreateWalletOptions = {
   chainId: number;
-  ownerAddress: string;
-  recoveryOwnerAddress: string;
-  guardians: string[];
+  transaction: FactoryTransaction;
 };
 
 type SendTransactionOptions = {
@@ -18,23 +20,15 @@ type SendTransactionOptions = {
 
 export const createWallet = async ({
   chainId,
-  ownerAddress,
-  recoveryOwnerAddress,
-  guardians,
+  transaction,
 }: CreateWalletOptions) => {
-  const { data } = await axios.post(
+  const { data } = await axios.post<TransactionResponse>(
     `${Constants.manifest?.extra?.relayerUrl}/wallets`,
-    {
-      chainId,
-      ownerAddress,
-      recoveryOwnerAddress,
-      guardians,
-    }
+    { chainId, transaction }
   );
 
-  if (!data.walletAddress) throw new Error("Wallet creation failed");
-
-  return data.walletAddress;
+  if (!data.relayTransactionHash) throw new Error("Wallet creation failed");
+  return data.relayTransactionHash;
 };
 
 export const sendTransaction = async ({
@@ -42,10 +36,11 @@ export const sendTransaction = async ({
   sender,
   chainId,
 }: SendTransactionOptions) => {
-  const { data } = await axios.post<providers.TransactionResponse>(
+  const { data } = await axios.post<TransactionResponse>(
     `${Constants.manifest?.extra?.relayerUrl}/transactions`,
     { transaction, sender, chainId }
   );
 
-  return data;
+  if (!data.relayTransactionHash) throw new Error("Transaction failed");
+  return data.relayTransactionHash;
 };

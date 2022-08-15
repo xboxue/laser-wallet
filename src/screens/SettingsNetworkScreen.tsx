@@ -1,91 +1,50 @@
+import { useNavigation } from "@react-navigation/native";
 import { keyBy } from "lodash";
-import { Box, Button, Pressable, Text } from "native-base";
-import { useState } from "react";
+import { Box, Icon, Pressable, Text } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { defaultChains } from "wagmi";
+import { selectChainId, setChainId } from "../features/network/networkSlice";
 import {
-  addWallet,
-  selectOwnerAddress,
-  selectRecoveryOwnerAddress,
   selectWallets,
   setWalletAddress,
-} from "../features/auth/authSlice";
-import { selectGuardians } from "../features/guardians/guardiansSlice";
-import { selectChainId, setChainId } from "../features/network/networkSlice";
-import { createWallet } from "../services/wallet";
-
-const CreateWalletButton = ({
-  chainId,
-  ownerAddress,
-  recoveryOwnerAddress,
-  guardians,
-}) => {
-  const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
-  return (
-    <Button
-      isLoading={loading}
-      size="sm"
-      ml="auto"
-      onPress={async () => {
-        setLoading(true);
-        try {
-          const walletAddress = await createWallet({
-            chainId,
-            ownerAddress,
-            recoveryOwnerAddress,
-            guardians,
-          });
-          dispatch(addWallet({ chainId, address: walletAddress }));
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
-      Deploy
-    </Button>
-  );
-};
+} from "../features/wallet/walletSlice";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const SettingsNetworkScreen = () => {
+  const navigation = useNavigation();
   const wallets = useSelector(selectWallets);
-  const ownerAddress = useSelector(selectOwnerAddress);
-  const recoveryOwnerAddress = useSelector(selectRecoveryOwnerAddress);
-  const guardians = useSelector(selectGuardians);
-  const currentChainId = useSelector(selectChainId);
+  const chainId = useSelector(selectChainId);
   const dispatch = useDispatch();
-
   const walletsByChain = keyBy(wallets, "chainId");
+
   return (
-    <Box>
+    <Box px="4">
       {defaultChains.map(({ name, id }) => (
         <Pressable
-          disabled={!walletsByChain[id]}
           onPress={async () => {
-            dispatch(setWalletAddress(walletsByChain[id].address));
-            dispatch(setChainId(id));
+            if (walletsByChain[id]) {
+              dispatch(setWalletAddress(walletsByChain[id].address));
+              dispatch(setChainId(id));
+            } else {
+              navigation.navigate("SignUpDeployWallet", { chainId: id });
+            }
           }}
           key={id}
         >
           {({ isPressed }) => (
             <Box
-              px="4"
               py="2"
               flexDir="row"
               alignItems="center"
+              justifyContent="space-between"
               opacity={isPressed ? "0.2" : "1"}
             >
-              <Text variant="subtitle1" ml="3">
-                {name}
-                {currentChainId === id && " (current)"}
-              </Text>
-
-              {!walletsByChain[id] && (
-                <CreateWalletButton
-                  chainId={id}
-                  ownerAddress={ownerAddress}
-                  recoveryOwnerAddress={recoveryOwnerAddress}
-                  guardians={guardians.map((guardian) => guardian.address)}
+              <Text variant="subtitle1">{name}</Text>
+              {chainId === id && (
+                <Icon
+                  as={<Ionicons name="ios-checkmark-circle" />}
+                  size="6"
+                  color="green.500"
                 />
               )}
             </Box>

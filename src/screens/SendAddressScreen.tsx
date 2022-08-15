@@ -1,22 +1,38 @@
-import { useNavigation } from "@react-navigation/native";
-import {
-  Avatar,
-  Box,
-  Button,
-  Icon,
-  Input,
-  Pressable,
-  Stack,
-  Text,
-} from "native-base";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import { isAddress } from "ethers/lib/utils";
-import formatAddress from "../utils/formatAddress";
+import { Box, Icon, Input, Text } from "native-base";
+import { useState } from "react";
+import AddressPreviewContainer from "../components/AddressPreviewContainer/AddressPreviewContainer";
+import EnsPreviewContainer from "../components/EnsPreviewContainer/EnsPreviewContainer";
 
 const SendAddressScreen = () => {
   const navigation = useNavigation();
   const [value, setValue] = useState("");
+  const isEnsDomain = value.includes(".");
+
+  const handlePress = (address: string, ensName?: string) => {
+    navigation.navigate("SendAsset", {
+      address,
+      ensName,
+    });
+  };
+
+  const renderPreviewItem = () => {
+    if (isAddress(value))
+      return <AddressPreviewContainer address={value} onPress={handlePress} />;
+
+    if (isEnsDomain)
+      return (
+        <EnsPreviewContainer
+          ensName={value}
+          onPress={handlePress}
+          errorComponent={<Text mt="3">Invalid address</Text>}
+        />
+      );
+
+    if (value) return <Text mt="3">Invalid address</Text>;
+  };
 
   return (
     <Box>
@@ -36,21 +52,11 @@ const SendAddressScreen = () => {
           InputLeftElement={
             <Icon as={Ionicons} name="search-outline" ml="3" size="5" />
           }
+          autoCorrect={false}
+          autoCapitalize="none"
+          mb="1"
         />
-        {isAddress(value) ? (
-          <Pressable
-            onPress={() => navigation.navigate("SendAsset", { address: value })}
-          >
-            <Box flexDirection="row" alignItems="center" mt="3">
-              <Avatar>0x</Avatar>
-              <Text ml="2" variant="subtitle1">
-                {formatAddress(value)}
-              </Text>
-            </Box>
-          </Pressable>
-        ) : (
-          value && <Text mt="3">Invalid address</Text>
-        )}
+        {renderPreviewItem()}
       </Box>
     </Box>
   );

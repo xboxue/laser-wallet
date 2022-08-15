@@ -6,13 +6,13 @@ const StartScreen = () => {
 
   return (
     <Box flex={1} justifyContent="center" px="4">
-      <Text variant="h4" textAlign="center" mb="5">
+      <Text variant="h3" textAlign="center" mb="8">
         Laser Wallet
       </Text>
-      <Button onPress={() => navigation.navigate("SignUpPasscode")}>
+      <Button onPress={() => navigation.navigate("SignUpAuth")}>
         Create new wallet
       </Button>
-      <Button variant="ghost" mt="2">
+      <Button variant="subtle" mt="2">
         I already have a wallet
       </Button>
     </Box>

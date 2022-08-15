@@ -1,12 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
-import { Box, Button, Skeleton, Stack, Text } from "native-base";
-import { useState } from "react";
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import Constants from "expo-constants";
+import { Box, Button, Skeleton, Stack, Text, useToast } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useFeeData, useProvider } from "wagmi";
-import { selectWalletAddress } from "../features/auth/authSlice";
+import ToastAlert from "../components/ToastAlert/ToastAlert";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
+import { selectWalletAddress } from "../features/wallet/walletSlice";
 import useLaser from "../hooks/useLaser";
 import { sendTransaction } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
@@ -15,79 +16,123 @@ import formatAmount from "../utils/formatAmount";
 const SendConfirmScreen = ({ route }) => {
   const chainId = useSelector(selectChainId);
   const walletAddress = useSelector(selectWalletAddress);
-  const provider = useProvider({ chainId });
   const laser = useLaser();
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const toast = useToast();
+  const provider = useProvider({ chainId });
 
-  const [sending, setSending] = useState(false);
+  const { amount, address: to, ensName, token } = route.params;
 
-  const { amount, address: to, token } = route.params;
-
-  const { data: callGas, isLoading: callGasLoading } = useQuery(
-    "callGas",
+  const { data: baseFeePerGas, isLoading: baseFeePerGasLoading } = useQuery(
+    ["baseFeePerGas"],
     async () => {
-      const transactionInfo = {
+      const block = await provider.getBlock("latest");
+      return block.baseFeePerGas;
+    },
+    { refetchInterval: 1000 }
+  );
+
+  const { data: gasEstimate, isLoading: gasEstimateLoading } = useQuery(
+    ["gasEstimate", amount, to, token],
+    async () => {
+      const txInfo = {
         maxFeePerGas: 0,
         maxPriorityFeePerGas: 0,
-        gasTip: 0,
+        gasLimit: 1000000,
+        relayer: Constants.manifest?.extra?.relayerAddress,
       };
 
       const transaction = await (token.isToken
-        ? laser.transferERC20(token.address, to, amount, transactionInfo)
-        : laser.sendEth(to, amount, transactionInfo));
-      return laser.simulateTransaction(transaction);
+        ? laser.transferERC20(token.address, to, amount, txInfo)
+        : laser.sendEth(to, amount, txInfo));
+      return laser.estimateLaserGas(transaction);
     }
   );
 
-  const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
+  const { data: feeData, isLoading: feeDataLoading } = useFeeData();
 
-  const transferTokens = async () => {
-    try {
-      setSending(true);
-      const feeData = await provider.getFeeData();
-
+  const { mutate: transferTokens, isLoading: sendingTokens } = useMutation(
+    async () => {
+      if (!gasEstimate)
+        throw new Error("Unable to estimate gas. Please try again.");
       const transaction = await laser.transferERC20(token.address, to, amount, {
-        maxFeePerGas: feeData.maxFeePerGas,
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-        gasTip: 30000,
+        maxFeePerGas: 0,
+        maxPriorityFeePerGas: 0,
+        gasLimit: gasEstimate.add(20000),
+        relayer: Constants.manifest?.extra?.relayerAddress,
       });
-
-      const { hash } = await sendTransaction({
+      const hash = await sendTransaction({
         transaction,
         sender: walletAddress,
         chainId,
       });
-      dispatch(addPendingTransaction({ ...transaction, hash }));
-
-      navigation.navigate("Home", { tab: 1 });
-    } finally {
-      setSending(false);
+      return { ...transaction, hash };
+    },
+    {
+      onSuccess: (transaction) => {
+        toast.show({
+          render: () => (
+            <ToastAlert status="success" title="Transaction sent" />
+          ),
+        });
+        dispatch(addPendingTransaction(transaction));
+        navigation.navigate("Home", { tab: 1 });
+      },
     }
-  };
+  );
 
-  const sendEth = async () => {
-    try {
-      setSending(true);
-      const feeData = await provider.getFeeData();
-
+  const { mutate: sendEth, isLoading: sendingEth } = useMutation(
+    async () => {
+      if (!gasEstimate)
+        throw new Error("Unable to estimate gas. Please try again.");
       const transaction = await laser.sendEth(to, amount, {
-        maxFeePerGas: feeData.maxFeePerGas,
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-        gasTip: 30000,
+        maxFeePerGas: 0,
+        maxPriorityFeePerGas: 0,
+        gasLimit: gasEstimate.add(20000),
+        relayer: Constants.manifest?.extra?.relayerAddress,
       });
-
-      const { hash } = await sendTransaction({
+      const hash = await sendTransaction({
         sender: walletAddress,
         transaction,
         chainId,
       });
-      dispatch(addPendingTransaction({ ...transaction, hash }));
-
-      navigation.navigate("Home", { tab: 1 });
-    } finally {
-      setSending(false);
+      return { ...transaction, hash };
+    },
+    {
+      onSuccess: (transaction) => {
+        toast.show({
+          render: () => (
+            <ToastAlert status="success" title="Transaction sent" />
+          ),
+        });
+        dispatch(addPendingTransaction(transaction));
+        navigation.navigate("Home", { tab: 1 });
+      },
     }
+  );
+
+  const renderGasFee = () => {
+    if (
+      feeDataLoading ||
+      !feeData?.maxPriorityFeePerGas ||
+      baseFeePerGasLoading ||
+      !baseFeePerGas ||
+      gasEstimateLoading ||
+      !gasEstimate
+    ) {
+      return <Skeleton w="16" />;
+    }
+
+    const gasFee = baseFeePerGas
+      .add(feeData.maxPriorityFeePerGas)
+      .mul(gasEstimate);
+
+    return (
+      <Text variant="subtitle2">
+        {formatAmount(gasFee, { precision: 6 })} ETH
+      </Text>
+    );
   };
 
   return (
@@ -104,31 +149,15 @@ const SendConfirmScreen = ({ route }) => {
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">To</Text>
-          <Text variant="subtitle2">{formatAddress(to)}</Text>
+          <Text variant="subtitle2">{ensName || formatAddress(to)}</Text>
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
-          <Text variant="subtitle2">Gas (estimate)</Text>
-          {!loadingFeeData &&
-          !callGasLoading &&
-          callGas &&
-          feeData?.maxFeePerGas &&
-          feeData?.maxPriorityFeePerGas ? (
-            <Text variant="subtitle2">
-              {formatAmount(
-                feeData.maxFeePerGas
-                  .add(feeData.maxPriorityFeePerGas)
-                  .mul(callGas),
-                { precision: 6 }
-              )}{" "}
-              ETH
-            </Text>
-          ) : (
-            <Skeleton w="16" />
-          )}
+          <Text variant="subtitle2">Network fee (estimate)</Text>
+          {renderGasFee()}
         </Box>
         <Button
           onPress={token.isToken ? transferTokens : sendEth}
-          isLoading={sending}
+          isLoading={sendingEth || sendingTokens}
         >
           Confirm
         </Button>

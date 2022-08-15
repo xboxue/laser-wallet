@@ -3,29 +3,29 @@ import "dotenv/config";
 export default {
   name: "Laser",
   slug: "laser-wallet",
-  version: "1.0.0",
+  version: "1.0.1",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#000000",
   },
   updates: {
     fallbackToCacheTimeout: 0,
   },
   assetBundlePatterns: ["**/*"],
+  runtimeVersion: "1.0.0",
   ios: {
-    supportsTablet: true,
-    googleServicesFile: "./GoogleService-Info.plist",
-    buildNumber: "2",
+    supportsTablet: false,
+    buildNumber: "1",
     bundleIdentifier: "com.laser.wallet",
   },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#FFFFFF",
+      backgroundColor: "#000000",
     },
     package: "com.laser.wallet",
   },
@@ -54,5 +54,9 @@ export default {
         },
       },
     ],
+  },
+  updates: {
+    fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/7a661128-fd6d-4dce-b72e-2f5f2ead8a58",
   },
 };

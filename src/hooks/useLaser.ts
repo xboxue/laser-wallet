@@ -5,7 +5,7 @@ import { useProvider } from "wagmi";
 import {
   selectOwnerPrivateKey,
   selectWalletAddress,
-} from "../features/auth/authSlice";
+} from "../features/wallet/walletSlice";
 import { selectChainId } from "../features/network/networkSlice";
 
 const useLaser = () => {
