@@ -9,21 +9,23 @@ import {
   Text,
 } from "native-base";
 import { useQuery } from "@tanstack/react-query";
-import { useFeeData } from "wagmi";
+import { useFeeData, useProvider } from "wagmi";
 import useLaser from "../../../hooks/useLaser";
 import formatAddress from "../../../utils/formatAddress";
 import formatAmount from "../../../utils/formatAmount";
+import Constants from "expo-constants";
+import { useSelector } from "react-redux";
+import { selectChainId } from "../../../features/network/networkSlice";
+import { BigNumber } from "ethers";
 
 interface Props {
   onClose: () => void;
   onReject: () => void;
-  onApprove: () => void;
+  onApprove: (gasEstimate: BigNumber) => void;
   peerMeta: IClientMeta;
   callRequest: IJsonRpcRequest;
   loading?: boolean;
 }
-
-const GAS_LIMIT = 300000;
 
 const WalletConnectTransactionPrompt = ({
   onClose,
@@ -35,36 +37,52 @@ const WalletConnectTransactionPrompt = ({
 }: Props) => {
   const { to, value = 0, data } = callRequest.params[0];
   const laser = useLaser();
+  const chainId = useSelector(selectChainId);
+  const provider = useProvider({ chainId });
 
-  const { data: feeData, isError, isLoading: loadingFeeData } = useFeeData();
-  // const { data: callGas, isLoading: callGasLoading } = useQuery(
-  //   "callGas",
-  //   async () => {
-  //     const transaction = await laser.sendTransaction(to, data, value, {
-  //       maxFeePerGas: 0,
-  //       maxPriorityFeePerGas: 0,
-  //       gasTip: 0,
-  //     });
-  //     return laser.simulateTransaction(transaction);
-  //   }
-  // );
+  const { data: feeData, isLoading: feeDataLoading } = useFeeData();
 
-  const renderGasEstimate = () => {
+  const { data: baseFeePerGas, isLoading: baseFeePerGasLoading } = useQuery(
+    ["baseFeePerGas"],
+    async () => {
+      const block = await provider.getBlock("latest");
+      return block.baseFeePerGas;
+    },
+    { refetchInterval: 1000 }
+  );
+
+  const { data: gasEstimate, isLoading: gasEstimateLoading } = useQuery(
+    ["gasEstimate", to, value, data],
+    async () => {
+      const transaction = await laser.execTransaction(to, value, data, {
+        maxFeePerGas: 0,
+        maxPriorityFeePerGas: 0,
+        gasLimit: 1000000,
+        relayer: Constants.manifest?.extra?.relayerAddress,
+      });
+      return laser.estimateLaserGas(transaction);
+    }
+  );
+
+  const renderGasFee = () => {
     if (
-      loadingFeeData ||
-      !feeData?.maxFeePerGas ||
-      !feeData?.maxPriorityFeePerGas
+      feeDataLoading ||
+      !feeData?.maxPriorityFeePerGas ||
+      baseFeePerGasLoading ||
+      !baseFeePerGas ||
+      gasEstimateLoading ||
+      !gasEstimate
     ) {
       return <Skeleton w="16" />;
     }
 
-    const gasEstimate = feeData.maxFeePerGas
+    const gasFee = baseFeePerGas
       .add(feeData.maxPriorityFeePerGas)
-      .mul(GAS_LIMIT);
+      .mul(gasEstimate);
 
     return (
       <Text variant="subtitle2">
-        {formatAmount(gasEstimate, { precision: 6 })} ETH
+        {formatAmount(gasFee, { precision: 6 })} ETH
       </Text>
     );
   };
@@ -92,10 +110,10 @@ const WalletConnectTransactionPrompt = ({
           </Box>
           <Box flexDirection="row" justifyContent="space-between">
             <Text variant="subtitle2">Gas (estimate)</Text>
-            {renderGasEstimate()}
+            {renderGasFee()}
           </Box>
           <Stack space="1" mt="1">
-            <Button isLoading={loading} onPress={onApprove}>
+            <Button isLoading={loading} onPress={() => onApprove(gasEstimate)}>
               Approve
             </Button>
             <Button isDisabled={loading} variant="subtle" onPress={onReject}>

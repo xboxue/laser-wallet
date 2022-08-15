@@ -1,7 +1,7 @@
 import { signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
-import { ethers, utils } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import Constants from "expo-constants";
 import { keyBy } from "lodash";
 import { useToast } from "native-base";
@@ -32,8 +32,6 @@ interface Props {
   walletAddress: string;
 }
 
-const GAS_LIMIT = 300000;
-
 const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const dispatch = useDispatch();
 
@@ -53,7 +51,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   };
 
   const { mutate: approveCallRequest, isLoading } = useMutation(
-    async () => {
+    async (gasEstimate?: BigNumber) => {
       if (!ownerPrivateKey || !callRequest) throw new Error("No call request");
       const connector = getConnector(callRequest.peerId);
       if (!connector) throw new Error("No connector");
@@ -77,22 +75,16 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
 
       if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
         const { to, value = 0, data } = callRequest.params[0];
+        if (!gasEstimate)
+          throw new Error("Unable to estimate gas. Please try again.");
 
-        const { nonce } = await laser.getWalletState();
-        const transaction = await laser.signTransaction(
-          {
-            to,
-            callData: data,
-            value,
-            txInfo: {
-              maxFeePerGas: 0,
-              maxPriorityFeePerGas: 0,
-              gasLimit: GAS_LIMIT,
-              relayer: Constants.manifest?.extra?.relayerAddress,
-            },
-          },
-          nonce
-        );
+        const transaction = await laser.execTransaction(to, value, data, {
+          maxFeePerGas: 0,
+          maxPriorityFeePerGas: 0,
+          gasLimit: gasEstimate.add(20000),
+          relayer: Constants.manifest?.extra?.relayerAddress,
+        });
+
         const hash = await sendTransaction({
           sender: walletAddress,
           transaction,
@@ -104,22 +96,15 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
 
       if (callRequest.method === REQUEST_TYPES.SIGN_TRANSACTION) {
         const { to, value = 0, data } = callRequest.params[0];
+        if (!gasEstimate)
+          throw new Error("Unable to estimate gas. Please try again.");
 
-        const { nonce } = await laser.getWalletState();
-        return laser.signTransaction(
-          {
-            to,
-            callData: data,
-            value,
-            txInfo: {
-              maxFeePerGas: 0,
-              maxPriorityFeePerGas: 0,
-              gasLimit: GAS_LIMIT,
-              relayer: Constants.manifest?.extra?.relayerAddress,
-            },
-          },
-          nonce
-        );
+        return laser.execTransaction(to, value, data, {
+          maxFeePerGas: 0,
+          maxPriorityFeePerGas: 0,
+          gasLimit: gasEstimate.add(20000),
+          relayer: Constants.manifest?.extra?.relayerAddress,
+        });
       }
 
       if (callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN) {
@@ -129,10 +114,11 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
         if (walletsByChain[id]) {
           dispatch(setWalletAddress(walletsByChain[id].address));
           dispatch(setChainId(id));
+          return null;
         } else {
           navigation.navigate("SignUpDeployWallet", { chainId: id });
+          throw new Error("No active wallet for chain");
         }
-        return null;
       }
 
       throw new Error("Unsupported method");

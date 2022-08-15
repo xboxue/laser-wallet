@@ -1,5 +1,5 @@
-import { BigNumber, ethers, providers } from "ethers";
-import { abi as walletAbi } from "laser-sdk/dist/deployments/mainnet/LaserWallet.json";
+import { ethers, providers } from "ethers";
+import { abi as walletAbi } from "laser-sdk/dist/deployments/localhost/LaserWallet.json";
 import { erc20ABI, erc721ABI } from "wagmi";
 import { TRANSACTION_TYPES } from "../constants/transactions";
 import { Transaction } from "../services/etherscan";

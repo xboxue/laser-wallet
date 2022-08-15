@@ -8623,10 +8623,10 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-laser-sdk@^0.4.3:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/laser-sdk/-/laser-sdk-0.4.3.tgz#fcb5821fb366a002ab564df1208a50b3bbf27dd9"
-  integrity sha512-C/pTrxbHE6SDPeFOvsRsHT1lx+svL51KYSAmKh43/DEbvf2i1x6mVSNLiCWfxX91kRCBUHaoFskrOrHi9822KA==
+laser-sdk@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/laser-sdk/-/laser-sdk-0.5.0.tgz#fe2baa62f7cb8002896a26d3f5ed9ec183a14801"
+  integrity sha512-plqOCT6e61V5rNJjfMXw3wcKLiNnNwzMRhwhhbAo//NmtVhIaExX7ij1i8p926RYaWgbXUoCamJJuTAVIbnmMg==
   dependencies:
     ethers "^5.6.9"
 
