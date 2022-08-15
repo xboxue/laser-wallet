@@ -80,10 +80,10 @@ const SignUpBackupPasswordScreen = () => {
 
   return (
     <Box p="4">
-      <Text variant="subtitle1">Create password</Text>
+      <Text variant="subtitle1">Create backup password</Text>
       <Text mb="4">
-        We encrypt your backup so that only you can restore your wallet. Do not
-        lose this password.
+        We encrypt your recovery key backup so that only you can restore your
+        wallet. Do not lose this password.
       </Text>
       <EnableICloudPrompt
         open={iCloudPromptOpen}
