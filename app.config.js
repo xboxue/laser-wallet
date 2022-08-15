@@ -14,6 +14,7 @@ export default {
   },
   updates: {
     fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/7a661128-fd6d-4dce-b72e-2f5f2ead8a58",
   },
   assetBundlePatterns: ["**/*"],
   runtimeVersion: "1.0.0",
@@ -54,9 +55,5 @@ export default {
         },
       },
     ],
-  },
-  updates: {
-    fallbackToCacheTimeout: 0,
-    url: "https://u.expo.dev/7a661128-fd6d-4dce-b72e-2f5f2ead8a58",
   },
 };
