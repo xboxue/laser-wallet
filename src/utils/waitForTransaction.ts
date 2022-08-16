@@ -14,7 +14,7 @@ const waitForTransaction = async ({
 }: WaitForTransactionOptions) => {
   const provider = new providers.InfuraProvider(
     chainId,
-    Constants.manifest?.extra?.infuraApiKey
+    Constants.expoConfig.extra.infuraApiKey
   );
 
   while (true) {

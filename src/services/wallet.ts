@@ -23,7 +23,7 @@ export const createWallet = async ({
   transaction,
 }: CreateWalletOptions) => {
   const { data } = await axios.post<TransactionResponse>(
-    `${Constants.manifest?.extra?.relayerUrl}/wallets`,
+    `${Constants.expoConfig.extra.relayerUrl}/wallets`,
     { chainId, transaction }
   );
 
@@ -37,7 +37,7 @@ export const sendTransaction = async ({
   chainId,
 }: SendTransactionOptions) => {
   const { data } = await axios.post<TransactionResponse>(
-    `${Constants.manifest?.extra?.relayerUrl}/transactions`,
+    `${Constants.expoConfig.extra.relayerUrl}/transactions`,
     { transaction, sender, chainId }
   );
 

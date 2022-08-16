@@ -82,7 +82,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           maxFeePerGas: 0,
           maxPriorityFeePerGas: 0,
           gasLimit: gasEstimate.add(20000),
-          relayer: Constants.manifest?.extra?.relayerAddress,
+          relayer: Constants.expoConfig.extra.relayerAddress,
         });
 
         const hash = await sendTransaction({
@@ -103,7 +103,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           maxFeePerGas: 0,
           maxPriorityFeePerGas: 0,
           gasLimit: gasEstimate.add(20000),
-          relayer: Constants.manifest?.extra?.relayerAddress,
+          relayer: Constants.expoConfig.extra.relayerAddress,
         });
       }
 

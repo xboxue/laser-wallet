@@ -11,8 +11,8 @@ import { publicProvider } from "wagmi/providers/public";
 import storage from "./mmkvStorage";
 
 const { provider, webSocketProvider } = configureChains(defaultChains, [
-  infuraProvider({ infuraId: Constants.manifest?.extra?.infuraApiKey }),
-  alchemyProvider({ alchemyId: Constants.manifest?.extra?.alchemyApiKey }),
+  infuraProvider({ infuraId: Constants.expoConfig.extra.infuraApiKey }),
+  alchemyProvider({ alchemyId: Constants.expoConfig.extra.alchemyApiKey }),
   publicProvider(),
 ]);
 

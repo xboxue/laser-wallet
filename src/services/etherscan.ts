@@ -72,7 +72,7 @@ export const getTransactions = async ({
         endblock: 99999999,
         sort: "asc",
       }),
-      apikey: Constants.manifest?.extra?.etherscanApiKey,
+      apikey: Constants.expoConfig.extra.etherscanApiKey,
       action: internal ? "txlistinternal" : "txlist",
       txhash: txHash,
     },
@@ -91,7 +91,7 @@ export const getERC20Transfers = async (address: string, chainId: number) => {
         startblock: 0,
         endblock: 99999999,
         sort: "asc",
-        apikey: Constants.manifest?.extra?.etherscanApiKey,
+        apikey: Constants.expoConfig.extra.etherscanApiKey,
       },
     }
   );

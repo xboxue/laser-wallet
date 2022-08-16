@@ -58,7 +58,7 @@ const WalletConnectTransactionPrompt = ({
         maxFeePerGas: 0,
         maxPriorityFeePerGas: 0,
         gasLimit: 1000000,
-        relayer: Constants.manifest?.extra?.relayerAddress,
+        relayer: Constants.expoConfig.extra.relayerAddress,
       });
       return laser.estimateLaserGas(transaction);
     }

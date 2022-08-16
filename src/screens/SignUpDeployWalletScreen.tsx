@@ -63,7 +63,7 @@ const SignUpDeployWalletScreen = ({ route }) => {
         0,
         BigNumber.from(deployFee?.gas).add(100000),
         salt,
-        Constants.manifest?.extra?.relayerAddress
+        Constants.expoConfig.extra.relayerAddress
       );
       const hash = await createWallet({ chainId, transaction });
       return waitForTransaction({ hash, chainId });

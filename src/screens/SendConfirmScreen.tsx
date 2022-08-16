@@ -40,7 +40,7 @@ const SendConfirmScreen = ({ route }) => {
         maxFeePerGas: 0,
         maxPriorityFeePerGas: 0,
         gasLimit: 1000000,
-        relayer: Constants.manifest?.extra?.relayerAddress,
+        relayer: Constants.expoConfig.extra.relayerAddress,
       };
 
       const transaction = await (token.isToken
@@ -60,7 +60,7 @@ const SendConfirmScreen = ({ route }) => {
         maxFeePerGas: 0,
         maxPriorityFeePerGas: 0,
         gasLimit: gasEstimate.add(20000),
-        relayer: Constants.manifest?.extra?.relayerAddress,
+        relayer: Constants.expoConfig.extra.relayerAddress,
       });
       const hash = await sendTransaction({
         transaction,
@@ -90,7 +90,7 @@ const SendConfirmScreen = ({ route }) => {
         maxFeePerGas: 0,
         maxPriorityFeePerGas: 0,
         gasLimit: gasEstimate.add(20000),
-        relayer: Constants.manifest?.extra?.relayerAddress,
+        relayer: Constants.expoConfig.extra.relayerAddress,
       });
       const hash = await sendTransaction({
         sender: walletAddress,

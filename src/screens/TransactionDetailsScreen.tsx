@@ -42,7 +42,7 @@ const TransactionDetailsScreen = ({ route }) => {
     internalTxs,
     (tx) =>
       tx.type === "call" &&
-      isEqualCaseInsensitive(tx.to, Constants.manifest?.extra?.relayerAddress)
+      isEqualCaseInsensitive(tx.to, Constants.expoConfig.extra.relayerAddress)
   )?.value;
 
   return (

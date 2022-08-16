@@ -39,7 +39,6 @@ export default {
     infuraApiKey: process.env.INFURA_API_KEY,
     alchemyApiKey: process.env.ALCHEMY_API_KEY,
     etherscanApiKey: process.env.ETHERSCAN_API_KEY,
-    googleDriveApiKey: process.env.GOOGLE_DRIVE_API_KEY,
     laserGuardianAddress: process.env.LASER_GUARDIAN_ADDRESS,
     relayerAddress: process.env.RELAYER_ADDRESS,
     sentryDsn: process.env.SENTRY_DSN,
