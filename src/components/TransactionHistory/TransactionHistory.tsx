@@ -56,7 +56,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
       }),
     {
       select: (txs) => {
-        const deployContractTx = txs.find((tx) => tx.type === "create");
+        const deployContractTx = txs.find((tx) => !tx.to);
         return (
           txs.find(
             (tx) =>
