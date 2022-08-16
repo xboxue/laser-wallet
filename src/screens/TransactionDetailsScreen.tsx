@@ -47,6 +47,26 @@ const TransactionDetailsScreen = ({ route }) => {
     decodeTransactionData(provider, transaction)
   );
 
+  const renderNetworkFee = () => {
+    if (gasFeeLoading) return <Skeleton />;
+
+    if (gasFee)
+      return (
+        <Text variant="subtitle2">
+          {formatAmount(gasFee, { precision: 6 })} ETH
+        </Text>
+      );
+
+    if (transaction.gasPrice && transaction.gasUsed)
+      <Text variant="subtitle2">
+        {formatAmount(
+          BigNumber.from(transaction.gasPrice).mul(transaction.gasUsed),
+          { precision: 6 }
+        )}{" "}
+        ETH
+      </Text>;
+  };
+
   return (
     <Box p="4">
       <Text variant="subtitle1" mb="3">
@@ -106,15 +126,7 @@ const TransactionDetailsScreen = ({ route }) => {
         )}
         <Box flexDirection="row" justifyContent="space-between" h="5">
           <Text variant="subtitle2">Network fee</Text>
-          <Text variant="subtitle2">
-            {gasFeeLoading && <Skeleton />}
-            {!gasFeeLoading && gasFee
-              ? `${formatAmount(gasFee, { precision: 6 })} ETH`
-              : `${formatAmount(
-                  BigNumber.from(transaction.gasPrice).mul(transaction.gasUsed),
-                  { precision: 6 }
-                )} ETH`}
-          </Text>
+          {renderNetworkFee()}
         </Box>
         <Button
           mt="2"

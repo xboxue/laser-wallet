@@ -17,6 +17,7 @@ import {
   selectRecoveryOwnerAddress,
   selectSalt,
 } from "../features/wallet/walletSlice";
+import useBlocker from "../hooks/useBlocker";
 import useLaserFactory from "../hooks/useLaserFactory";
 import { createWallet } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
@@ -99,6 +100,8 @@ const SignUpDeployWalletScreen = ({ route }) => {
         recoveryOwnerAddress,
       ])
   );
+
+  useBlocker(isCreating);
 
   const renderBalance = () => {
     if (isLoading || !balance) return <Skeleton />;
