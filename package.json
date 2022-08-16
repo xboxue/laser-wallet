@@ -46,7 +46,7 @@
     "expo-barcode-scanner": "~11.3.0",
     "expo-camera": "~12.2.0",
     "expo-clipboard": "~3.0.1",
-    "expo-constants": "~13.1.1",
+    "expo-constants": "~13.2.3",
     "expo-device": "~4.2.0",
     "expo-font": "~10.1.0",
     "expo-local-authentication": "~12.2.0",
