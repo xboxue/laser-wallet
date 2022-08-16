@@ -2,6 +2,7 @@ export const TRANSACTION_TYPES = {
   //   CANCEL: 'cancel',
   CONTRACT_INTERACTION: "contractInteraction",
   DEPLOY_CONTRACT: "contractDeployment",
+  DEPLOY_WALLET: "deployWallet",
   //   ETH_DECRYPT: MESSAGE_TYPE.ETH_DECRYPT,
   //   ETH_GET_ENCRYPTION_PUBLIC_KEY: MESSAGE_TYPE.ETH_GET_ENCRYPTION_PUBLIC_KEY,
   //   INCOMING: 'incoming',

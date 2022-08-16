@@ -5,7 +5,7 @@ import { BigNumber } from "ethers";
 import Constants from "expo-constants";
 import * as WebBrowser from "expo-web-browser";
 import { findLast } from "lodash";
-import { Badge, Box, Button, Icon, Stack, Text } from "native-base";
+import { Badge, Box, Button, Icon, Skeleton, Stack, Text } from "native-base";
 import { useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
@@ -67,24 +67,28 @@ const TransactionDetailsScreen = ({ route }) => {
             )}
           </Text>
         </Box>
-        <Box flexDirection="row" justifyContent="space-between" h="5">
-          <Text variant="subtitle2">From</Text>
-          <Box flexDirection="row" alignItems="center">
-            <Text mr="0.5" variant="subtitle2">
-              {txData?.from.ensName || formatAddress(txData.from.address)}
-            </Text>
-            <CopyIconButton value={txData.from.address} />
+        {txData.from && (
+          <Box flexDirection="row" justifyContent="space-between" h="5">
+            <Text variant="subtitle2">From</Text>
+            <Box flexDirection="row" alignItems="center">
+              <Text mr="0.5" variant="subtitle2">
+                {txData.from.ensName || formatAddress(txData.from.address)}
+              </Text>
+              <CopyIconButton value={txData.from.address} />
+            </Box>
           </Box>
-        </Box>
-        <Box flexDirection="row" justifyContent="space-between" h="5">
-          <Text variant="subtitle2">To</Text>
-          <Box flexDirection="row" alignItems="center">
-            <Text mr="0.5" variant="subtitle2">
-              {txData?.to.ensName || formatAddress(txData.to.address)}
-            </Text>
-            <CopyIconButton value={txData.to.address} />
+        )}
+        {txData.to && (
+          <Box flexDirection="row" justifyContent="space-between" h="5">
+            <Text variant="subtitle2">To</Text>
+            <Box flexDirection="row" alignItems="center">
+              <Text mr="0.5" variant="subtitle2">
+                {txData.to.ensName || formatAddress(txData.to.address)}
+              </Text>
+              <CopyIconButton value={txData.to.address} />
+            </Box>
           </Box>
-        </Box>
+        )}
         <Box flexDirection="row" justifyContent="space-between" h="5">
           <Text variant="subtitle2">Submitted</Text>
           <Text variant="subtitle2">
@@ -94,14 +98,17 @@ const TransactionDetailsScreen = ({ route }) => {
             )}
           </Text>
         </Box>
-        <Box flexDirection="row" justifyContent="space-between" h="5">
-          <Text variant="subtitle2">Amount</Text>
-          <Text variant="subtitle2">{formatAmount(txData.value)} ETH</Text>
-        </Box>
+        {txData.value && (
+          <Box flexDirection="row" justifyContent="space-between" h="5">
+            <Text variant="subtitle2">Amount</Text>
+            <Text variant="subtitle2">{formatAmount(txData.value)} ETH</Text>
+          </Box>
+        )}
         <Box flexDirection="row" justifyContent="space-between" h="5">
           <Text variant="subtitle2">Network fee</Text>
           <Text variant="subtitle2">
-            {gasFee
+            {gasFeeLoading && <Skeleton />}
+            {!gasFeeLoading && gasFee
               ? `${formatAmount(gasFee, { precision: 6 })} ETH`
               : `${formatAmount(
                   BigNumber.from(transaction.gasPrice).mul(transaction.gasUsed),

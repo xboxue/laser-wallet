@@ -122,6 +122,13 @@ const TransactionItemContainer = ({ transaction }: Props) => {
         </Circle>
       );
 
+    if (txData.type === TRANSACTION_TYPES.DEPLOY_WALLET)
+      return (
+        <Circle bg="gray.800" size="9">
+          <Icon as={<Ionicons name="flash-outline" />} size="4" color="white" />
+        </Circle>
+      );
+
     if (txData.type === TRANSACTION_TYPES.CONTRACT_INTERACTION)
       return (
         <Circle bg="gray.800" size="9">
@@ -151,6 +158,9 @@ const TransactionItemContainer = ({ transaction }: Props) => {
   };
 
   const renderTitle = () => {
+    if (txData.type === TRANSACTION_TYPES.DEPLOY_WALLET)
+      return "Activate wallet";
+
     if (txData.type === TRANSACTION_TYPES.SEND) {
       if (isEqualCaseInsensitive(txData.from.address, walletAddress))
         return "Send";
@@ -159,6 +169,22 @@ const TransactionItemContainer = ({ transaction }: Props) => {
     }
 
     return titles[txData.type];
+  };
+
+  const renderSubtitle = () => {
+    if (txData.type === TRANSACTION_TYPES.DEPLOY_WALLET) return;
+
+    if (isEqualCaseInsensitive(txData.from.address, walletAddress))
+      return `To: ${txData.to.ensName || formatAddress(txData.to.address)}`;
+
+    return `From: ${txData.from.ensName || formatAddress(txData.from.address)}`;
+  };
+
+  const renderAmount = () => {
+    if (txData.type === TRANSACTION_TYPES.DEPLOY_WALLET)
+      return `${formatAmount(transaction.value)} ETH`;
+
+    return `${formatAmount(txData.value)} ETH`;
   };
 
   if (
@@ -185,12 +211,8 @@ const TransactionItemContainer = ({ transaction }: Props) => {
       onPress={() => navigation.navigate("TransactionDetails", { transaction })}
       icon={renderIcon()}
       title={renderTitle()}
-      subtitle={
-        isEqualCaseInsensitive(txData.from.address, walletAddress)
-          ? `To: ${txData.to.ensName || formatAddress(txData.to.address)}`
-          : `From: ${txData.from.ensName || formatAddress(txData.from.address)}`
-      }
-      amount={`${formatAmount(txData.value)} ETH`}
+      subtitle={renderSubtitle()}
+      amount={renderAmount()}
       timestamp={fromUnixTime(parseInt(transaction.timeStamp, 10))}
     />
   );

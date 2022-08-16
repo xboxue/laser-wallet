@@ -1,5 +1,6 @@
 import { ethers, providers } from "ethers";
 import { abi as walletAbi } from "laser-sdk/dist/deployments/localhost/LaserWallet.json";
+import { abi as factoryAbi } from "laser-sdk/dist/deployments/localhost/LaserFactory.json";
 import { erc20ABI, erc721ABI } from "wagmi";
 import { TRANSACTION_TYPES } from "../constants/transactions";
 import { Transaction } from "../services/etherscan";
@@ -9,6 +10,12 @@ const decodeTransactionData = async (
   transaction: Transaction
 ) => {
   const tx = await provider.getTransaction(transaction.hash);
+
+  const factoryInterface = new ethers.utils.Interface(factoryAbi);
+  try {
+    factoryInterface.parseTransaction({ data: tx.data });
+    return { type: TRANSACTION_TYPES.DEPLOY_WALLET };
+  } catch {}
 
   if (tx.data === "0x") {
     return {
@@ -25,8 +32,10 @@ const decodeTransactionData = async (
     };
   }
 
-  const iface = new ethers.utils.Interface(walletAbi);
-  const [to, value, callData] = iface.parseTransaction({ data: tx.data }).args;
+  const walletInterface = new ethers.utils.Interface(walletAbi);
+  const [to, value, callData] = walletInterface.parseTransaction({
+    data: tx.data,
+  }).args;
 
   const baseData = {
     from: {
