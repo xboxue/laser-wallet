@@ -1,11 +1,10 @@
 import { format, fromUnixTime, isToday } from "date-fns";
 import { Box, Image, Pressable, Text } from "native-base";
-import ethIcon from "../../../assets/eth-icon.png";
 
 interface Props {
   onPress: () => void;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   amount: string;
   timestamp: Date;
   icon: React.ReactNode;
@@ -32,8 +31,8 @@ const TransactionItem = ({
           <Box ml="3">
             <Text variant="subtitle1">{title}</Text>
             <Text>
-              {format(timestamp, isToday(timestamp) ? "h:mm a" : "LLL d")} ·{" "}
-              {subtitle}
+              {format(timestamp, isToday(timestamp) ? "h:mm a" : "LLL d")}{" "}
+              {subtitle && `· ${subtitle}`}
             </Text>
           </Box>
           <Text variant="subtitle1" ml="auto">

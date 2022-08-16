@@ -10,7 +10,6 @@ import { useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
 import { selectChainId } from "../features/network/networkSlice";
-import { selectWalletAddress } from "../features/wallet/walletSlice";
 import { getTransactions, getTransactionUrl } from "../services/etherscan";
 import decodeTransactionData from "../utils/decodeTransactionData";
 import formatAddress from "../utils/formatAddress";
@@ -19,31 +18,34 @@ import isEqualCaseInsensitive from "../utils/isEqualCaseInsensitive";
 
 const TransactionDetailsScreen = ({ route }) => {
   const { transaction } = route.params;
-  const walletAddress = useSelector(selectWalletAddress);
   const chainId = useSelector(selectChainId);
   const provider = useProvider({ chainId });
 
-  const { data: internalTxs = [], isLoading: internalTxsLoading } = useQuery(
+  const { data: gasFee, isLoading: gasFeeLoading } = useQuery(
     ["internalTxs", transaction.hash],
     () =>
       getTransactions({
-        address: walletAddress,
         chainId,
         internal: true,
         txHash: transaction.hash,
-      })
+      }),
+    {
+      select: (txs) =>
+        findLast(
+          txs,
+          (tx) =>
+            tx.type === "call" &&
+            isEqualCaseInsensitive(
+              tx.to,
+              Constants.expoConfig.extra.relayerAddress
+            )
+        )?.value,
+    }
   );
 
   const { data: txData } = useQuery(["txData", transaction.hash], () =>
     decodeTransactionData(provider, transaction)
   );
-
-  const gasFee = findLast(
-    internalTxs,
-    (tx) =>
-      tx.type === "call" &&
-      isEqualCaseInsensitive(tx.to, Constants.expoConfig.extra.relayerAddress)
-  )?.value;
 
   return (
     <Box p="4">
@@ -100,10 +102,10 @@ const TransactionDetailsScreen = ({ route }) => {
           <Text variant="subtitle2">Network fee</Text>
           <Text variant="subtitle2">
             {gasFee
-              ? `${formatAmount(gasFee, { precision: 7 })} ETH`
+              ? `${formatAmount(gasFee, { precision: 6 })} ETH`
               : `${formatAmount(
                   BigNumber.from(transaction.gasPrice).mul(transaction.gasUsed),
-                  { precision: 7 }
+                  { precision: 6 }
                 )} ETH`}
           </Text>
         </Box>

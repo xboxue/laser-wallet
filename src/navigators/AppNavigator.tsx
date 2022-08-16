@@ -2,13 +2,13 @@ import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
-import { ChevronLeftIcon, Icon } from "native-base";
+import { ChevronLeftIcon } from "native-base";
 import { Platform } from "react-native";
 import { useSelector } from "react-redux";
-import { DEFAULT_CHAIN } from "../constants/chains";
 import { selectIsAuthenticated } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import { selectOwnerAddress } from "../features/wallet/walletSlice";
+import DeployWalletTransactionDetailsScreen from "../screens/DeployWalletTransactionDetailsScreen";
 import HomeScreen from "../screens/HomeScreen";
 import QRCodeScanScreen from "../screens/QRCodeScanScreen";
 import SendAddressScreen from "../screens/SendAddressScreen";
@@ -127,6 +127,10 @@ const AppNavigator = () => {
           <Stack.Screen
             name="TransactionDetails"
             component={TransactionDetailsScreen}
+          />
+          <Stack.Screen
+            name="DeployWalletTransactionDetails"
+            component={DeployWalletTransactionDetailsScreen}
           />
         </>
       );
