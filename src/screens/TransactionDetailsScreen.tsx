@@ -58,13 +58,15 @@ const TransactionDetailsScreen = ({ route }) => {
       );
 
     if (transaction.gasPrice && transaction.gasUsed)
-      <Text variant="subtitle2">
-        {formatAmount(
-          BigNumber.from(transaction.gasPrice).mul(transaction.gasUsed),
-          { precision: 6 }
-        )}{" "}
-        ETH
-      </Text>;
+      return (
+        <Text variant="subtitle2">
+          {formatAmount(
+            BigNumber.from(transaction.gasPrice).mul(transaction.gasUsed),
+            { precision: 6 }
+          )}{" "}
+          ETH
+        </Text>
+      );
   };
 
   return (
