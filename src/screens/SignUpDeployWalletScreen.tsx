@@ -104,7 +104,7 @@ const SignUpDeployWalletScreen = ({ route }) => {
   useBlocker(isCreating);
 
   const renderBalance = () => {
-    if (isLoading || !balance) return <Skeleton />;
+    if (isLoading || !balance) return <Skeleton w="16" h="6" />;
 
     return (
       <Text variant="subtitle1">
@@ -114,7 +114,8 @@ const SignUpDeployWalletScreen = ({ route }) => {
   };
 
   const renderDeployFee = () => {
-    if (deployFeeLoading || !deployFee || !balance) return <Skeleton />;
+    if (deployFeeLoading || !deployFee || !balance)
+      return <Skeleton w="16" h="6" />;
 
     return (
       <Text variant="subtitle1">
@@ -134,7 +135,7 @@ const SignUpDeployWalletScreen = ({ route }) => {
       </Text>
       <Text variant="subtitle2">Wallet address:</Text>
       {walletAddressLoading || !walletAddress ? (
-        <Skeleton />
+        <Skeleton w="32" h="6" />
       ) : (
         <Box flexDir="row" alignItems="center">
           <Text variant="subtitle1">{formatAddress(walletAddress)}</Text>

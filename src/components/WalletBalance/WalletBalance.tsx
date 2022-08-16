@@ -20,7 +20,7 @@ const WalletBalance = ({ walletAddress }: Props) => {
     chainId,
   });
 
-  if (isLoading || !balance) return <Skeleton />;
+  if (isLoading || !balance) return <Skeleton w="32" h="9" />;
 
   return (
     <Text variant="h4">

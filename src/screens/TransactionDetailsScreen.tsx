@@ -48,7 +48,7 @@ const TransactionDetailsScreen = ({ route }) => {
   );
 
   const renderNetworkFee = () => {
-    if (gasFeeLoading) return <Skeleton />;
+    if (gasFeeLoading) return <Skeleton w="16" h="5" />;
 
     if (gasFee)
       return (

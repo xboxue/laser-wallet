@@ -121,7 +121,7 @@ const SendConfirmScreen = ({ route }) => {
       gasEstimateLoading ||
       !gasEstimate
     ) {
-      return <Skeleton w="16" />;
+      return <Skeleton w="16" h="5" />;
     }
 
     const gasFee = baseFeePerGas
