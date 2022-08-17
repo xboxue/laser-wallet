@@ -56,7 +56,10 @@ const PendingTransactionItem = ({
       );
       return {
         ...data,
-        from: { address: walletAddress },
+        from: {
+          address: walletAddress,
+          ensName: await provider.lookupAddress(walletAddress),
+        },
         to: {
           address: transaction.to,
           ensName: await provider.lookupAddress(transaction.to),
@@ -83,7 +86,11 @@ const PendingTransactionItem = ({
         onPress={() => {
           if (receipt && !txDataLoading)
             navigation.navigate("TransactionDetails", {
-              transaction: { hash: receipt.transactionHash },
+              transaction: {
+                hash: receipt.transactionHash,
+                gasPrice: receipt.effectiveGasPrice,
+                gasUsed: receipt.gasUsed,
+              },
               txData,
             });
         }}
@@ -97,7 +104,11 @@ const PendingTransactionItem = ({
       onPress={() => {
         if (receipt && !txDataLoading)
           navigation.navigate("TransactionDetails", {
-            transaction: { hash: receipt.transactionHash },
+            transaction: {
+              hash: receipt.transactionHash,
+              gasPrice: receipt.effectiveGasPrice,
+              gasUsed: receipt.gasUsed,
+            },
             txData,
           });
       }}
