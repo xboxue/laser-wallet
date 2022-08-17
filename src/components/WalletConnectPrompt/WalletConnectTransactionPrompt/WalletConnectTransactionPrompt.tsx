@@ -113,7 +113,11 @@ const WalletConnectTransactionPrompt = ({
             {renderGasFee()}
           </Box>
           <Stack space="1" mt="1">
-            <Button isLoading={loading} onPress={() => onApprove(gasEstimate)}>
+            <Button
+              isLoading={loading}
+              isDisabled={gasEstimateLoading}
+              onPress={() => onApprove(gasEstimate)}
+            >
               Approve
             </Button>
             <Button isDisabled={loading} variant="subtle" onPress={onReject}>

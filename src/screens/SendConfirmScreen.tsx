@@ -158,6 +158,7 @@ const SendConfirmScreen = ({ route }) => {
         <Button
           onPress={token.isToken ? transferTokens : sendEth}
           isLoading={sendingEth || sendingTokens}
+          isDisabled={gasEstimateLoading}
         >
           Confirm
         </Button>
