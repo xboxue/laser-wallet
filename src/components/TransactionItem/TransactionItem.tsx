@@ -1,12 +1,12 @@
-import { format, fromUnixTime, isToday } from "date-fns";
-import { Box, Image, Pressable, Text } from "native-base";
+import { format, isToday } from "date-fns";
+import { Box, Pressable, Text } from "native-base";
 
 interface Props {
   onPress: () => void;
   title: string;
   subtitle?: string;
   amount: string;
-  timestamp: Date;
+  timestamp?: Date;
   icon: React.ReactNode;
 }
 
@@ -31,7 +31,9 @@ const TransactionItem = ({
           <Box ml="3">
             <Text variant="subtitle1">{title}</Text>
             <Text>
-              {format(timestamp, isToday(timestamp) ? "h:mm a" : "LLL d")}{" "}
+              {timestamp
+                ? format(timestamp, isToday(timestamp) ? "h:mm a" : "LLL d")
+                : "Pending"}{" "}
               {subtitle && `· ${subtitle}`}
             </Text>
           </Box>

@@ -11,7 +11,7 @@ import { useProvider } from "wagmi";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
 import { selectChainId } from "../features/network/networkSlice";
 import { getTransactions, getTransactionUrl } from "../services/etherscan";
-import decodeTransactionData from "../utils/decodeTransactionData";
+import decodeEtherscanTxData from "../utils/decodeTransactionData";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
 import isEqualCaseInsensitive from "../utils/isEqualCaseInsensitive";
@@ -44,7 +44,7 @@ const TransactionDetailsScreen = ({ route }) => {
   );
 
   const { data: txData } = useQuery(["txData", transaction.hash], () =>
-    decodeTransactionData(provider, transaction)
+    decodeEtherscanTxData(provider, transaction)
   );
 
   const renderNetworkFee = () => {
@@ -78,13 +78,13 @@ const TransactionDetailsScreen = ({ route }) => {
         <Box flexDirection="row" justifyContent="space-between" h="5">
           <Text variant="subtitle2">Status</Text>
           <Text variant="subtitle2">
-            {transaction.isError === "0" ? (
-              <Badge _text={{ fontSize: "sm" }} colorScheme="success">
-                Success
-              </Badge>
-            ) : (
+            {txData.isError ? (
               <Badge _text={{ fontSize: "sm" }} colorScheme="danger">
                 Fail
+              </Badge>
+            ) : (
+              <Badge _text={{ fontSize: "sm" }} colorScheme="success">
+                Success
               </Badge>
             )}
           </Text>

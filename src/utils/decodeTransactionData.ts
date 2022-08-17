@@ -1,11 +1,12 @@
+import { fromUnixTime } from "date-fns";
 import { ethers, providers } from "ethers";
-import { abi as walletAbi } from "laser-sdk/dist/deployments/localhost/LaserWallet.json";
 import { abi as factoryAbi } from "laser-sdk/dist/deployments/localhost/LaserFactory.json";
+import { abi as walletAbi } from "laser-sdk/dist/deployments/localhost/LaserWallet.json";
 import { erc20ABI, erc721ABI } from "wagmi";
 import { TRANSACTION_TYPES } from "../constants/transactions";
 import { Transaction } from "../services/etherscan";
 
-const decodeTransactionData = async (
+const decodeEtherscanTxData = async (
   provider: providers.Provider,
   transaction: Transaction
 ) => {
@@ -14,7 +15,12 @@ const decodeTransactionData = async (
   const factoryInterface = new ethers.utils.Interface(factoryAbi);
   try {
     factoryInterface.parseTransaction({ data: tx.data });
-    return { type: TRANSACTION_TYPES.DEPLOY_WALLET };
+    return {
+      type: TRANSACTION_TYPES.DEPLOY_WALLET,
+      gasFee: transaction.value,
+      isError: transaction.isError === "1",
+      timestamp: fromUnixTime(parseInt(transaction.timeStamp, 10)),
+    };
   } catch {}
 
   if (tx.data === "0x") {
@@ -29,6 +35,8 @@ const decodeTransactionData = async (
         ensName: await provider.lookupAddress(transaction.from),
       },
       value: transaction.value,
+      isError: transaction.isError === "1",
+      timestamp: fromUnixTime(parseInt(transaction.timeStamp, 10)),
     };
   }
 
@@ -37,22 +45,32 @@ const decodeTransactionData = async (
     data: tx.data,
   }).args;
 
-  const baseData = {
+  const data = await decodeWalletTxData(provider, to, callData);
+  return {
+    ...data,
     from: {
       address: transaction.to,
       ensName: await provider.lookupAddress(transaction.to),
     },
     to: { address: to, ensName: await provider.lookupAddress(to) },
     value,
+    isError: transaction.isError === "1",
+    timestamp: fromUnixTime(parseInt(transaction.timeStamp, 10)),
   };
+};
 
-  if (callData === "0x") return { type: TRANSACTION_TYPES.SEND, ...baseData };
+export const decodeWalletTxData = async (
+  provider: providers.Provider,
+  to: string,
+  callData: string
+) => {
+  if (callData === "0x") return { type: TRANSACTION_TYPES.SEND };
 
   try {
     const data = await decodeContractData(provider, callData, to);
-    return { ...data, ...baseData };
+    return data;
   } catch (error) {
-    return { type: TRANSACTION_TYPES.CONTRACT_INTERACTION, ...baseData };
+    return { type: TRANSACTION_TYPES.CONTRACT_INTERACTION };
   }
 };
 
@@ -110,4 +128,4 @@ const decodeContractData = async (
   throw new Error("Unsupported contract type");
 };
 
-export default decodeTransactionData;
+export default decodeEtherscanTxData;
