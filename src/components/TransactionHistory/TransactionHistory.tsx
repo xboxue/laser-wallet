@@ -1,15 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import Constants from "expo-constants";
-import { orderBy } from "lodash";
+import { keyBy, orderBy } from "lodash";
 import { SectionList, useToast } from "native-base";
 import { useMemo } from "react";
 import { RefreshControl } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useBalance } from "wagmi";
 import { selectChainId } from "../../features/network/networkSlice";
 import {
   PendingTransaction,
-  removePendingTransaction,
   selectPendingTransactions,
 } from "../../features/transactions/transactionsSlice";
 import { selectConnectors } from "../../features/walletConnect/walletConnectSlice";
@@ -27,8 +26,11 @@ interface Props {
 const TransactionHistory = ({ walletAddress }: Props) => {
   const chainId = useSelector(selectChainId);
   const pendingTransactions = useSelector(selectPendingTransactions);
+  const pendingTxs = useMemo(
+    () => [...pendingTransactions].reverse(),
+    [pendingTransactions]
+  );
   const connectors = useSelector(selectConnectors);
-  const dispatch = useDispatch();
   const toast = useToast();
 
   const { refetch: refetchTokens } = useTokenBalances(walletAddress);
@@ -80,6 +82,8 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     return orderBy([...txs, deployWalletTx], (tx) => tx.timeStamp, "desc");
   }, [txs, deployWalletTx]);
 
+  const txsByHash = useMemo(() => keyBy(txs, "hash"), [txs]);
+
   const handleRefresh = () => {
     refetchTxs();
     refetchTokens();
@@ -98,6 +102,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   }) => {
     return (
       <PendingTransactionItem
+        txsByHash={txsByHash}
         transaction={transaction}
         onSuccess={(receipt) => {
           if (transaction.callRequest) {
@@ -110,7 +115,6 @@ const TransactionHistory = ({ walletAddress }: Props) => {
               result: receipt.transactionHash,
             });
           }
-          dispatch(removePendingTransaction(transaction.hash));
           toast.show({
             render: () => (
               <ToastAlert status="success" title="Transaction confirmed" />
@@ -127,7 +131,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
       <SectionList
         contentContainerStyle={{ padding: 16, paddingTop: 8 }}
         sections={[
-          { data: pendingTransactions, renderItem: renderPendingTransaction },
+          { data: pendingTxs, renderItem: renderPendingTransaction },
           { data: allTxs, renderItem: renderTransaction },
         ]}
         refreshControl={

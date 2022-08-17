@@ -31,7 +31,7 @@ const TransactionItemContainer = ({ transaction }: Props) => {
       <TokenTransactionItem
         txData={txData}
         onPress={() =>
-          navigation.navigate("TransactionDetails", { transaction })
+          navigation.navigate("TransactionDetails", { transaction, txData })
         }
       />
     );
@@ -40,7 +40,9 @@ const TransactionItemContainer = ({ transaction }: Props) => {
   return (
     <WalletTransactionItem
       txData={txData}
-      onPress={() => navigation.navigate("TransactionDetails", { transaction })}
+      onPress={() =>
+        navigation.navigate("TransactionDetails", { transaction, txData })
+      }
     />
   );
 };

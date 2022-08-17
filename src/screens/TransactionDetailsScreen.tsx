@@ -1,25 +1,22 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQuery } from "@tanstack/react-query";
-import { format, fromUnixTime } from "date-fns";
+import { format } from "date-fns";
 import { BigNumber } from "ethers";
 import Constants from "expo-constants";
 import * as WebBrowser from "expo-web-browser";
 import { findLast } from "lodash";
 import { Badge, Box, Button, Icon, Skeleton, Stack, Text } from "native-base";
 import { useSelector } from "react-redux";
-import { useProvider } from "wagmi";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
 import { selectChainId } from "../features/network/networkSlice";
 import { getTransactions, getTransactionUrl } from "../services/etherscan";
-import decodeEtherscanTxData from "../utils/decodeTransactionData";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
 import isEqualCaseInsensitive from "../utils/isEqualCaseInsensitive";
 
 const TransactionDetailsScreen = ({ route }) => {
-  const { transaction } = route.params;
+  const { transaction, txData } = route.params;
   const chainId = useSelector(selectChainId);
-  const provider = useProvider({ chainId });
 
   const { data: gasFee, isLoading: gasFeeLoading } = useQuery(
     ["internalTxs", transaction.hash],
@@ -41,10 +38,6 @@ const TransactionDetailsScreen = ({ route }) => {
             )
         )?.value,
     }
-  );
-
-  const { data: txData } = useQuery(["txData", transaction.hash], () =>
-    decodeEtherscanTxData(provider, transaction)
   );
 
   const renderNetworkFee = () => {
@@ -114,13 +107,10 @@ const TransactionDetailsScreen = ({ route }) => {
         <Box flexDirection="row" justifyContent="space-between" h="5">
           <Text variant="subtitle2">Submitted</Text>
           <Text variant="subtitle2">
-            {format(
-              fromUnixTime(parseInt(transaction.timeStamp, 10)),
-              "LLL d, h:mm a"
-            )}
+            {format(txData.timestamp, "LLL d, h:mm a")}
           </Text>
         </Box>
-        {txData.value && (
+        {!!txData.value && (
           <Box flexDirection="row" justifyContent="space-between" h="5">
             <Text variant="subtitle2">Amount</Text>
             <Text variant="subtitle2">{formatAmount(txData.value)} ETH</Text>
