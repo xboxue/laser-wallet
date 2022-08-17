@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { orderBy } from "lodash";
-import { SectionList } from "native-base";
+import { SectionList, useToast } from "native-base";
 import { useMemo } from "react";
 import { RefreshControl } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,10 +12,12 @@ import {
   removePendingTransaction,
   selectPendingTransactions,
 } from "../../features/transactions/transactionsSlice";
+import { selectConnectors } from "../../features/walletConnect/walletConnectSlice";
 import useTokenBalances from "../../hooks/useTokenBalances";
 import { getTransactions, Transaction } from "../../services/etherscan";
 import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
 import PendingTransactionItem from "../PendingTransactionItem/PendingTransactionItem";
+import ToastAlert from "../ToastAlert/ToastAlert";
 import TransactionItemContainer from "../TransactionItemContainer/TransactionItemContainer";
 
 interface Props {
@@ -25,7 +27,9 @@ interface Props {
 const TransactionHistory = ({ walletAddress }: Props) => {
   const chainId = useSelector(selectChainId);
   const pendingTransactions = useSelector(selectPendingTransactions);
+  const connectors = useSelector(selectConnectors);
   const dispatch = useDispatch();
+  const toast = useToast();
 
   const { refetch: refetchTokens } = useTokenBalances(walletAddress);
   const { refetch: refetchBalance } = useBalance({
@@ -95,8 +99,23 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     return (
       <PendingTransactionItem
         transaction={transaction}
-        onSuccess={() => {
+        onSuccess={(receipt) => {
+          if (transaction.callRequest) {
+            const connector = connectors.find(
+              (connector) => connector.peerId === transaction.callRequest.peerId
+            );
+            if (!connector) return;
+            connector.approveRequest({
+              id: transaction.callRequest.id,
+              result: receipt.transactionHash,
+            });
+          }
           dispatch(removePendingTransaction(transaction.hash));
+          toast.show({
+            render: () => (
+              <ToastAlert status="success" title="Transaction confirmed" />
+            ),
+          });
           handleRefresh();
         }}
       />

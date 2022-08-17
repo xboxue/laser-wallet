@@ -1,3 +1,4 @@
+import { providers } from "ethers";
 import { Box, Circle, Pressable, Spinner, Text } from "native-base";
 import { useSelector } from "react-redux";
 import { useEnsName } from "wagmi";
@@ -9,7 +10,7 @@ import formatAmount from "../../utils/formatAmount";
 
 interface Props {
   transaction: PendingTransaction;
-  onSuccess: () => void;
+  onSuccess: (receipt: providers.TransactionReceipt) => void;
 }
 
 const PendingTransactionItem = ({ transaction, onSuccess }: Props) => {
@@ -17,7 +18,7 @@ const PendingTransactionItem = ({ transaction, onSuccess }: Props) => {
   useWaitForTransaction({
     hash: transaction.hash,
     chainId,
-    confirmations: 3,
+    confirmations: 1,
     onSuccess,
   });
 

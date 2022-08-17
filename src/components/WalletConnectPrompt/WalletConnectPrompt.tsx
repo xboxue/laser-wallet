@@ -90,7 +90,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           transaction,
           chainId,
         });
-        dispatch(addPendingTransaction({ ...transaction, hash }));
+        dispatch(addPendingTransaction({ ...transaction, hash, callRequest }));
         return hash;
       }
 
@@ -129,6 +129,16 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
         const connector = getConnector(callRequest.peerId);
         if (!connector) throw new Error("No connector");
 
+        if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
+          toast.show({
+            render: () => (
+              <ToastAlert status="success" title="Transaction sent" />
+            ),
+          });
+          dispatch(setCallRequest(null));
+          return;
+        }
+
         connector.approveRequest({
           id: callRequest.id,
           result,
@@ -141,14 +151,6 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           connector.updateSession({
             accounts: [walletsByChain[id].address],
             chainId: id,
-          });
-        }
-
-        if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
-          toast.show({
-            render: () => (
-              <ToastAlert status="success" title="Transaction sent" />
-            ),
           });
         }
       },
