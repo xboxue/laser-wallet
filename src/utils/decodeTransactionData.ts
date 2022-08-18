@@ -18,7 +18,7 @@ const decodeEtherscanTxData = async (
     return {
       type: TRANSACTION_TYPES.DEPLOY_WALLET,
       gasFee: transaction.value,
-      isError: transaction.isError === "1",
+      isError: transaction.txreceipt_status === "0",
       timestamp: fromUnixTime(parseInt(transaction.timeStamp, 10)),
     };
   } catch {}
@@ -32,10 +32,10 @@ const decodeEtherscanTxData = async (
       },
       to: {
         address: transaction.to,
-        ensName: await provider.lookupAddress(transaction.from),
+        ensName: await provider.lookupAddress(transaction.to),
       },
       value: transaction.value,
-      isError: transaction.isError === "1",
+      isError: transaction.txreceipt_status === "0",
       timestamp: fromUnixTime(parseInt(transaction.timeStamp, 10)),
     };
   }
@@ -54,7 +54,7 @@ const decodeEtherscanTxData = async (
     },
     to: { address: to, ensName: await provider.lookupAddress(to) },
     value,
-    isError: transaction.isError === "1",
+    isError: transaction.txreceipt_status === "0",
     timestamp: fromUnixTime(parseInt(transaction.timeStamp, 10)),
   };
 };

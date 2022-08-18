@@ -19,6 +19,7 @@ export interface Transaction {
   type: string;
   value: string;
   functionName: string;
+  txreceipt_status: string;
 }
 
 export interface TransactionERC20 extends Transaction {
