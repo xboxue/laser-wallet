@@ -41,9 +41,7 @@ const WalletConnectRequestPrompt = ({
             size="10"
             alignSelf="center"
           />
-          <Text variant="subtitle1">
-            {peerMeta.name}: {callRequest.method}
-          </Text>
+          <Text variant="subtitle1">{peerMeta.name}: Signature request</Text>
           <ScrollView maxH="300">
             <Text>
               {(callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
