@@ -1,4 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import { IClientMeta, IJsonRpcRequest } from "@walletconnect/types";
+import { BigNumber } from "ethers";
+import Constants from "expo-constants";
 import {
   Actionsheet,
   Box,
@@ -8,15 +11,15 @@ import {
   Stack,
   Text,
 } from "native-base";
-import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 import { useFeeData, useProvider } from "wagmi";
+import { TRANSACTION_TYPES } from "../../../constants/transactions";
+import { selectChainId } from "../../../features/network/networkSlice";
 import useLaser from "../../../hooks/useLaser";
+import { decodeWalletTxData } from "../../../utils/decodeTransactionData";
 import formatAddress from "../../../utils/formatAddress";
 import formatAmount from "../../../utils/formatAmount";
-import Constants from "expo-constants";
-import { useSelector } from "react-redux";
-import { selectChainId } from "../../../features/network/networkSlice";
-import { BigNumber } from "ethers";
+import WalletConnectApprovePrompt from "../WalletConnectApprovePrompt/WalletConnectApprovePrompt";
 
 interface Props {
   onClose: () => void;
@@ -41,6 +44,11 @@ const WalletConnectTransactionPrompt = ({
   const provider = useProvider({ chainId });
 
   const { data: feeData, isLoading: feeDataLoading } = useFeeData();
+
+  const { data: txData, isLoading: txDataLoading } = useQuery(
+    ["decodedtxData", to, data],
+    () => decodeWalletTxData(provider, to, data)
+  );
 
   const { data: baseFeePerGas, isLoading: baseFeePerGasLoading } = useQuery(
     ["baseFeePerGas"],
@@ -87,32 +95,50 @@ const WalletConnectTransactionPrompt = ({
     );
   };
 
+  const renderContent = () => {
+    if (txDataLoading) return <Skeleton />;
+
+    if (txData?.type === TRANSACTION_TYPES.TOKEN_APPROVE)
+      return (
+        <WalletConnectApprovePrompt
+          txData={txData}
+          gasFee={renderGasFee()}
+          peerMeta={peerMeta}
+        />
+      );
+
+    return (
+      <Stack space="4">
+        <Text variant="subtitle1">{peerMeta.name}: Confirm transaction</Text>
+        <Box flexDirection="row" justifyContent="space-between">
+          <Text variant="subtitle2">To</Text>
+          <Text variant="subtitle2">{formatAddress(to)}</Text>
+        </Box>
+        <Box flexDirection="row" justifyContent="space-between">
+          <Text variant="subtitle2">Amount</Text>
+          <Text variant="subtitle2">{formatAmount(value)} ETH</Text>
+        </Box>
+        <Box flexDirection="row" justifyContent="space-between">
+          <Text variant="subtitle2">Network fee (estimate)</Text>
+          {renderGasFee()}
+        </Box>
+      </Stack>
+    );
+  };
+
   return (
     <Actionsheet isOpen onClose={onClose}>
       <Actionsheet.Content>
-        <Stack space="4" width="100%" px="4" py="2">
+        <Box width="100%" px="4" py="2">
           <Image
             source={{ uri: peerMeta.icons[0] }}
             alt="logo"
             size="10"
             alignSelf="center"
+            mb="4"
           />
-          <Text variant="subtitle1">
-            {peerMeta.name}: {callRequest.method}
-          </Text>
-          <Box flexDirection="row" justifyContent="space-between">
-            <Text variant="subtitle2">To</Text>
-            <Text variant="subtitle2">{formatAddress(to)}</Text>
-          </Box>
-          <Box flexDirection="row" justifyContent="space-between">
-            <Text variant="subtitle2">Amount</Text>
-            <Text variant="subtitle2">{formatAmount(value)} ETH</Text>
-          </Box>
-          <Box flexDirection="row" justifyContent="space-between">
-            <Text variant="subtitle2">Gas (estimate)</Text>
-            {renderGasFee()}
-          </Box>
-          <Stack space="1" mt="1">
+          {renderContent()}
+          <Stack space="1" mt="5">
             <Button
               isLoading={loading}
               isDisabled={gasEstimateLoading}
@@ -124,7 +150,7 @@ const WalletConnectTransactionPrompt = ({
               Reject
             </Button>
           </Stack>
-        </Stack>
+        </Box>
       </Actionsheet.Content>
     </Actionsheet>
   );

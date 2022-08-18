@@ -68,7 +68,12 @@ const TransactionDetailsScreen = ({ route }) => {
         Transaction
       </Text>
       <Stack space="4">
-        <Box flexDirection="row" justifyContent="space-between" h="5">
+        <Box
+          flexDirection="row"
+          justifyContent="space-between"
+          alignItems="center"
+          h="5"
+        >
           <Text variant="subtitle2">Status</Text>
           <Text variant="subtitle2">
             {txData.isError ? (
