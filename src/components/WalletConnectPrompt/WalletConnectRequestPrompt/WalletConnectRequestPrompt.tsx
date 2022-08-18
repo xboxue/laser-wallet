@@ -28,8 +28,9 @@ const WalletConnectRequestPrompt = ({
   peerMeta,
   callRequest,
 }: Props) => {
-  const chainId = useSelector(selectChainId);
-  const provider = useProvider({ chainId });
+  const chain = allChains.find(
+    (chain) => chain.id === parseInt(callRequest.params[0].chainId, 16)
+  )?.name;
 
   return (
     <Actionsheet isOpen onClose={onClose}>
@@ -41,7 +42,13 @@ const WalletConnectRequestPrompt = ({
             size="10"
             alignSelf="center"
           />
-          <Text variant="subtitle1">{peerMeta.name}: Signature request</Text>
+          <Text variant="subtitle1">
+            {`${peerMeta.name}: ${
+              callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN
+                ? `Switch to ${chain} network?`
+                : "Signature request"
+            }`}
+          </Text>
           <ScrollView maxH="300">
             <Text>
               {(callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
@@ -54,12 +61,7 @@ const WalletConnectRequestPrompt = ({
               {callRequest.method === REQUEST_TYPES.PERSONAL_SIGN &&
                 hexToAscii(callRequest.params[0])}
               {callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN &&
-                `Chain: ${
-                  allChains.find(
-                    (chain) =>
-                      chain.id === parseInt(callRequest.params[0].chainId, 16)
-                  )?.name
-                }`}
+                `This will switch the active wallet to your wallet on ${chain}.`}
             </Text>
           </ScrollView>
           <Stack space="1">
