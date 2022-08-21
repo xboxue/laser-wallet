@@ -19,6 +19,7 @@ export interface Transaction {
   type: string;
   value: string;
   functionName: string;
+  txreceipt_status: string;
 }
 
 export interface TransactionERC20 extends Transaction {
@@ -33,10 +34,13 @@ export interface TransactionERC20 extends Transaction {
 }
 
 interface GetTransactionsOptions {
-  address: string;
+  address?: string;
   chainId: number;
   internal?: boolean;
   txHash?: string;
+  sort?: string;
+  offset?: number;
+  page?: number;
 }
 
 const getUrl = (chainId: number) => {
@@ -62,17 +66,20 @@ export const getTransactions = async ({
   chainId,
   internal,
   txHash,
+  sort = "asc",
+  page,
+  offset,
 }: GetTransactionsOptions) => {
   const { data } = await axios.get<{ result: Transaction[] }>(getUrl(chainId), {
     params: {
       module: "account",
       ...(!txHash && {
         address,
-        startblock: 0,
-        endblock: 99999999,
-        sort: "asc",
+        sort,
+        page,
+        offset,
       }),
-      apikey: Constants.manifest?.extra?.etherscanApiKey,
+      apikey: Constants.expoConfig.extra.etherscanApiKey,
       action: internal ? "txlistinternal" : "txlist",
       txhash: txHash,
     },
@@ -91,7 +98,7 @@ export const getERC20Transfers = async (address: string, chainId: number) => {
         startblock: 0,
         endblock: 99999999,
         sort: "asc",
-        apikey: Constants.manifest?.extra?.etherscanApiKey,
+        apikey: Constants.expoConfig.extra.etherscanApiKey,
       },
     }
   );

@@ -9,10 +9,10 @@ const SignUpBackupScreen = () => {
 
   return (
     <Box p="4">
-      <Text variant="subtitle1">Back up your recovery wallet</Text>
+      <Text variant="subtitle1">Back up your recovery key</Text>
       <Text>
-        Store the encrypted key of your recovery wallet. This will be used to
-        recover your funds in case your device is lost.
+        Your recovery key will be used to complete your wallet recovery in case
+        your device is lost.
       </Text>
 
       <Button

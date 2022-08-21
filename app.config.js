@@ -3,7 +3,7 @@ import "dotenv/config";
 export default {
   name: "Laser",
   slug: "laser-wallet",
-  version: "1.0.1",
+  version: "1.0.2",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -14,6 +14,7 @@ export default {
   },
   updates: {
     fallbackToCacheTimeout: 0,
+    url: "https://u.expo.dev/7a661128-fd6d-4dce-b72e-2f5f2ead8a58",
   },
   assetBundlePatterns: ["**/*"],
   runtimeVersion: "1.0.0",
@@ -38,7 +39,6 @@ export default {
     infuraApiKey: process.env.INFURA_API_KEY,
     alchemyApiKey: process.env.ALCHEMY_API_KEY,
     etherscanApiKey: process.env.ETHERSCAN_API_KEY,
-    googleDriveApiKey: process.env.GOOGLE_DRIVE_API_KEY,
     laserGuardianAddress: process.env.LASER_GUARDIAN_ADDRESS,
     relayerAddress: process.env.RELAYER_ADDRESS,
     sentryDsn: process.env.SENTRY_DSN,
@@ -54,9 +54,5 @@ export default {
         },
       },
     ],
-  },
-  updates: {
-    fallbackToCacheTimeout: 0,
-    url: "https://u.expo.dev/7a661128-fd6d-4dce-b72e-2f5f2ead8a58",
   },
 };

@@ -4,6 +4,7 @@
   },
   "build": {
     "development": {
+      "channel": "staging",
       "distribution": "internal",
       "android": {
         "gradleCommand": ":app:assembleDebug"
@@ -20,6 +21,7 @@
       }
     },
     "preview": {
+      "channel": "staging",
       "distribution": "internal",
       "env": {
         "RELAYER_URL": "https://laser-relayer.herokuapp.com",
@@ -30,6 +32,7 @@
       }
     },
     "production": {
+      "channel": "production",
       "env": {
         "RELAYER_URL": "https://laser-relayer.herokuapp.com",
         "LASER_GUARDIAN_ADDRESS": "0xcC9d02aBe5487dd64A890bBfFd0b05cF7901043c",

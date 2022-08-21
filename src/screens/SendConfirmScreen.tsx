@@ -40,7 +40,7 @@ const SendConfirmScreen = ({ route }) => {
         maxFeePerGas: 0,
         maxPriorityFeePerGas: 0,
         gasLimit: 1000000,
-        relayer: Constants.manifest?.extra?.relayerAddress,
+        relayer: Constants.expoConfig.extra.relayerAddress,
       };
 
       const transaction = await (token.isToken
@@ -60,7 +60,7 @@ const SendConfirmScreen = ({ route }) => {
         maxFeePerGas: 0,
         maxPriorityFeePerGas: 0,
         gasLimit: gasEstimate.add(20000),
-        relayer: Constants.manifest?.extra?.relayerAddress,
+        relayer: Constants.expoConfig.extra.relayerAddress,
       });
       const hash = await sendTransaction({
         transaction,
@@ -90,7 +90,7 @@ const SendConfirmScreen = ({ route }) => {
         maxFeePerGas: 0,
         maxPriorityFeePerGas: 0,
         gasLimit: gasEstimate.add(20000),
-        relayer: Constants.manifest?.extra?.relayerAddress,
+        relayer: Constants.expoConfig.extra.relayerAddress,
       });
       const hash = await sendTransaction({
         sender: walletAddress,
@@ -121,7 +121,7 @@ const SendConfirmScreen = ({ route }) => {
       gasEstimateLoading ||
       !gasEstimate
     ) {
-      return <Skeleton w="16" />;
+      return <Skeleton w="16" h="5" />;
     }
 
     const gasFee = baseFeePerGas
@@ -158,6 +158,7 @@ const SendConfirmScreen = ({ route }) => {
         <Button
           onPress={token.isToken ? transferTokens : sendEth}
           isLoading={sendingEth || sendingTokens}
+          isDisabled={gasEstimateLoading}
         >
           Confirm
         </Button>

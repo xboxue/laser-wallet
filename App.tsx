@@ -32,7 +32,7 @@ const tokenCache = {
 };
 
 Sentry.init({
-  dsn: Constants.manifest?.extra?.sentryDsn,
+  dsn: Constants.expoConfig.extra.sentryDsn,
 });
 
 const AppWithQueryClient = () => {

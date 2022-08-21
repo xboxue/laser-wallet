@@ -14,7 +14,7 @@ const waitForTransaction = async ({
 }: WaitForTransactionOptions) => {
   const provider = new providers.InfuraProvider(
     chainId,
-    Constants.manifest?.extra?.infuraApiKey
+    Constants.expoConfig.extra.infuraApiKey
   );
 
   while (true) {
@@ -25,7 +25,7 @@ const waitForTransaction = async ({
     if (!broadcasts) continue;
     for (const broadcast of broadcasts) {
       const receipt = await provider.getTransactionReceipt(broadcast.ethTxHash);
-      if (receipt?.confirmations > confirmations) return receipt;
+      if (receipt?.confirmations >= confirmations) return receipt;
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }

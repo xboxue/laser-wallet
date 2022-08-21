@@ -43,7 +43,7 @@ export const selectGuardianAddresses = createSelector(
   (guardians, isLaserGuardianEnabled) => {
     const addresses = guardians.map((guardian) => guardian.address);
     if (isLaserGuardianEnabled) {
-      addresses.push(Constants.manifest?.extra?.laserGuardianAddress);
+      addresses.push(Constants.expoConfig.extra.laserGuardianAddress);
     }
     return addresses;
   }
