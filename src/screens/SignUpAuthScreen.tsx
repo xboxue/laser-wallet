@@ -31,7 +31,7 @@ const SignUpAuthScreen = () => {
               });
               if (success) {
                 dispatch(setIsBiometricsEnabled(true));
-                navigation.navigate("SignUpEmail");
+                navigation.navigate("SignUpBackup");
               }
             }}
           >

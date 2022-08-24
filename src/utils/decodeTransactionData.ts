@@ -1,76 +1,56 @@
 import { fromUnixTime } from "date-fns";
 import { ethers, providers } from "ethers";
-import { abi as factoryAbi } from "laser-sdk/dist/deployments/localhost/LaserFactory.json";
-import { abi as walletAbi } from "laser-sdk/dist/deployments/localhost/LaserWallet.json";
 import { erc20ABI, erc721ABI } from "wagmi";
 import { TRANSACTION_TYPES } from "../constants/transactions";
-import { Transaction } from "../services/etherscan";
 
-const decodeEtherscanTxData = async (
+export const decodeTxDataByHash = async (
   provider: providers.Provider,
-  transaction: Transaction
+  hash: string
 ) => {
-  const tx = await provider.getTransaction(transaction.hash);
+  const [tx, receipt] = await Promise.all([
+    provider.getTransaction(hash),
+    provider.getTransactionReceipt(hash),
+  ]);
 
-  const factoryInterface = new ethers.utils.Interface(factoryAbi);
-  try {
-    factoryInterface.parseTransaction({ data: tx.data });
-    return {
-      type: TRANSACTION_TYPES.DEPLOY_WALLET,
-      gasFee: transaction.value,
-      isError: transaction.txreceipt_status === "0",
-      timestamp: fromUnixTime(parseInt(transaction.timeStamp, 10)),
-    };
-  } catch {}
-
-  if (tx.data === "0x") {
-    return {
-      type: TRANSACTION_TYPES.SEND,
-      from: {
-        address: transaction.from,
-        ensName: await provider.lookupAddress(transaction.from),
-      },
-      to: {
-        address: transaction.to,
-        ensName: await provider.lookupAddress(transaction.to),
-      },
-      value: transaction.value,
-      isError: transaction.txreceipt_status === "0",
-      timestamp: fromUnixTime(parseInt(transaction.timeStamp, 10)),
-    };
-  }
-
-  const walletInterface = new ethers.utils.Interface(walletAbi);
-  const [to, value, callData] = walletInterface.parseTransaction({
-    data: tx.data,
-  }).args;
-
-  const data = await decodeWalletTxData(provider, to, callData);
-  return {
-    ...data,
-    from: {
-      address: transaction.to,
-      ensName: await provider.lookupAddress(transaction.to),
-    },
-    to: { address: to, ensName: await provider.lookupAddress(to) },
-    value,
-    isError: transaction.txreceipt_status === "0",
-    timestamp: fromUnixTime(parseInt(transaction.timeStamp, 10)),
+  const baseData = {
+    from: { address: tx.from, ensName: await provider.lookupAddress(tx.from) },
+    to: { address: tx.to, ensName: await provider.lookupAddress(tx.to) },
+    value: tx.value,
+    ...(receipt && {
+      isError: receipt.status === 0,
+      timestamp: fromUnixTime(
+        (await provider.getBlock(receipt.blockNumber)).timestamp
+      ),
+    }),
   };
+
+  if (tx.data === "0x") return { type: TRANSACTION_TYPES.SEND, ...baseData };
+
+  try {
+    const data = await decodeContractData(provider, tx.data, tx.to);
+    return { ...data, ...baseData };
+  } catch (error) {
+    return { type: TRANSACTION_TYPES.CONTRACT_INTERACTION, ...baseData };
+  }
 };
 
-export const decodeWalletTxData = async (
+export const decodePendingTxData = async (
   provider: providers.Provider,
-  to: string,
-  callData: string
+  tx: providers.TransactionRequest
 ) => {
-  if (callData === "0x") return { type: TRANSACTION_TYPES.SEND };
+  const baseData = {
+    from: { address: tx.from, ensName: await provider.lookupAddress(tx.from) },
+    to: { address: tx.to, ensName: await provider.lookupAddress(tx.to) },
+    value: tx.value,
+  };
+
+  if (tx.data === "0x") return { type: TRANSACTION_TYPES.SEND, ...baseData };
 
   try {
-    const data = await decodeContractData(provider, callData, to);
-    return data;
+    const data = await decodeContractData(provider, tx.data, tx.to);
+    return { ...data, ...baseData };
   } catch (error) {
-    return { type: TRANSACTION_TYPES.CONTRACT_INTERACTION };
+    return { type: TRANSACTION_TYPES.CONTRACT_INTERACTION, ...baseData };
   }
 };
 
@@ -127,5 +107,3 @@ const decodeContractData = async (
 
   throw new Error("Unsupported contract type");
 };
-
-export default decodeEtherscanTxData;

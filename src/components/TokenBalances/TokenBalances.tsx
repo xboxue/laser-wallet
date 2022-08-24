@@ -117,7 +117,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   const renderActivateWallet = () => {
     if (isWalletDeployed) return null;
     return (
-      <Pressable onPress={() => navigation.navigate("SignUpDeployWallet")}>
+      <Pressable>
         {({ isPressed }) => (
           <Box
             borderColor="gray.200"
@@ -133,8 +133,8 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
               <Icon as={Ionicons} color="white" name="ios-arrow-up" size="5" />
             </Circle>
             <Box ml="3">
-              <Text variant="subtitle1">Activate wallet</Text>
-              <Text>Deposit funds to activate your wallet</Text>
+              <Text variant="subtitle1">Activate vault</Text>
+              <Text>Secure your wallet by activating your vault.</Text>
             </Box>
           </Box>
         )}

@@ -29,7 +29,7 @@ export const store = configureStore({
       networkReducer
     ),
     wallet: persistReducer(
-      { key: "auth", storage: createSecureStore() },
+      { key: "wallet", storage: AsyncStorage },
       walletReducer
     ),
     auth: persistReducer(

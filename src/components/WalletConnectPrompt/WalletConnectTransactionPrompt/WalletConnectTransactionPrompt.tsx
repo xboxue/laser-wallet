@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { IClientMeta, IJsonRpcRequest } from "@walletconnect/types";
-import { BigNumber } from "ethers";
-import Constants from "expo-constants";
 import {
   Actionsheet,
   Box,
@@ -15,8 +13,7 @@ import { useSelector } from "react-redux";
 import { useFeeData, useProvider } from "wagmi";
 import { TRANSACTION_TYPES } from "../../../constants/transactions";
 import { selectChainId } from "../../../features/network/networkSlice";
-import useLaser from "../../../hooks/useLaser";
-import { decodeWalletTxData } from "../../../utils/decodeTransactionData";
+import { decodePendingTxData } from "../../../utils/decodeTransactionData";
 import formatAddress from "../../../utils/formatAddress";
 import formatAmount from "../../../utils/formatAmount";
 import WalletConnectApprovePrompt from "../WalletConnectApprovePrompt/WalletConnectApprovePrompt";
@@ -24,7 +21,7 @@ import WalletConnectApprovePrompt from "../WalletConnectApprovePrompt/WalletConn
 interface Props {
   onClose: () => void;
   onReject: () => void;
-  onApprove: (gasEstimate: BigNumber) => void;
+  onApprove: () => void;
   peerMeta: IClientMeta;
   callRequest: IJsonRpcRequest;
   loading?: boolean;
@@ -38,16 +35,30 @@ const WalletConnectTransactionPrompt = ({
   callRequest,
   loading = false,
 }: Props) => {
-  const { to, value = 0, data } = callRequest.params[0];
-  const laser = useLaser();
+  const transaction = callRequest.params[0];
   const chainId = useSelector(selectChainId);
   const provider = useProvider({ chainId });
+
+  const { data: gasEstimate, isLoading: gasEstimateLoading } = useQuery(
+    ["gasEstimate", transaction],
+    async () => {
+      if (transaction.gas) return transaction.gas;
+
+      return provider.estimateGas({
+        from: transaction.from,
+        to: transaction.to,
+        data: transaction.data,
+        value: transaction.value,
+        nonce: transaction.nonce,
+      });
+    }
+  );
 
   const { data: feeData, isLoading: feeDataLoading } = useFeeData();
 
   const { data: txData, isLoading: txDataLoading } = useQuery(
-    ["decodedtxData", to, data],
-    () => decodeWalletTxData(provider, to, data)
+    ["pendingTxData", transaction],
+    () => decodePendingTxData(provider, transaction)
   );
 
   const { data: baseFeePerGas, isLoading: baseFeePerGasLoading } = useQuery(
@@ -56,20 +67,7 @@ const WalletConnectTransactionPrompt = ({
       const block = await provider.getBlock("latest");
       return block.baseFeePerGas;
     },
-    { refetchInterval: 1000 }
-  );
-
-  const { data: gasEstimate, isLoading: gasEstimateLoading } = useQuery(
-    ["gasEstimate", to, value, data],
-    async () => {
-      const transaction = await laser.execTransaction(to, value, data, {
-        maxFeePerGas: 0,
-        maxPriorityFeePerGas: 0,
-        gasLimit: 1000000,
-        relayer: Constants.expoConfig.extra.relayerAddress,
-      });
-      return laser.estimateLaserGas(transaction);
-    }
+    { refetchInterval: 5000 }
   );
 
   const renderGasFee = () => {
@@ -112,11 +110,13 @@ const WalletConnectTransactionPrompt = ({
         <Text variant="subtitle1">{peerMeta.name}: Confirm transaction</Text>
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">To</Text>
-          <Text variant="subtitle2">{formatAddress(to)}</Text>
+          <Text variant="subtitle2">{formatAddress(transaction.to)}</Text>
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">Amount</Text>
-          <Text variant="subtitle2">{formatAmount(value)} ETH</Text>
+          <Text variant="subtitle2">
+            {transaction.value ? formatAmount(transaction.value) : 0} ETH
+          </Text>
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle2">Network fee (estimate)</Text>
@@ -142,7 +142,7 @@ const WalletConnectTransactionPrompt = ({
             <Button
               isLoading={loading}
               isDisabled={gasEstimateLoading}
-              onPress={() => onApprove(gasEstimate)}
+              onPress={() => onApprove()}
             >
               Approve
             </Button>

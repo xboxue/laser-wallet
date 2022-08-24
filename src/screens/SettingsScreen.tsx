@@ -24,17 +24,17 @@ const SettingsScreen = () => {
       icon: <Icon as={Ionicons} color="white" name="md-refresh" size="5" />,
       onPress: () => navigation.navigate("SettingsWalletRecovery"),
     },
-    {
-      title: "Account",
-      icon: (
-        <Icon
-          as={Ionicons}
-          color="white"
-          name="person-circle-outline"
-          size="5"
-        />
-      ),
-    },
+    // {
+    //   title: "Account",
+    //   icon: (
+    //     <Icon
+    //       as={Ionicons}
+    //       color="white"
+    //       name="person-circle-outline"
+    //       size="5"
+    //     />
+    //   ),
+    // },
   ];
 
   return (

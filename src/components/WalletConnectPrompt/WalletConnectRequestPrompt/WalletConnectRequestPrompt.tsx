@@ -64,7 +64,7 @@ const WalletConnectRequestPrompt = ({
                 `This will switch the active wallet to your wallet on ${chain}.`}
             </Text>
           </ScrollView>
-          <Stack space="1">
+          <Stack space="2">
             <Button onPress={onApprove}>Approve</Button>
             <Button variant="subtle" onPress={onReject}>
               Reject

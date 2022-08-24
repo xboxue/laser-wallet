@@ -40,7 +40,7 @@ const WalletConnectSessionPrompt = ({
             />
             <Text variant="subtitle1">{peerMeta.name} wants to connect</Text>
             <Link href={peerMeta.url}>{peerMeta.url}</Link>
-            <Stack space="1" mt="4">
+            <Stack space="2" mt="4">
               <Button onPress={onApprove}>Approve</Button>
               <Button variant="subtle" onPress={onReject}>
                 Reject

@@ -46,49 +46,12 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   } = useQuery(["txs", walletAddress, chainId], () =>
     getTransactions({ address: walletAddress, chainId, sort: "desc" })
   );
-
-  const {
-    data: deployWalletTx,
-    isLoading: deployWalletTxLoading,
-    refetch: refetchDeployWalletTx,
-  } = useQuery(
-    ["deployWalletTx", walletAddress, chainId],
-    async () =>
-      getTransactions({
-        address: walletAddress,
-        chainId,
-        internal: true,
-        offset: 20,
-      }),
-    {
-      select: (txs) => {
-        const deployContractTx = txs.find((tx) => !tx.to);
-        return (
-          txs.find(
-            (tx) =>
-              tx.hash === deployContractTx?.hash &&
-              isEqualCaseInsensitive(
-                tx.to,
-                Constants.expoConfig.extra.relayerAddress
-              )
-          ) || null
-        );
-      },
-    }
-  );
-
-  const allTxs = useMemo(() => {
-    if (!deployWalletTx) return txs;
-    return orderBy([...txs, deployWalletTx], (tx) => tx.timeStamp, "desc");
-  }, [txs, deployWalletTx]);
-
   const txsByHash = useMemo(() => keyBy(txs, "hash"), [txs]);
 
   const handleRefresh = () => {
     refetchTxs();
     refetchTokens();
     refetchBalance();
-    refetchDeployWalletTx();
   };
 
   const renderTransaction = ({ item: transaction }: { item: Transaction }) => {
@@ -104,17 +67,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
       <PendingTransactionItem
         txsByHash={txsByHash}
         transaction={transaction}
-        onSuccess={(receipt) => {
-          if (transaction.callRequest) {
-            const connector = connectors.find(
-              (connector) => connector.peerId === transaction.callRequest.peerId
-            );
-            if (!connector) return;
-            connector.approveRequest({
-              id: transaction.callRequest.id,
-              result: receipt.transactionHash,
-            });
-          }
+        onSuccess={() => {
           toast.show({
             render: () => (
               <ToastAlert status="success" title="Transaction confirmed" />
@@ -132,13 +85,10 @@ const TransactionHistory = ({ walletAddress }: Props) => {
         contentContainerStyle={{ padding: 16, paddingTop: 8 }}
         sections={[
           { data: pendingTxs, renderItem: renderPendingTransaction },
-          { data: allTxs, renderItem: renderTransaction },
+          { data: txs, renderItem: renderTransaction },
         ]}
         refreshControl={
-          <RefreshControl
-            refreshing={txsLoading || deployWalletTxLoading}
-            onRefresh={handleRefresh}
-          />
+          <RefreshControl refreshing={txsLoading} onRefresh={handleRefresh} />
         }
       />
     </>

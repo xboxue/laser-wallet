@@ -5,7 +5,7 @@ import { useProvider } from "wagmi";
 import { TRANSACTION_TYPES } from "../../constants/transactions";
 import { selectChainId } from "../../features/network/networkSlice";
 import { Transaction } from "../../services/etherscan";
-import decodeEtherscanTxData from "../../utils/decodeTransactionData";
+import { decodeTxDataByHash } from "../../utils/decodeTransactionData";
 import TokenTransactionItem from "../TokenTransactionItem/TokenTransactionItem";
 import WalletTransactionItem from "../WalletTransactionItem/WalletTransactionItem";
 
@@ -19,7 +19,7 @@ const TransactionItemContainer = ({ transaction }: Props) => {
   const provider = useProvider({ chainId });
 
   const { data: txData } = useQuery(["txData", transaction.hash], () =>
-    decodeEtherscanTxData(provider, transaction)
+    decodeTxDataByHash(provider, transaction.hash)
   );
   if (!txData) return null;
 
@@ -31,7 +31,11 @@ const TransactionItemContainer = ({ transaction }: Props) => {
       <TokenTransactionItem
         txData={txData}
         onPress={() =>
-          navigation.navigate("TransactionDetails", { transaction, txData })
+          navigation.navigate("TransactionDetails", {
+            receipt: transaction,
+            hash: transaction.hash,
+            txData,
+          })
         }
       />
     );
@@ -41,7 +45,11 @@ const TransactionItemContainer = ({ transaction }: Props) => {
     <WalletTransactionItem
       txData={txData}
       onPress={() =>
-        navigation.navigate("TransactionDetails", { transaction, txData })
+        navigation.navigate("TransactionDetails", {
+          receipt: transaction,
+          hash: transaction.hash,
+          txData,
+        })
       }
     />
   );

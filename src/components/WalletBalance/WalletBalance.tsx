@@ -11,11 +11,7 @@ interface Props {
 
 const WalletBalance = ({ walletAddress }: Props) => {
   const chainId = useSelector(selectChainId);
-  const {
-    data: balance,
-    isLoading,
-    error,
-  } = useBalance({
+  const { data: balance, isLoading } = useBalance({
     addressOrName: walletAddress,
     chainId,
   });

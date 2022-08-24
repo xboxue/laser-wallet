@@ -9,10 +9,7 @@ import TokenBalances from "../components/TokenBalances/TokenBalances";
 import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
-import {
-  selectIsWalletDeployed,
-  selectWalletAddress,
-} from "../features/wallet/walletSlice";
+import { selectWalletAddress } from "../features/wallet/walletSlice";
 import useWalletConnectSubscription from "../hooks/useWalletConnectSubscription";
 import formatAddress from "../utils/formatAddress";
 
@@ -24,13 +21,12 @@ const routes = [
 const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
-  const isWalletDeployed = useSelector(selectIsWalletDeployed);
   const window = useWindowDimensions();
   useWalletConnectSubscription();
 
-  const { tab } = route.params;
+  if (!walletAddress) throw new Error();
 
-  if (!walletAddress) return <Text>Error</Text>;
+  const { tab } = route.params;
 
   const renderTabBar = ({
     navigationState,
@@ -71,17 +67,11 @@ const HomeScreen = ({ route }) => {
       <Box flexDir="row" justifyContent="space-between" px="1">
         <IconButton
           icon={<Icon as={Ionicons} name="settings-outline" />}
-          onPress={() => {
-            navigation.navigate("Settings");
-          }}
+          onPress={() => navigation.navigate("Settings")}
         />
         <IconButton
           icon={<Icon as={Ionicons} name="qr-code-outline" />}
-          onPress={() => {
-            if (!isWalletDeployed)
-              return navigation.navigate("SignUpDeployWallet");
-            navigation.navigate("QRCodeScan");
-          }}
+          onPress={() => navigation.navigate("QRCodeScan")}
         />
       </Box>
       <Box p="4">
@@ -95,8 +85,6 @@ const HomeScreen = ({ route }) => {
           mt="4"
           mb="5"
           onPress={() => {
-            if (!isWalletDeployed)
-              return navigation.navigate("SignUpDeployWallet");
             navigation.navigate("SendAddress");
           }}
         >

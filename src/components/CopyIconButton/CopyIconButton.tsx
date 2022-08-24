@@ -1,28 +1,31 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Clipboard from "expo-clipboard";
-import { Icon, IconButton, Tooltip } from "native-base";
+import { Icon, IconButton, Tooltip, useToast } from "native-base";
 import { useState } from "react";
+import ToastAlert from "../ToastAlert/ToastAlert";
 
 interface Props {
   value: string;
 }
 
 const CopyIconButton = ({ value }: Props) => {
-  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const toast = useToast();
 
   return (
-    <Tooltip label="Copied" isOpen={tooltipOpen} hasArrow placement="top">
-      <IconButton
-        size="sm"
-        variant="ghost"
-        icon={<Icon as={<Ionicons name="copy-outline" />} />}
-        onPress={() => {
-          Clipboard.setStringAsync(value);
-          setTooltipOpen(true);
-          setTimeout(() => setTooltipOpen(false), 1000);
-        }}
-      />
-    </Tooltip>
+    <IconButton
+      size="sm"
+      variant="ghost"
+      icon={<Icon as={<Ionicons name="copy-outline" />} />}
+      onPress={() => {
+        Clipboard.setStringAsync(value);
+        toast.show({
+          render: () => (
+            <ToastAlert status="success" title="Copied to clipboard" />
+          ),
+          duration: 2000,
+        });
+      }}
+    />
   );
 };
 

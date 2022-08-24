@@ -1,22 +1,21 @@
 import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import Constants from "expo-constants";
+import { Contract, ethers } from "ethers";
+import { parseEther, parseUnits } from "ethers/lib/utils";
+import * as SecureStore from "expo-secure-store";
 import { Box, Button, Skeleton, Stack, Text, useToast } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
-import { useFeeData, useProvider } from "wagmi";
+import { erc20ABI, useFeeData, useProvider } from "wagmi";
 import ToastAlert from "../components/ToastAlert/ToastAlert";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
-import useLaser from "../hooks/useLaser";
-import { sendTransaction } from "../services/wallet";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
 
 const SendConfirmScreen = ({ route }) => {
   const chainId = useSelector(selectChainId);
   const walletAddress = useSelector(selectWalletAddress);
-  const laser = useLaser();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const toast = useToast();
@@ -30,43 +29,43 @@ const SendConfirmScreen = ({ route }) => {
       const block = await provider.getBlock("latest");
       return block.baseFeePerGas;
     },
-    { refetchInterval: 1000 }
+    { refetchInterval: 5000 }
   );
+  const { data: feeData, isLoading: feeDataLoading } = useFeeData();
 
   const { data: gasEstimate, isLoading: gasEstimateLoading } = useQuery(
     ["gasEstimate", amount, to, token],
     async () => {
-      const txInfo = {
-        maxFeePerGas: 0,
-        maxPriorityFeePerGas: 0,
-        gasLimit: 1000000,
-        relayer: Constants.expoConfig.extra.relayerAddress,
-      };
-
-      const transaction = await (token.isToken
-        ? laser.transferERC20(token.address, to, amount, txInfo)
-        : laser.sendEth(to, amount, txInfo));
-      return laser.estimateLaserGas(transaction);
+      if (token.isToken) {
+        const erc20 = new Contract(token.address, erc20ABI, provider);
+        return erc20.estimateGas.transfer(
+          to,
+          parseUnits(amount, token.decimals)
+        );
+      }
+      return provider.estimateGas({
+        from: walletAddress,
+        to,
+        value: parseEther(amount),
+      });
     }
   );
 
-  const { data: feeData, isLoading: feeDataLoading } = useFeeData();
-
-  const { mutate: transferTokens, isLoading: sendingTokens } = useMutation(
+  const { mutate: sendToken, isLoading: sendingToken } = useMutation(
     async () => {
-      if (!gasEstimate)
-        throw new Error("Unable to estimate gas. Please try again.");
-      const transaction = await laser.transferERC20(token.address, to, amount, {
-        maxFeePerGas: 0,
-        maxPriorityFeePerGas: 0,
-        gasLimit: gasEstimate.add(20000),
-        relayer: Constants.expoConfig.extra.relayerAddress,
+      const privateKey = await SecureStore.getItemAsync("privateKey", {
+        requireAuthentication: true,
       });
-      const hash = await sendTransaction({
-        transaction,
-        sender: walletAddress,
-        chainId,
-      });
+      if (!privateKey) throw new Error("No private key");
+
+      const owner = new ethers.Wallet(privateKey).connect(provider);
+      const erc20 = new Contract(token.address, erc20ABI, owner);
+      const transaction = await erc20.populateTransaction.transfer(
+        to,
+        parseUnits(amount, token.decimals)
+      );
+
+      const { hash } = await owner.sendTransaction(transaction);
       return { ...transaction, hash };
     },
     {
@@ -84,19 +83,17 @@ const SendConfirmScreen = ({ route }) => {
 
   const { mutate: sendEth, isLoading: sendingEth } = useMutation(
     async () => {
-      if (!gasEstimate)
-        throw new Error("Unable to estimate gas. Please try again.");
-      const transaction = await laser.sendEth(to, amount, {
-        maxFeePerGas: 0,
-        maxPriorityFeePerGas: 0,
-        gasLimit: gasEstimate.add(20000),
-        relayer: Constants.expoConfig.extra.relayerAddress,
+      const privateKey = await SecureStore.getItemAsync("privateKey", {
+        requireAuthentication: true,
       });
-      const hash = await sendTransaction({
-        sender: walletAddress,
-        transaction,
-        chainId,
+      if (!privateKey) throw new Error("No private key");
+
+      const owner = new ethers.Wallet(privateKey).connect(provider);
+      const transaction = await owner.populateTransaction({
+        to,
+        value: parseEther(amount),
       });
+      const { hash } = await owner.sendTransaction(transaction);
       return { ...transaction, hash };
     },
     {
@@ -156,8 +153,8 @@ const SendConfirmScreen = ({ route }) => {
           {renderGasFee()}
         </Box>
         <Button
-          onPress={token.isToken ? transferTokens : sendEth}
-          isLoading={sendingEth || sendingTokens}
+          onPress={token.isToken ? sendToken : sendEth}
+          isLoading={sendingEth || sendingToken}
           isDisabled={gasEstimateLoading}
         >
           Confirm

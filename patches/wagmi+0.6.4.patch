@@ -1,39 +1,39 @@
 diff --git a/node_modules/wagmi/dist/wagmi.cjs.dev.js b/node_modules/wagmi/dist/wagmi.cjs.dev.js
-index 909d868..8b79cf8 100644
+index c3d3b34..1f91601 100644
 --- a/node_modules/wagmi/dist/wagmi.cjs.dev.js
 +++ b/node_modules/wagmi/dist/wagmi.cjs.dev.js
-@@ -8,7 +8,7 @@ var reactQuery = require('react-query');
- var persistQueryClient = require('react-query/persistQueryClient');
- var createWebStoragePersister = require('react-query/createWebStoragePersister');
+@@ -8,7 +8,7 @@ var reactQueryPersistClient = require('@tanstack/react-query-persist-client');
+ var core = require('@wagmi/core');
  var ethers = require('ethers/lib/ethers');
+ var React = require('react');
 -var pkg = require('use-sync-external-store/shim/index.js');
 +var pkg = require('use-sync-external-store/shim');
  var withSelector_js = require('use-sync-external-store/shim/with-selector.js');
  
  function _interopNamespace(e) {
 diff --git a/node_modules/wagmi/dist/wagmi.cjs.prod.js b/node_modules/wagmi/dist/wagmi.cjs.prod.js
-index 909d868..8b79cf8 100644
+index c3d3b34..1f91601 100644
 --- a/node_modules/wagmi/dist/wagmi.cjs.prod.js
 +++ b/node_modules/wagmi/dist/wagmi.cjs.prod.js
-@@ -8,7 +8,7 @@ var reactQuery = require('react-query');
- var persistQueryClient = require('react-query/persistQueryClient');
- var createWebStoragePersister = require('react-query/createWebStoragePersister');
+@@ -8,7 +8,7 @@ var reactQueryPersistClient = require('@tanstack/react-query-persist-client');
+ var core = require('@wagmi/core');
  var ethers = require('ethers/lib/ethers');
+ var React = require('react');
 -var pkg = require('use-sync-external-store/shim/index.js');
 +var pkg = require('use-sync-external-store/shim');
  var withSelector_js = require('use-sync-external-store/shim/with-selector.js');
  
  function _interopNamespace(e) {
 diff --git a/node_modules/wagmi/dist/wagmi.esm.js b/node_modules/wagmi/dist/wagmi.esm.js
-index eb3e237..892e51e 100644
+index a58322e..b6c57be 100644
 --- a/node_modules/wagmi/dist/wagmi.esm.js
 +++ b/node_modules/wagmi/dist/wagmi.esm.js
-@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider, useQueryClient, useIsRestoring, useQu
- import { persistQueryClient } from 'react-query/persistQueryClient';
- import { createWebStoragePersister } from 'react-query/createWebStoragePersister';
- import { BigNumber, Contract } from 'ethers/lib/ethers';
+@@ -5,7 +5,7 @@ import { createClient as createClient$1, watchProvider, getProvider, watchWebSoc
+ export { AddChainError, ChainDoesNotSupportMulticallError, ChainMismatchError, ChainNotConfiguredError, Client, Connector, ConnectorAlreadyConnectedError, ConnectorNotFoundError, ContractMethodNoResultError, ProviderChainsNotFound, ProviderRpcError, ResourceUnavailableError, RpcError, SwitchChainError, SwitchChainNotSupportedError, UserRejectedRequestError, alchemyRpcUrls, allChains, chain, chainId, configureChains, createStorage, deepEqual, defaultChains, defaultL2Chains, erc20ABI, erc721ABI, etherscanBlockExplorers, infuraRpcUrls, publicRpcUrls, readContracts } from '@wagmi/core';
+ import { BigNumber } from 'ethers/lib/ethers';
+ import * as React from 'react';
 -import * as pkg from 'use-sync-external-store/shim/index.js';
 +import * as pkg from 'use-sync-external-store/shim';
  import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector.js';
  
- /** Forked from https://github.com/epoberezkin/fast-deep-equal */
+ const findAndReplace = (cacheRef, _ref) => {

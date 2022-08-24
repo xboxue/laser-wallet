@@ -27,6 +27,8 @@ import ToastAlert from "../ToastAlert/ToastAlert";
 import WalletConnectRequestPrompt from "./WalletConnectRequestPrompt/WalletConnectRequestPrompt";
 import WalletConnectSessionPrompt from "./WalletConnectSessionPrompt/WalletConnectSessionPrompt";
 import WalletConnectTransactionPrompt from "./WalletConnectTransactionPrompt/WalletConnectTransactionPrompt";
+import * as SecureStore from "expo-secure-store";
+import { useProvider } from "wagmi";
 
 interface Props {
   walletAddress: string;
@@ -38,89 +40,71 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
   const connectors = useSelector(selectConnectors);
   const sessionRequest = useSelector(selectSessionRequest);
   const callRequest = useSelector(selectCallRequest);
-  const ownerPrivateKey = useSelector(selectOwnerPrivateKey);
   const isConnecting = useSelector(selectIsConnecting);
   const chainId = useSelector(selectChainId);
-  const wallets = useSelector(selectWallets);
-  const laser = useLaser();
   const toast = useToast();
-  const navigation = useNavigation();
+  const provider = useProvider({ chainId });
 
   const getConnector = (peerId: string) => {
     return connectors.find((connector) => connector.peerId === peerId);
   };
 
   const { mutate: approveCallRequest, isLoading } = useMutation(
-    async (gasEstimate?: BigNumber) => {
-      if (!ownerPrivateKey || !callRequest) throw new Error("No call request");
+    async () => {
+      if (!callRequest) throw new Error("No call request");
+
+      const privateKey = await SecureStore.getItemAsync("privateKey", {
+        requireAuthentication: true,
+      });
+      if (!privateKey) throw new Error("No private key");
+
       const connector = getConnector(callRequest.peerId);
       if (!connector) throw new Error("No connector");
 
-      const owner = new ethers.Wallet(ownerPrivateKey);
+      const owner = new ethers.Wallet(privateKey);
 
       if (
         callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
         callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA_V4
       ) {
         return signTypedData({
-          privateKey: ethers.utils.arrayify(ownerPrivateKey),
+          privateKey: ethers.utils.arrayify(privateKey),
           version: SignTypedDataVersion.V4,
           data: JSON.parse(callRequest.params[1]),
         });
       }
-
       if (callRequest.method === REQUEST_TYPES.PERSONAL_SIGN) {
         return owner.signMessage(utils.arrayify(callRequest.params[0]));
       }
-
       if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
-        const { to, value = 0, data } = callRequest.params[0];
-        if (!gasEstimate)
-          throw new Error("Unable to estimate gas. Please try again.");
-
-        const transaction = await laser.execTransaction(to, value, data, {
-          maxFeePerGas: 0,
-          maxPriorityFeePerGas: 0,
-          gasLimit: gasEstimate.add(20000),
-          relayer: Constants.expoConfig.extra.relayerAddress,
+        const transaction = callRequest.params[0];
+        const { hash } = await owner.connect(provider).sendTransaction({
+          from: transaction.from,
+          to: transaction.to,
+          data: transaction.data,
+          gasLimit: transaction.gas,
+          value: transaction.value,
+          nonce: transaction.nonce,
         });
-
-        const hash = await sendTransaction({
-          sender: walletAddress,
-          transaction,
-          chainId,
-        });
-        dispatch(addPendingTransaction({ ...transaction, hash, callRequest }));
+        dispatch(addPendingTransaction({ ...transaction, hash }));
         return hash;
       }
-
       if (callRequest.method === REQUEST_TYPES.SIGN_TRANSACTION) {
-        const { to, value = 0, data } = callRequest.params[0];
-        if (!gasEstimate)
-          throw new Error("Unable to estimate gas. Please try again.");
-
-        return laser.execTransaction(to, value, data, {
-          maxFeePerGas: 0,
-          maxPriorityFeePerGas: 0,
-          gasLimit: gasEstimate.add(20000),
-          relayer: Constants.expoConfig.extra.relayerAddress,
+        const transaction = callRequest.params[0];
+        return owner.signTransaction({
+          from: transaction.from,
+          to: transaction.to,
+          data: transaction.data,
+          gasLimit: transaction.gas,
+          value: transaction.value,
+          nonce: transaction.nonce,
         });
       }
-
       if (callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN) {
         const id = parseInt(callRequest.params[0].chainId, 16);
-
-        const walletsByChain = keyBy(wallets, "chainId");
-        if (walletsByChain[id]) {
-          dispatch(setWalletAddress(walletsByChain[id].address));
-          dispatch(setChainId(id));
-          return null;
-        } else {
-          navigation.navigate("SignUpDeployWallet", { chainId: id });
-          throw new Error("No active wallet for chain");
-        }
+        dispatch(setChainId(id));
+        return null;
       }
-
       throw new Error("Unsupported method");
     },
     {
@@ -135,8 +119,9 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
               <ToastAlert status="success" title="Transaction sent" />
             ),
           });
-          dispatch(setCallRequest(null));
-          return;
+        } else if (callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN) {
+          const id = parseInt(callRequest.params[0].chainId, 16);
+          connector.updateSession({ accounts: [walletAddress], chainId: id });
         }
 
         connector.approveRequest({
@@ -144,15 +129,6 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           result,
         });
         dispatch(setCallRequest(null));
-
-        if (callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN) {
-          const id = parseInt(callRequest.params[0].chainId, 16);
-          const walletsByChain = keyBy(wallets, "chainId");
-          connector.updateSession({
-            accounts: [walletsByChain[id].address],
-            chainId: id,
-          });
-        }
       },
     }
   );
