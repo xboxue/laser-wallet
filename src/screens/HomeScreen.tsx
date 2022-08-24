@@ -26,7 +26,7 @@ const HomeScreen = ({ route }) => {
 
   if (!walletAddress) throw new Error();
 
-  const { tab } = route.params;
+  const tab = route?.params?.tab || 0;
 
   const renderTabBar = ({
     navigationState,
