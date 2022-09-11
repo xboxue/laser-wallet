@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { providers } from "ethers";
-import { Transaction } from "laser-sdk/dist/types";
 import { RootState } from "../../store";
 import { CallRequest } from "../walletConnect/walletConnectSlice";
 
 export interface PendingTransaction extends providers.TransactionResponse {
   hash: string;
   callRequest?: CallRequest;
+  isDeployVault?: boolean;
 }
 
 interface TransactionsState {

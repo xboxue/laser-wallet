@@ -1,19 +1,13 @@
 import { signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
-import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
-import { BigNumber, ethers, utils } from "ethers";
-import Constants from "expo-constants";
-import { keyBy } from "lodash";
+import { ethers, utils } from "ethers";
+import * as SecureStore from "expo-secure-store";
 import { useToast } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
+import { useProvider } from "wagmi";
 import { REQUEST_TYPES } from "../../constants/walletConnect";
 import { selectChainId, setChainId } from "../../features/network/networkSlice";
 import { addPendingTransaction } from "../../features/transactions/transactionsSlice";
-import {
-  selectOwnerPrivateKey,
-  selectWallets,
-  setWalletAddress,
-} from "../../features/wallet/walletSlice";
 import {
   selectCallRequest,
   selectConnectors,
@@ -21,14 +15,10 @@ import {
   selectSessionRequest,
   setCallRequest,
 } from "../../features/walletConnect/walletConnectSlice";
-import useLaser from "../../hooks/useLaser";
-import { sendTransaction } from "../../services/wallet";
 import ToastAlert from "../ToastAlert/ToastAlert";
 import WalletConnectRequestPrompt from "./WalletConnectRequestPrompt/WalletConnectRequestPrompt";
 import WalletConnectSessionPrompt from "./WalletConnectSessionPrompt/WalletConnectSessionPrompt";
 import WalletConnectTransactionPrompt from "./WalletConnectTransactionPrompt/WalletConnectTransactionPrompt";
-import * as SecureStore from "expo-secure-store";
-import { useProvider } from "wagmi";
 
 interface Props {
   walletAddress: string;
@@ -77,27 +67,25 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
         return owner.signMessage(utils.arrayify(callRequest.params[0]));
       }
       if (callRequest.method === REQUEST_TYPES.SEND_TRANSACTION) {
-        const transaction = callRequest.params[0];
-        const { hash } = await owner.connect(provider).sendTransaction({
-          from: transaction.from,
-          to: transaction.to,
-          data: transaction.data,
-          gasLimit: transaction.gas,
-          value: transaction.value,
-          nonce: transaction.nonce,
-        });
-        dispatch(addPendingTransaction({ ...transaction, hash }));
-        return hash;
+        const { from, to, data, gasLimit, value, nonce } =
+          callRequest.params[0];
+
+        const transaction = await owner
+          .connect(provider)
+          .sendTransaction({ from, to, data, gasLimit, value, nonce });
+        dispatch(addPendingTransaction(transaction));
+        return transaction.hash;
       }
       if (callRequest.method === REQUEST_TYPES.SIGN_TRANSACTION) {
-        const transaction = callRequest.params[0];
+        const { from, to, data, gasLimit, value, nonce } =
+          callRequest.params[0];
         return owner.signTransaction({
-          from: transaction.from,
-          to: transaction.to,
-          data: transaction.data,
-          gasLimit: transaction.gas,
-          value: transaction.value,
-          nonce: transaction.nonce,
+          from,
+          to,
+          data,
+          gasLimit,
+          value,
+          nonce,
         });
       }
       if (callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN) {

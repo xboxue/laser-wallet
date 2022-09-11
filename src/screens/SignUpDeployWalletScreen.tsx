@@ -1,54 +1,31 @@
 import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { BigNumber } from "ethers";
-import { parseEther } from "ethers/lib/utils";
-import Constants from "expo-constants";
-import { calculateDeploymentCost } from "laser-sdk/dist/utils";
+import { Wallet } from "ethers";
+import * as SecureStore from "expo-secure-store";
+import { LaserFactory } from "laser-sdk";
+import { estimateDeployGas } from "laser-sdk/dist/utils";
 import { Box, Button, Skeleton, Text, useToast } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
-import { useBalance, useProvider } from "wagmi";
-import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
+import { useBalance, useFeeData, useProvider } from "wagmi";
 import ToastAlert from "../components/ToastAlert/ToastAlert";
-import { DEFAULT_CHAIN } from "../constants/chains";
 import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
-import {
-  addWallet,
-  selectOwnerAddress,
-  selectRecoveryOwnerAddress,
-  selectSalt,
-} from "../features/wallet/walletSlice";
-import useBlocker from "../hooks/useBlocker";
-import useLaserFactory from "../hooks/useLaserFactory";
-import { createWallet } from "../services/wallet";
-import formatAddress from "../utils/formatAddress";
+import { selectChainId } from "../features/network/networkSlice";
+import { addPendingTransaction } from "../features/transactions/transactionsSlice";
+import { selectWalletAddress } from "../features/wallet/walletSlice";
 import formatAmount from "../utils/formatAmount";
-import waitForTransaction from "../utils/waitForTransaction";
 
 const SignUpDeployWalletScreen = ({ route }) => {
-  const chainId = route.params?.chainId || DEFAULT_CHAIN;
+  const { salt, recoveryOwnerAddress } = route.params;
+  const chainId = useSelector(selectChainId);
   const provider = useProvider({ chainId });
   const navigation = useNavigation();
   const dispatch = useDispatch();
+
+  const walletAddress = useSelector(selectWalletAddress);
   const toast = useToast();
-
-  const factory = useLaserFactory(chainId);
-  const ownerAddress = useSelector(selectOwnerAddress);
-  const recoveryOwnerAddress = useSelector(selectRecoveryOwnerAddress);
   const guardianAddresses = useSelector(selectGuardianAddresses);
-  const salt = useSelector(selectSalt);
 
-  const { data: walletAddress, isLoading: walletAddressLoading } = useQuery(
-    ["walletAddress", chainId],
-    () =>
-      factory.preComputeAddress(
-        ownerAddress,
-        [recoveryOwnerAddress],
-        guardianAddresses,
-        salt
-      )
-  );
-
-  const { data: balance, isLoading } = useBalance({
+  const { data: balance, isLoading: balanceLoading } = useBalance({
     addressOrName: walletAddress,
     chainId,
     watch: true,
@@ -56,55 +33,59 @@ const SignUpDeployWalletScreen = ({ route }) => {
 
   const { mutate: onCreateWallet, isLoading: isCreating } = useMutation(
     async () => {
-      const transaction = await factory.createWallet(
-        ownerAddress,
+      const privateKey = await SecureStore.getItemAsync("privateKey", {
+        requireAuthentication: true,
+      });
+      const ownerPrivateKey = await SecureStore.getItemAsync(
+        "ownerPrivateKey",
+        { requireAuthentication: true }
+      );
+
+      if (!ownerPrivateKey || !privateKey) throw new Error("No private key");
+
+      const owner = new Wallet(ownerPrivateKey);
+
+      const factory = new LaserFactory(provider, owner);
+      return factory.createWallet(
+        owner.address,
         [recoveryOwnerAddress],
         guardianAddresses,
-        0,
-        0,
-        BigNumber.from(deployFee?.gas).add(100000),
         salt,
-        Constants.expoConfig.extra.relayerAddress
+        new Wallet(privateKey)
       );
-      const hash = await createWallet({ chainId, transaction });
-      return waitForTransaction({ hash, chainId });
     },
     {
-      onSuccess: (receipt) => {
-        if (receipt.status === 0) {
-          toast.show({
-            render: () => (
-              <ToastAlert
-                status="error"
-                title="Wallet activation failed. Please try again"
-              />
-            ),
-          });
-        } else if (receipt.status === 1) {
-          dispatch(addWallet({ address: walletAddress, chainId }));
-          navigation.navigate("Home");
-          toast.show({
-            render: () => (
-              <ToastAlert status="success" title="Wallet activated" />
-            ),
-          });
-        }
+      onSuccess: (transaction) => {
+        toast.show({
+          render: () => (
+            <ToastAlert status="success" title="Transaction sent" />
+          ),
+        });
+        dispatch(
+          addPendingTransaction({ ...transaction, isDeployVault: true })
+        );
+        navigation.navigate("Home", { tab: 1 });
       },
     }
   );
 
-  const { data: deployFee, isLoading: deployFeeLoading } = useQuery(
-    ["deployFee"],
-    () =>
-      calculateDeploymentCost(provider, guardianAddresses, [
-        recoveryOwnerAddress,
-      ])
+  const { data: gasEstimate, isLoading: gasEstimateLoading } = useQuery(
+    ["gasEstimate", guardianAddresses],
+    () => estimateDeployGas(guardianAddresses, [recoveryOwnerAddress])
   );
 
-  useBlocker(isCreating);
+  const { data: baseFeePerGas, isLoading: baseFeePerGasLoading } = useQuery(
+    ["baseFeePerGas"],
+    async () => {
+      const block = await provider.getBlock("latest");
+      return block.baseFeePerGas;
+    },
+    { refetchInterval: 5000 }
+  );
+  const { data: feeData, isLoading: feeDataLoading } = useFeeData();
 
   const renderBalance = () => {
-    if (isLoading || !balance) return <Skeleton w="16" h="6" />;
+    if (balanceLoading || !balance) return <Skeleton w="16" h="6" />;
 
     return (
       <Text variant="subtitle1">
@@ -114,48 +95,44 @@ const SignUpDeployWalletScreen = ({ route }) => {
   };
 
   const renderDeployFee = () => {
-    if (deployFeeLoading || !deployFee || !balance)
-      return <Skeleton w="16" h="6" />;
+    if (!feeData?.maxPriorityFeePerGas || !baseFeePerGas || !gasEstimate) {
+      return <Skeleton w="16" h="5" />;
+    }
+
+    const gasFee = baseFeePerGas
+      .add(feeData.maxPriorityFeePerGas)
+      .mul(gasEstimate);
 
     return (
       <Text variant="subtitle1">
-        {formatAmount(parseEther(deployFee.eth), { precision: 6 })}{" "}
-        {balance.symbol}
+        {formatAmount(gasFee, { precision: 6 })} ETH
       </Text>
     );
   };
 
   return (
     <Box p="4">
-      <Text variant="subtitle1">Activate wallet</Text>
-      <Text mb="4">
-        There is a one-time setup fee to activate your wallet. We recommend
-        depositing more than the activation fee to account for network fee
-        changes.
-      </Text>
-      <Text variant="subtitle2">Wallet address:</Text>
-      {walletAddressLoading || !walletAddress ? (
-        <Skeleton w="32" h="6" />
-      ) : (
-        <Box flexDir="row" alignItems="center">
-          <Text variant="subtitle1">{formatAddress(walletAddress)}</Text>
-          <CopyIconButton value={walletAddress} />
-        </Box>
-      )}
+      <Text variant="subtitle1">Activate vault</Text>
+      <Text>There is a one-time network fee to activate your vault.</Text>
       <Text variant="subtitle2" mt="2">
-        Current activation fee:{" "}
+        Network fee:
       </Text>
       {renderDeployFee()}
       <Text variant="subtitle2" mt="2">
-        Balance:{" "}
+        Balance:
       </Text>
       {renderBalance()}
       <Button
         mt="4"
         isDisabled={
-          deployFeeLoading ||
-          isLoading ||
-          (deployFee && balance && balance.value.lt(parseEther(deployFee.eth)))
+          !baseFeePerGas ||
+          !feeData?.maxPriorityFeePerGas ||
+          !gasEstimate ||
+          !balance ||
+          baseFeePerGas
+            .add(feeData.maxPriorityFeePerGas)
+            .mul(gasEstimate)
+            .gt(balance.value)
         }
         onPress={() => onCreateWallet()}
         isLoading={isCreating}

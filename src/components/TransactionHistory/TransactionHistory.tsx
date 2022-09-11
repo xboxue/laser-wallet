@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import Constants from "expo-constants";
-import { keyBy, orderBy } from "lodash";
+import { keyBy } from "lodash";
 import { SectionList, useToast } from "native-base";
 import { useMemo } from "react";
 import { RefreshControl } from "react-native";
@@ -11,10 +10,8 @@ import {
   PendingTransaction,
   selectPendingTransactions,
 } from "../../features/transactions/transactionsSlice";
-import { selectConnectors } from "../../features/walletConnect/walletConnectSlice";
 import useTokenBalances from "../../hooks/useTokenBalances";
 import { getTransactions, Transaction } from "../../services/etherscan";
-import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
 import PendingTransactionItem from "../PendingTransactionItem/PendingTransactionItem";
 import ToastAlert from "../ToastAlert/ToastAlert";
 import TransactionItemContainer from "../TransactionItemContainer/TransactionItemContainer";
@@ -30,7 +27,6 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     () => [...pendingTransactions].reverse(),
     [pendingTransactions]
   );
-  const connectors = useSelector(selectConnectors);
   const toast = useToast();
 
   const { refetch: refetchTokens } = useTokenBalances(walletAddress);

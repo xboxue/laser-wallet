@@ -65,8 +65,7 @@ const SendConfirmScreen = ({ route }) => {
         parseUnits(amount, token.decimals)
       );
 
-      const { hash } = await owner.sendTransaction(transaction);
-      return { ...transaction, hash };
+      return owner.sendTransaction(transaction);
     },
     {
       onSuccess: (transaction) => {
@@ -93,8 +92,7 @@ const SendConfirmScreen = ({ route }) => {
         to,
         value: parseEther(amount),
       });
-      const { hash } = await owner.sendTransaction(transaction);
-      return { ...transaction, hash };
+      return owner.sendTransaction(transaction);
     },
     {
       onSuccess: (transaction) => {

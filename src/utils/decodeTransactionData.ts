@@ -1,5 +1,6 @@
 import { fromUnixTime } from "date-fns";
 import { ethers, providers } from "ethers";
+import { LaserFactory__factory } from "laser-sdk/dist/typechain";
 import { erc20ABI, erc721ABI } from "wagmi";
 import { TRANSACTION_TYPES } from "../constants/transactions";
 
@@ -103,6 +104,17 @@ const decodeContractData = async (
       data: callData,
     });
     return { type: method.name };
+  } catch {}
+
+  try {
+    const factoryInterface = new ethers.utils.Interface(
+      LaserFactory__factory.abi
+    );
+    const method = factoryInterface.parseTransaction({
+      data: callData,
+    });
+    if (method.name === "createProxy")
+      return { type: TRANSACTION_TYPES.DEPLOY_WALLET };
   } catch {}
 
   throw new Error("Unsupported contract type");

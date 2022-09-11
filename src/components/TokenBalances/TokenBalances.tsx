@@ -14,7 +14,7 @@ import { useSelector } from "react-redux";
 import { useBalance } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
 import { selectChainId } from "../../features/network/networkSlice";
-import { selectIsWalletDeployed } from "../../features/wallet/walletSlice";
+import { selectVaultAddress } from "../../features/wallet/walletSlice";
 import useRefreshOnFocus from "../../hooks/useRefreshOnFocus";
 import useTokenBalances, { TokenBalance } from "../../hooks/useTokenBalances";
 import formatAmount from "../../utils/formatAmount";
@@ -34,7 +34,7 @@ interface Props {
 
 const TokenBalances = ({ walletAddress, onPress }: Props) => {
   const chainId = useSelector(selectChainId);
-  const isWalletDeployed = useSelector(selectIsWalletDeployed);
+  const vaultAddress = useSelector(selectVaultAddress);
   const navigation = useNavigation();
 
   const {
@@ -115,9 +115,9 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   };
 
   const renderActivateWallet = () => {
-    if (isWalletDeployed) return null;
+    if (vaultAddress) return null;
     return (
-      <Pressable>
+      <Pressable onPress={() => navigation.navigate("SignUpEmail")}>
         {({ isPressed }) => (
           <Box
             borderColor="gray.200"

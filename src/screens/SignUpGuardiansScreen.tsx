@@ -106,7 +106,7 @@ const SignUpGuardiansScreen = () => {
         </Button>
         <Button
           mt="2"
-          onPress={() => navigation.navigate("SignUpBackup")}
+          onPress={() => navigation.navigate("VaultBackup")}
           isDisabled={!guardians.length && !isLaserGuardianEnabled}
         >
           Next

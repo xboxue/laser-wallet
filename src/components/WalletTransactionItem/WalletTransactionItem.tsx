@@ -18,8 +18,7 @@ interface Props {
 const titles = {
   [TRANSACTION_TYPES.CONTRACT_INTERACTION]: "Contract Interaction",
   [TRANSACTION_TYPES.DEPLOY_CONTRACT]: "Contract Deployment",
-  [TRANSACTION_TYPES.SEND]: "Send",
-  [TRANSACTION_TYPES.DEPLOY_WALLET]: "Activate wallet",
+  [TRANSACTION_TYPES.DEPLOY_WALLET]: "Activate vault",
 };
 
 const WalletTransactionItem = ({
@@ -86,8 +85,8 @@ const WalletTransactionItem = ({
   const renderTitle = () => {
     if (txData.type === TRANSACTION_TYPES.SEND) {
       if (isEqualCaseInsensitive(txData.from.address, walletAddress))
-        return "Send";
-      return "Receive";
+        return "Send ETH";
+      return "Receive ETH";
     }
 
     return titles[txData.type];
@@ -103,9 +102,6 @@ const WalletTransactionItem = ({
   };
 
   const renderAmount = () => {
-    if (txData.type === TRANSACTION_TYPES.DEPLOY_WALLET)
-      return `${formatAmount(txData.gasFee)} ETH`;
-
     return `${formatAmount(txData.value)} ETH`;
   };
 
