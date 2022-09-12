@@ -76,6 +76,7 @@ const AppNavigator = () => {
             name="Home"
             component={HomeScreen}
             initialParams={{ tab: 0 }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="SignUpDeployWallet"

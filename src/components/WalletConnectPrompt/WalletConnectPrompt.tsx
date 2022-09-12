@@ -43,9 +43,11 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
     async () => {
       if (!callRequest) throw new Error("No call request");
 
-      const privateKey = await SecureStore.getItemAsync("privateKey", {
+      const privateKeys = await SecureStore.getItemAsync("privateKeys", {
         requireAuthentication: true,
       });
+      if (!privateKeys) throw new Error("No private key");
+      const privateKey = JSON.parse(privateKeys)[walletAddress];
       if (!privateKey) throw new Error("No private key");
 
       const connector = getConnector(callRequest.peerId);

@@ -53,9 +53,11 @@ const SendConfirmScreen = ({ route }) => {
 
   const { mutate: sendToken, isLoading: sendingToken } = useMutation(
     async () => {
-      const privateKey = await SecureStore.getItemAsync("privateKey", {
+      const privateKeys = await SecureStore.getItemAsync("privateKeys", {
         requireAuthentication: true,
       });
+      if (!privateKeys) throw new Error("No private key");
+      const privateKey = JSON.parse(privateKeys)[walletAddress];
       if (!privateKey) throw new Error("No private key");
 
       const owner = new ethers.Wallet(privateKey).connect(provider);
@@ -82,9 +84,11 @@ const SendConfirmScreen = ({ route }) => {
 
   const { mutate: sendEth, isLoading: sendingEth } = useMutation(
     async () => {
-      const privateKey = await SecureStore.getItemAsync("privateKey", {
+      const privateKeys = await SecureStore.getItemAsync("privateKeys", {
         requireAuthentication: true,
       });
+      if (!privateKeys) throw new Error("No private key");
+      const privateKey = JSON.parse(privateKeys)[walletAddress];
       if (!privateKey) throw new Error("No private key");
 
       const owner = new ethers.Wallet(privateKey).connect(provider);

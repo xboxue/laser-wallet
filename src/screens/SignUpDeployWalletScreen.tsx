@@ -33,9 +33,11 @@ const SignUpDeployWalletScreen = ({ route }) => {
 
   const { mutate: onCreateWallet, isLoading: isCreating } = useMutation(
     async () => {
-      const privateKey = await SecureStore.getItemAsync("privateKey", {
+      const privateKeys = await SecureStore.getItemAsync("privateKeys", {
         requireAuthentication: true,
       });
+      if (!privateKeys) throw new Error("No private key");
+      const privateKey = JSON.parse(privateKeys)[walletAddress];
       const ownerPrivateKey = await SecureStore.getItemAsync(
         "ownerPrivateKey",
         { requireAuthentication: true }

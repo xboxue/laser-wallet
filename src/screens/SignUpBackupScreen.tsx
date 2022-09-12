@@ -3,14 +3,13 @@ import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { generateMnemonic, mnemonicToSeed } from "bip39";
 import { hdkey } from "ethereumjs-wallet";
+import { utils } from "ethers";
 import * as SecureStore from "expo-secure-store";
 import { Box, Button, Text } from "native-base";
 import { useMemo } from "react";
 import { Platform } from "react-native";
 import RNCloudFs from "react-native-cloud-fs";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
-
-const DEFAULT_DERIVATION_PATH = "m/44'/60'/0'/0";
 
 const SignUpBackupScreen = () => {
   const navigation = useNavigation();
@@ -19,10 +18,19 @@ const SignUpBackupScreen = () => {
   const createWallet = async () => {
     const seed = await mnemonicToSeed(seedPhrase);
     const hdwallet = hdkey.fromMasterSeed(seed);
-    const wallet = hdwallet.derivePath(DEFAULT_DERIVATION_PATH).getWallet();
+    const privateKeys: Record<string, string> = {};
+    const wallets = [];
+    for (let i = 0; i < 10; i++) {
+      const wallet = hdwallet
+        .derivePath(utils.defaultPath)
+        .deriveChild(i)
+        .getWallet();
+      privateKeys[wallet.getAddressString()] = wallet.getPrivateKeyString();
+      wallets.push({ address: wallet.getAddressString() });
+    }
     await SecureStore.setItemAsync("seedPhrase", seedPhrase);
-    await SecureStore.setItemAsync("privateKey", wallet.getPrivateKeyString());
-    return wallet.getAddressString();
+    await SecureStore.setItemAsync("privateKeys", JSON.stringify(privateKeys));
+    return wallets;
   };
 
   const { mutate, isLoading: isCreating } = useMutation(
@@ -31,8 +39,8 @@ const SignUpBackupScreen = () => {
       return createWallet();
     },
     {
-      onSuccess: (walletAddress) =>
-        navigation.navigate("SignUpVerifySeedPhrase", { walletAddress }),
+      onSuccess: (wallets) =>
+        navigation.navigate("SignUpVerifySeedPhrase", { wallets }),
     }
   );
 
@@ -56,8 +64,8 @@ const SignUpBackupScreen = () => {
         return createWallet();
       },
       {
-        onSuccess: (walletAddress) =>
-          navigation.navigate("SignUpBackupPassword", { walletAddress }),
+        onSuccess: (wallets) =>
+          navigation.navigate("SignUpBackupPassword", { wallets }),
       }
     );
 

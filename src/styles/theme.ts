@@ -39,6 +39,9 @@ const theme = extendTheme({
     IconButton: {
       defaultProps: {
         colorScheme: "coolGray",
+        _pressed: {
+          bgColor: "gray.200",
+        },
       },
     },
     Button: {

@@ -1,14 +1,13 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Clipboard from "expo-clipboard";
-import { Icon, IconButton, Tooltip, useToast } from "native-base";
-import { useState } from "react";
+import { Icon, IconButton, IIconButtonProps, useToast } from "native-base";
 import ToastAlert from "../ToastAlert/ToastAlert";
 
-interface Props {
+interface Props extends IIconButtonProps {
   value: string;
 }
 
-const CopyIconButton = ({ value }: Props) => {
+const CopyIconButton = ({ value, ...props }: Props) => {
   const toast = useToast();
 
   return (
@@ -25,6 +24,7 @@ const CopyIconButton = ({ value }: Props) => {
           duration: 2000,
         });
       }}
+      {...props}
     />
   );
 };

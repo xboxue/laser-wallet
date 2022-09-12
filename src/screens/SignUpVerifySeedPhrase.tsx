@@ -1,4 +1,3 @@
-import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 import { shuffle } from "lodash";
@@ -6,13 +5,12 @@ import { Badge, Box, Button, FlatList, Text } from "native-base";
 import { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setIsAuthenticated } from "../features/auth/authSlice";
-import { setWalletAddress } from "../features/wallet/walletSlice";
+import { setWalletAddress, setWallets } from "../features/wallet/walletSlice";
 
 const SignUpVerifySeedPhrase = ({ route }) => {
-  const navigation = useNavigation();
   const [firstSelection, setFirstSelection] = useState(null);
   const [lastSelection, setLastSelection] = useState(null);
-  const { walletAddress } = route.params;
+  const { wallets } = route.params;
   const dispatch = useDispatch();
 
   const { data: seedPhrase } = useQuery(["seedPhrase"], async () => {
@@ -87,7 +85,8 @@ const SignUpVerifySeedPhrase = ({ route }) => {
             lastSelection === seedPhrase.split(" ")[words.length - 1]
           ) {
             dispatch(setIsAuthenticated(true));
-            dispatch(setWalletAddress(walletAddress));
+            dispatch(setWalletAddress(wallets[0].address));
+            dispatch(setWallets(wallets));
           } else {
             setFirstSelection(null);
             setLastSelection(null);
