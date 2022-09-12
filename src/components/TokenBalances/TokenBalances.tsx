@@ -69,21 +69,29 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
         })
       }
     >
-      <Box flexDirection="row" alignItems="center" px="4" py="1.5">
-        <Image
-          source={{ uri: token.logoURI.replace("ipfs://", IPFS_GATEWAY_URL) }}
-          fallbackSource={ethIcon}
-          size="9"
-          alt="Token icon"
-        />
-        <Box ml="3">
-          <Text variant="subtitle1">{token.symbol}</Text>
-          <Text>{token.name}</Text>
+      {({ isPressed }) => (
+        <Box
+          flexDirection="row"
+          alignItems="center"
+          px="4"
+          py="1.5"
+          opacity={isPressed ? 0.3 : 1}
+        >
+          <Image
+            source={{ uri: token.logoURI.replace("ipfs://", IPFS_GATEWAY_URL) }}
+            fallbackSource={ethIcon}
+            size="9"
+            alt="Token icon"
+          />
+          <Box ml="3">
+            <Text variant="subtitle1">{token.symbol}</Text>
+            <Text>{token.name}</Text>
+          </Box>
+          <Text variant="subtitle1" ml="auto">
+            {formatAmount(token.balance, { decimals: token.decimals })}
+          </Text>
         </Box>
-        <Text variant="subtitle1" ml="auto">
-          {formatAmount(token.balance, { decimals: token.decimals })}
-        </Text>
-      </Box>
+      )}
     </Pressable>
   );
 
@@ -100,16 +108,24 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
           })
         }
       >
-        <Box flexDirection="row" alignItems="center" px="4" py="1.5">
-          <Image source={ethIcon} size="9" alt="Token icon" />
-          <Box ml="3">
-            <Text variant="subtitle1">{balance.symbol}</Text>
-            <Text>Ethereum</Text>
+        {({ isPressed }) => (
+          <Box
+            flexDirection="row"
+            alignItems="center"
+            px="4"
+            py="1.5"
+            opacity={isPressed ? 0.3 : 1}
+          >
+            <Image source={ethIcon} size="9" alt="Token icon" />
+            <Box ml="3">
+              <Text variant="subtitle1">{balance.symbol}</Text>
+              <Text>Ethereum</Text>
+            </Box>
+            <Text variant="subtitle1" ml="auto">
+              {formatAmount(balance.value, { decimals: balance.decimals })}
+            </Text>
           </Box>
-          <Text variant="subtitle1" ml="auto">
-            {formatAmount(balance.value, { decimals: balance.decimals })}
-          </Text>
-        </Box>
+        )}
       </Pressable>
     );
   };
