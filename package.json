@@ -103,6 +103,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
+    "@typechain/ethers-v5": "^10.1.0",
     "@types/crypto-js": "^4.1.1",
     "@types/react": "~17.0.21",
     "@types/react-native": "~0.66.13",
@@ -122,6 +123,7 @@
     "prettier": "^2.6.2",
     "react-native-svg-transformer": "^1.0.0",
     "rn-nodeify": "^10.3.0",
+    "typechain": "^8.1.0",
     "typescript": "~4.3.5"
   },
   "private": true,

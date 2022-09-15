@@ -2,6 +2,7 @@ import { fromUnixTime } from "date-fns";
 import { ethers, providers } from "ethers";
 import { LaserFactory__factory } from "laser-sdk/dist/typechain";
 import { erc20ABI, erc721ABI } from "wagmi";
+import { Erc20__factory } from "../abis/types";
 import { TRANSACTION_TYPES } from "../constants/transactions";
 
 export const decodeTxDataByHash = async (
@@ -65,7 +66,7 @@ const decodeContractData = async (
     const method = erc20Interface.parseTransaction({
       data: callData,
     });
-    const erc20 = new ethers.Contract(contractAddress, erc20ABI, provider);
+    const erc20 = Erc20__factory.connect(contractAddress, provider);
     if (method.name === TRANSACTION_TYPES.TOKEN_APPROVE) {
       return {
         type: method.name,
