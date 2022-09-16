@@ -82,7 +82,7 @@ const HomeScreen = ({ route }) => {
   };
 
   return (
-    <Box flex={1} pt={6}>
+    <Box flex={1} safeAreaTop pt={6}>
       <Actionsheet
         isOpen={walletSheetOpen}
         onClose={() => setWalletSheetOpen(false)}

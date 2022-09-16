@@ -54,7 +54,7 @@ const SendConfirmScreen = ({ route }) => {
       if (!email) throw new Error("No email");
       if (!signIn) throw new Error();
 
-      if (isSignedIn) await clerk.signOut();
+      await clerk.signOut();
 
       const signInAttempt = await signIn.create({
         identifier: email,
