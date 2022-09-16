@@ -36,7 +36,6 @@ const tokenCache = {
 Sentry.init({
   dsn: Constants.expoConfig.extra.sentryDsn,
 });
-Constants.expoConfig.extra.vaultApi = "https://2875-38-34-50-111.ngrok.io";
 
 const AppWithQueryClient = () => {
   const toast = useToast();
@@ -93,7 +92,6 @@ const App = () => {
   }, []);
 
   if (!loaded) return <AppLoading />;
-  console.log(Constants.expoConfig.extra);
 
   return (
     <Provider store={store}>
