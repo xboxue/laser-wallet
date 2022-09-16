@@ -11,13 +11,21 @@ const SignUpVerifyEmailScreen = () => {
   const navigation = useNavigation();
 
   const { mutate: verifyCode, isLoading } = useMutation(
-    (code: string) => {
+    async (code: string) => {
       if (!signUp) throw new Error();
-      return signUp.attemptEmailAddressVerification({ code });
+      const signUpAttempt = await signUp.attemptEmailAddressVerification({
+        code,
+      });
+
+      if (signUpAttempt.verifications.emailAddress.status !== "verified") {
+        throw new Error("Email verification failed");
+      }
+      return signUpAttempt;
     },
+
     {
-      onSuccess: (data) => {
-        clerk.setSession(data.createdSessionId);
+      onSuccess: async (data) => {
+        await clerk.setSession(data.createdSessionId);
         navigation.dispatch(StackActions.replace("SignUpGuardians"));
       },
       onError: (error) => {

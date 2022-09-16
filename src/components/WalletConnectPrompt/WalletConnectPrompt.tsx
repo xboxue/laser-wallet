@@ -53,7 +53,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
       const connector = getConnector(callRequest.peerId);
       if (!connector) throw new Error("No connector");
 
-      const owner = new ethers.Wallet(privateKey);
+      const owner = new ethers.Wallet(privateKey, provider);
 
       if (
         callRequest.method === REQUEST_TYPES.SIGN_TYPED_DATA ||
@@ -72,9 +72,14 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
         const { from, to, data, gasLimit, value, nonce } =
           callRequest.params[0];
 
-        const transaction = await owner
-          .connect(provider)
-          .sendTransaction({ from, to, data, gasLimit, value, nonce });
+        const transaction = await owner.sendTransaction({
+          from,
+          to,
+          data,
+          gasLimit,
+          value,
+          nonce,
+        });
         dispatch(addPendingTransaction(transaction));
         return transaction.hash;
       }

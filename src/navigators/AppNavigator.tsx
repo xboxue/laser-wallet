@@ -36,6 +36,7 @@ import StartScreen from "../screens/StartScreen";
 import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 import VaultBackupPasswordScreen from "../screens/VaultBackupPasswordScreen";
 import VaultBackupScreen from "../screens/VaultBackupScreen";
+import VaultVerifyEmail from "../screens/VaultVerifyEmail";
 
 const Stack = createStackNavigator();
 
@@ -138,6 +139,7 @@ const AppNavigator = () => {
             name="VaultBackupPassword"
             component={VaultBackupPasswordScreen}
           />
+          <Stack.Screen name="VaultVerifyEmail" component={VaultVerifyEmail} />
         </>
       );
 

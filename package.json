@@ -58,7 +58,7 @@
     "expo-web-browser": "~10.2.1",
     "formik": "^2.2.9",
     "https-browserify": "~0.0.0",
-    "laser-sdk": "^0.6.2",
+    "laser-sdk": "^0.6.4",
     "lodash": "^4.17.21",
     "native-base": "^3.4.5",
     "path-browserify": "0.0.0",

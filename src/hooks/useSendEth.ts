@@ -32,7 +32,7 @@ const useSendEth = (
     const privateKey = JSON.parse(privateKeys)[walletAddress];
     if (!privateKey) throw new Error("No private key");
 
-    const owner = new ethers.Wallet(privateKey).connect(provider);
+    const owner = new ethers.Wallet(privateKey, provider);
     return owner.sendTransaction({ to, value: parseEther(amount) });
   }, options);
 };

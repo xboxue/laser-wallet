@@ -1,5 +1,7 @@
+import { useSignIn } from "@clerk/clerk-expo";
+import { EmailCodeFactor } from "@clerk/types";
 import { useNavigation } from "@react-navigation/native";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { providers } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { Box, Button, Skeleton, Stack, Text, useToast } from "native-base";
@@ -9,7 +11,10 @@ import { Erc20__factory } from "../abis/types";
 import ToastAlert from "../components/ToastAlert/ToastAlert";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
-import { selectWalletAddress } from "../features/wallet/walletSlice";
+import {
+  selectVaultAddress,
+  selectWalletAddress,
+} from "../features/wallet/walletSlice";
 import useSendEth from "../hooks/useSendEth";
 import useSendToken from "../hooks/useSendToken";
 import formatAddress from "../utils/formatAddress";
@@ -18,10 +23,12 @@ import formatAmount from "../utils/formatAmount";
 const SendConfirmScreen = ({ route }) => {
   const chainId = useSelector(selectChainId);
   const walletAddress = useSelector(selectWalletAddress);
+  const vaultAddress = useSelector(selectVaultAddress);
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const toast = useToast();
   const provider = useProvider({ chainId });
+  const { signIn } = useSignIn();
 
   const onSuccess = (transaction: providers.TransactionResponse) => {
     toast.show({
@@ -37,6 +44,25 @@ const SendConfirmScreen = ({ route }) => {
   const { mutate: sendToken, isLoading: isSendingToken } = useSendToken({
     onSuccess,
   });
+
+  const { mutate: sendEmailCode, isLoading: isSendingEmailCode } = useMutation(
+    async () => {
+      if (!signIn) throw new Error();
+
+      const signInAttempt = await signIn.create({
+        identifier: "xboxue@gmail.com",
+      });
+
+      const emailCodeFactor = signInAttempt.supportedFirstFactors.find(
+        ({ strategy }) => strategy === "email_code"
+      ) as EmailCodeFactor;
+
+      await signInAttempt.prepareFirstFactor({
+        strategy: "email_code",
+        emailAddressId: emailCodeFactor.emailAddressId,
+      });
+    }
+  );
 
   const { amount, address: to, ensName, token } = route.params;
 
@@ -113,11 +139,16 @@ const SendConfirmScreen = ({ route }) => {
           {renderGasFee()}
         </Box>
         <Button
-          onPress={() => {
-            if (token.isToken) return sendToken({ to, amount, token });
-            return sendEth({ to, amount });
+          onPress={async () => {
+            if (walletAddress === vaultAddress) {
+              sendEmailCode();
+              return navigation.navigate("VaultVerifyEmail", route.params);
+            }
+
+            if (token.isToken) sendToken({ to, amount, token });
+            else sendEth({ to, amount });
           }}
-          isLoading={isSendingEth || isSendingToken}
+          isLoading={isSendingEth || isSendingToken || isSendingEmailCode}
           isDisabled={gasEstimateLoading}
         >
           Confirm
