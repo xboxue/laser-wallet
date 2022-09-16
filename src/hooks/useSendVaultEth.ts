@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/clerk-expo";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import axios from "axios";
 import { ethers, providers, Wallet } from "ethers";
@@ -30,6 +31,7 @@ const useSendVaultEth = (
   const walletAddress = useSelector(selectWalletAddress);
   const provider = useProvider({ chainId });
   const wallets = useSelector(selectWallets);
+  const { getToken } = useAuth();
 
   return useMutation(async ({ to, amount }: SendEthArgs) => {
     const ownerPrivateKey = await SecureStore.getItemAsync("ownerPrivateKey", {
@@ -51,8 +53,10 @@ const useSendVaultEth = (
       "0x",
       nonce
     );
+    const token = await getToken();
+    if (!token) throw new Error("Not authenticated");
 
-    const signatures = await signHash(hash);
+    const signatures = await signHash(hash, token);
     const tx = bundleTransactions(transaction, {
       ...transaction,
       signatures,

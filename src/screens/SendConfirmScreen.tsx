@@ -1,4 +1,4 @@
-import { useSignIn } from "@clerk/clerk-expo";
+import { useAuth, useClerk, useSignIn } from "@clerk/clerk-expo";
 import { EmailCodeFactor } from "@clerk/types";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -12,6 +12,7 @@ import ToastAlert from "../components/ToastAlert/ToastAlert";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
 import {
+  selectEmail,
   selectVaultAddress,
   selectWalletAddress,
 } from "../features/wallet/walletSlice";
@@ -29,6 +30,9 @@ const SendConfirmScreen = ({ route }) => {
   const toast = useToast();
   const provider = useProvider({ chainId });
   const { signIn } = useSignIn();
+  const email = useSelector(selectEmail);
+  const { isSignedIn } = useAuth();
+  const clerk = useClerk();
 
   const onSuccess = (transaction: providers.TransactionResponse) => {
     toast.show({
@@ -47,10 +51,13 @@ const SendConfirmScreen = ({ route }) => {
 
   const { mutate: sendEmailCode, isLoading: isSendingEmailCode } = useMutation(
     async () => {
+      if (!email) throw new Error("No email");
       if (!signIn) throw new Error();
 
+      if (isSignedIn) await clerk.signOut();
+
       const signInAttempt = await signIn.create({
-        identifier: "xboxue@gmail.com",
+        identifier: email,
       });
 
       const emailCodeFactor = signInAttempt.supportedFirstFactors.find(

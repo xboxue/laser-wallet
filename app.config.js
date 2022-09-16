@@ -41,7 +41,9 @@ export default {
     laserGuardianAddress: process.env.LASER_GUARDIAN_ADDRESS,
     relayerAddress: process.env.RELAYER_ADDRESS,
     sentryDsn: process.env.SENTRY_DSN,
-    backendUrl: process.env.BACKEND_URL,
+    vaultApi: process.env.VAULT_API,
+    graphqlApi: process.env.GRAPHQL_API,
+    clerkApi: process.env.CLERK_API,
   },
   hooks: {
     postPublish: [

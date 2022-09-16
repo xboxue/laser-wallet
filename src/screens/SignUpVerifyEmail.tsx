@@ -4,11 +4,14 @@ import { useFormik } from "formik";
 import { Box, Button, Input, Text } from "native-base";
 import { useMutation } from "@tanstack/react-query";
 import * as yup from "yup";
+import { setEmail } from "../features/wallet/walletSlice";
+import { useDispatch } from "react-redux";
 
 const SignUpVerifyEmailScreen = () => {
   const { signUp } = useSignUp();
   const clerk = useClerk();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const { mutate: verifyCode, isLoading } = useMutation(
     async (code: string) => {
@@ -25,7 +28,7 @@ const SignUpVerifyEmailScreen = () => {
 
     {
       onSuccess: async (data) => {
-        await clerk.setSession(data.createdSessionId);
+        dispatch(setEmail(data.emailAddress));
         navigation.dispatch(StackActions.replace("SignUpGuardians"));
       },
       onError: (error) => {

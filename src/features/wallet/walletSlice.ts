@@ -11,12 +11,14 @@ interface WalletState {
   vaultAddress: string | null;
   // vaults: Wallet[];
   wallets: Wallet[];
+  email: string | null;
 }
 
 const initialState: WalletState = {
   walletAddress: null,
   vaultAddress: null,
   wallets: [],
+  email: null,
 };
 
 const walletSlice = createSlice({
@@ -32,6 +34,9 @@ const walletSlice = createSlice({
     setWallets: (state, action: PayloadAction<Wallet[]>) => {
       state.wallets = action.payload;
     },
+    setEmail: (state, action: PayloadAction<string>) => {
+      state.email = action.payload;
+    },
   },
 });
 
@@ -40,8 +45,9 @@ export const selectWalletAddress = (state: RootState) =>
   state.wallet.walletAddress;
 export const selectVaultAddress = (state: RootState) =>
   state.wallet.vaultAddress;
+export const selectEmail = (state: RootState) => state.wallet.email;
 
-export const { setWalletAddress, setVaultAddress, setWallets } =
+export const { setWalletAddress, setVaultAddress, setWallets, setEmail } =
   walletSlice.actions;
 
 export default walletSlice.reducer;

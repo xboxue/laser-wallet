@@ -1,4 +1,5 @@
-import { ClerkProvider } from "@clerk/clerk-expo";
+import { ApolloProvider } from "@apollo/client";
+import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -20,8 +21,9 @@ import * as Sentry from "sentry-expo";
 import { WagmiConfig } from "wagmi";
 import ToastAlert from "./src/components/ToastAlert/ToastAlert";
 import AppNavigator from "./src/navigators/AppNavigator";
-import getQueryClient from "./src/services/queryClient";
+import getApolloClient from "./src/services/apolloClient";
 import storage from "./src/services/mmkvStorage";
+import getQueryClient from "./src/services/queryClient";
 import wagmiClient from "./src/services/wagmiClient";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
@@ -34,9 +36,11 @@ const tokenCache = {
 Sentry.init({
   dsn: Constants.expoConfig.extra.sentryDsn,
 });
+Constants.expoConfig.extra.vaultApi = "https://2875-38-34-50-111.ngrok.io";
 
 const AppWithQueryClient = () => {
   const toast = useToast();
+  const { getToken } = useAuth();
 
   const onError = (error: unknown) => {
     toast.show({
@@ -54,11 +58,17 @@ const AppWithQueryClient = () => {
   };
 
   return (
-    <QueryClientProvider client={getQueryClient(onError)}>
-      <NavigationContainer theme={{ colors: { background: "white" } }}>
-        <AppNavigator />
-      </NavigationContainer>
-    </QueryClientProvider>
+    <ApolloProvider
+      client={getApolloClient({
+        getToken: () => getToken({ template: "hasura" }),
+      })}
+    >
+      <QueryClientProvider client={getQueryClient(onError)}>
+        <NavigationContainer theme={{ colors: { background: "white" } }}>
+          <AppNavigator />
+        </NavigationContainer>
+      </QueryClientProvider>
+    </ApolloProvider>
   );
 };
 
@@ -83,13 +93,14 @@ const App = () => {
   }, []);
 
   if (!loaded) return <AppLoading />;
+  console.log(Constants.expoConfig.extra);
 
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={getPersistor()}>
         <WagmiConfig client={wagmiClient}>
           <ClerkProvider
-            frontendApi="clerk.eager.panda-0.lcl.dev"
+            frontendApi={Constants.expoConfig.extra.clerkApi}
             tokenCache={tokenCache}
           >
             <NativeBaseProvider theme={theme}>

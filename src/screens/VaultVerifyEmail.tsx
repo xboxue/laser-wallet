@@ -1,16 +1,13 @@
-import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-expo";
-import { StackActions, useNavigation } from "@react-navigation/native";
+import { useAuth, useClerk, useSignIn } from "@clerk/clerk-expo";
+import { useNavigation } from "@react-navigation/native";
+import { useMutation } from "@tanstack/react-query";
+import { providers } from "ethers";
 import { useFormik } from "formik";
 import { Box, Button, Input, Text, useToast } from "native-base";
-import { useMutation } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
 import * as yup from "yup";
-import { providers } from "ethers";
 import ToastAlert from "../components/ToastAlert/ToastAlert";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
-import { useDispatch } from "react-redux";
-import useSendEth from "../hooks/useSendEth";
-import useSendToken from "../hooks/useSendToken";
-import { Laser } from "laser-sdk";
 import useSendVaultEth from "../hooks/useSendVaultEth";
 import useSendVaultToken from "../hooks/useSendVaultToken";
 
@@ -20,6 +17,7 @@ const VaultVerifyEmail = ({ route }) => {
   const { signIn } = useSignIn();
   const toast = useToast();
   const dispatch = useDispatch();
+  const { isSignedIn } = useAuth();
 
   const onSuccess = (transaction: providers.TransactionResponse) => {
     toast.show({
@@ -39,23 +37,21 @@ const VaultVerifyEmail = ({ route }) => {
 
   const { mutate: verifyCode, isLoading } = useMutation(
     async (code: string) => {
-      // if (!signIn) throw new Error();
-      // const signInAttempt = await signIn.attemptFirstFactor({
-      //   strategy: "email_code",
-      //   code,
-      // });
-      // if (signInAttempt.status !== "complete") {
-      //   throw new Error("Sign in failed");
-      // }
-      // return signInAttempt;
+      if (!signIn) throw new Error();
+      const signInAttempt = await signIn.attemptFirstFactor({
+        strategy: "email_code",
+        code,
+      });
+      if (signInAttempt.status !== "complete") {
+        throw new Error("Sign in failed");
+      }
+      return signInAttempt;
     },
     {
       onSuccess: async (data) => {
-        // await clerk.setSession(data.createdSessionId);
+        await clerk.setSession(data.createdSessionId);
         if (token.isToken) sendToken({ to, amount, token });
         else sendEth({ to, amount });
-
-        // navigation.dispatch(StackActions.replace("SignUpGuardians"));
       },
       onError: (error) => {
         const clerkError = error?.errors?.[0];
@@ -66,7 +62,12 @@ const VaultVerifyEmail = ({ route }) => {
 
   const formik = useFormik({
     initialValues: { code: "" },
-    onSubmit: (values) => verifyCode(values.code),
+    onSubmit: (values) => {
+      if (!isSignedIn) return verifyCode(values.code);
+
+      if (token.isToken) sendToken({ to, amount, token });
+      else sendEth({ to, amount });
+    },
     validationSchema: yup.object().shape({
       code: yup.string().required("Required"),
     }),

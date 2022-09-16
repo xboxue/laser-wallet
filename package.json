@@ -11,6 +11,7 @@
     "postinstall": "rn-nodeify --install --yarn --hack 'crypto,buffer,react-native-randombytes,vm,stream,http,https,os,url,net,fs,process' && patch-package"
   },
   "dependencies": {
+    "@apollo/client": "^3.6.9",
     "@clerk/clerk-expo": "^0.9.36",
     "@ethersproject/shims": "^5.6.0",
     "@expo-google-fonts/inter": "^0.2.2",
@@ -57,8 +58,9 @@
     "expo-updates": "~0.13.3",
     "expo-web-browser": "~10.2.1",
     "formik": "^2.2.9",
+    "graphql": "^16.6.0",
     "https-browserify": "~0.0.0",
-    "laser-sdk": "^0.6.4",
+    "laser-sdk": "^0.6.5",
     "lodash": "^4.17.21",
     "native-base": "^3.4.5",
     "path-browserify": "0.0.0",

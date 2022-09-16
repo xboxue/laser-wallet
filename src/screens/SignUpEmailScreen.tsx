@@ -70,7 +70,7 @@ const SignUpEmailScreen = () => {
       <Button mt="4" onPress={formik.handleSubmit} isLoading={isLoading}>
         Next
       </Button>
-      <Button
+      {/* <Button
         variant="subtle"
         mt="2"
         onPress={() => {
@@ -79,7 +79,7 @@ const SignUpEmailScreen = () => {
         }}
       >
         Skip
-      </Button>
+      </Button> */}
     </Box>
   );
 };
