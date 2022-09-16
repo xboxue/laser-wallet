@@ -3,7 +3,7 @@ import "dotenv/config";
 export default {
   name: "Laser",
   slug: "laser-wallet",
-  version: "1.0.2",
+  version: "1.0.3",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
