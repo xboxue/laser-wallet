@@ -12,6 +12,7 @@ import {
 } from "../../features/transactions/transactionsSlice";
 import useTokenBalances from "../../hooks/useTokenBalances";
 import { getTransactions, Transaction } from "../../services/etherscan";
+import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
 import PendingTransactionItem from "../PendingTransactionItem/PendingTransactionItem";
 import ToastAlert from "../ToastAlert/ToastAlert";
 import TransactionItemContainer from "../TransactionItemContainer/TransactionItemContainer";
@@ -24,8 +25,11 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   const chainId = useSelector(selectChainId);
   const pendingTransactions = useSelector(selectPendingTransactions);
   const pendingTxs = useMemo(
-    () => [...pendingTransactions].reverse(),
-    [pendingTransactions]
+    () =>
+      pendingTransactions
+        .filter((tx) => isEqualCaseInsensitive(tx.from, walletAddress))
+        .reverse(),
+    [pendingTransactions, walletAddress]
   );
   const toast = useToast();
 
