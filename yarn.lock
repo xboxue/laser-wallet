@@ -9114,10 +9114,10 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-laser-sdk@^0.6.7:
-  version "0.6.7"
-  resolved "https://registry.yarnpkg.com/laser-sdk/-/laser-sdk-0.6.7.tgz#d0fc5c1a4ce42182db60adf518eee127b1ee3fb4"
-  integrity sha512-b3bW0vl0dJtpA0agrZ13OEo7JkKGY8hVw9XIsPH1wvTxhwORND+3GZaKqkETapswJxk9/RydCFBF+0IZ0oqn6A==
+laser-sdk@^0.6.8:
+  version "0.6.8"
+  resolved "https://registry.yarnpkg.com/laser-sdk/-/laser-sdk-0.6.8.tgz#83a8cb308e6d1b08526bf477127488dd2ffe35bd"
+  integrity sha512-QmyrHMVLn0Hxyj7XUUUURtCCJB+VYANSOxEDVZel1gpK2S0HYzIhFHq7cDBX5kaTW/KqytKA6VZhLrT9Wukb+Q==
   dependencies:
     ethers "^5.6.9"
 

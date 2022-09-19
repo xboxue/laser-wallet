@@ -1,6 +1,9 @@
 import { fromUnixTime } from "date-fns";
 import { ethers, providers } from "ethers";
-import { LaserFactory__factory } from "laser-sdk/dist/typechain";
+import {
+  LaserFactory__factory,
+  LaserWallet__factory,
+} from "laser-sdk/dist/typechain";
 import { erc20ABI, erc721ABI } from "wagmi";
 import { Erc20__factory } from "../abis/types";
 import { TRANSACTION_TYPES } from "../constants/transactions";
@@ -30,7 +33,7 @@ export const decodeTxDataByHash = async (
 
   try {
     const data = await decodeContractData(provider, tx.data, tx.to);
-    return { ...data, ...baseData };
+    return { ...baseData, ...data };
   } catch (error) {
     return { type: TRANSACTION_TYPES.CONTRACT_INTERACTION, ...baseData };
   }
@@ -62,10 +65,20 @@ const decodeContractData = async (
   contractAddress: string
 ) => {
   try {
-    const erc20Interface = new ethers.utils.Interface(erc20ABI);
-    const method = erc20Interface.parseTransaction({
-      data: callData,
+    const vaultInterface = new ethers.utils.Interface(LaserWallet__factory.abi);
+    const { args } = vaultInterface.parseTransaction({ data: callData });
+    const [to, value, data] = args;
+    return decodePendingTxData(provider, {
+      from: contractAddress,
+      to,
+      value,
+      data,
     });
+  } catch {}
+
+  try {
+    const erc20Interface = new ethers.utils.Interface(erc20ABI);
+    const method = erc20Interface.parseTransaction({ data: callData });
     const erc20 = Erc20__factory.connect(contractAddress, provider);
     if (method.name === TRANSACTION_TYPES.TOKEN_APPROVE) {
       return {
@@ -97,13 +110,11 @@ const decodeContractData = async (
         tokenDecimals: await erc20.decimals(),
         contractAddress,
       };
-  } catch (error) {}
+  } catch {}
 
   try {
     const erc721Interface = new ethers.utils.Interface(erc721ABI);
-    const method = erc721Interface.parseTransaction({
-      data: callData,
-    });
+    const method = erc721Interface.parseTransaction({ data: callData });
     return { type: method.name };
   } catch {}
 
