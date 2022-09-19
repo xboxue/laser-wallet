@@ -53,7 +53,7 @@ const useSendVaultToken = (
       nonce
     );
     const hash = await laser.wallet.operationHash(
-      to,
+      token.address,
       0,
       transaction.callData,
       nonce
@@ -73,7 +73,7 @@ const useSendVaultToken = (
       JSON.parse(privateKeys)[wallets[0].address],
       provider
     );
-    return laser.execTransaction(tx, wallet);
+    return laser.execTransaction(tx, wallet, 100000);
   }, options);
 };
 
