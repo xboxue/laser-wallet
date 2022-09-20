@@ -8,7 +8,9 @@
     "web": "expo start --web",
     "eject": "expo eject",
     "prepare": "husky install",
-    "postinstall": "rn-nodeify --install --yarn --hack 'crypto,buffer,react-native-randombytes,vm,stream,http,https,os,url,net,fs,process' && patch-package && typechain --target ethers-v5 --out-dir src/abis/types 'src/abis/*.json'"
+    "postinstall": "rn-nodeify --install --yarn --hack 'crypto,buffer,react-native-randombytes,vm,stream,http,https,os,url,net,fs,process' && patch-package && yarn contracts:generate && yarn graphql:generate",
+    "graphql:generate": "graphql-codegen --config codegen.yml -r dotenv/config",
+    "contracts:generate": "typechain --target ethers-v5 --out-dir src/abis/types 'src/abis/*.json'"
   },
   "dependencies": {
     "@apollo/client": "^3.6.9",
@@ -22,11 +24,13 @@
     "@react-navigation/native": "^6.0.10",
     "@react-navigation/stack": "^6.2.1",
     "@reduxjs/toolkit": "^1.8.2",
+    "@sentry/browser": "^7.13.0",
     "@sentry/react-native": "^4.0.1",
     "@tanstack/react-query": "^4.0.10",
     "@tradle/react-native-http": "^2.0.0",
     "@uniswap/default-token-list": "^4.1.0",
     "@walletconnect/client": "^1.7.8",
+    "apollo-link-sentry": "^3.2.0",
     "assert": "^1.1.1",
     "axios": "^0.27.2",
     "bip39": "^3.0.4",
@@ -105,6 +109,10 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
+    "@graphql-codegen/cli": "2.12.1",
+    "@graphql-codegen/typescript": "2.7.3",
+    "@graphql-codegen/typescript-operations": "2.5.3",
+    "@graphql-codegen/typescript-react-apollo": "3.3.3",
     "@typechain/ethers-v5": "^10.1.0",
     "@types/crypto-js": "^4.1.1",
     "@types/react": "~17.0.21",

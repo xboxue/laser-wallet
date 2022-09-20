@@ -1,24 +1,45 @@
 import {
   ApolloClient,
   createHttpLink,
+  from,
   InMemoryCache,
   NormalizedCacheObject,
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
+import { RetryLink } from "@apollo/client/link/retry";
+import { SentryLink } from "apollo-link-sentry";
+import Constants from "expo-constants";
 
 let client: ApolloClient<NormalizedCacheObject>;
 
 type ClientOptions = {
   getToken: () => Promise<string | null>;
+  onError: (error?: unknown) => void;
 };
 
-const createApolloClient = ({ getToken }: ClientOptions) => {
+const createApolloClient = (options: ClientOptions) => {
+  const sentryLink = new SentryLink();
+
+  const errorLink = onError(({ graphQLErrors, networkError }) => {
+    if (graphQLErrors) {
+      console.log(graphQLErrors);
+      options.onError();
+    }
+    if (networkError) {
+      console.log(networkError);
+      options.onError(networkError);
+    }
+  });
+
+  const retryLink = new RetryLink();
+
   const httpLink = createHttpLink({
-    uri: process.env.REACT_APP_HASURA_API,
+    uri: Constants.expoConfig.extra.graphqlApi,
   });
 
   const authLink = setContext(async (_, { headers }) => {
-    const token = await getToken();
+    const token = await options.getToken();
 
     return {
       headers: {
@@ -29,7 +50,7 @@ const createApolloClient = ({ getToken }: ClientOptions) => {
   });
 
   return new ApolloClient({
-    link: authLink.concat(httpLink),
+    link: from([authLink, errorLink, sentryLink, retryLink, httpLink]),
     cache: new InMemoryCache(),
   });
 };

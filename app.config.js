@@ -44,6 +44,7 @@ export default {
     vaultApi: process.env.VAULT_API,
     graphqlApi: process.env.GRAPHQL_API,
     clerkApi: process.env.CLERK_API,
+    graphqlApi: process.env.GRAPHQL_API,
   },
   hooks: {
     postPublish: [

@@ -26,6 +26,7 @@ import getQueryClient from "./src/services/queryClient";
 import wagmiClient from "./src/services/wagmiClient";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
+import { excludeGraphQLFetch } from "apollo-link-sentry";
 
 const tokenCache = {
   getToken: (key: string) => AsyncStorage.getItem(key),
@@ -34,31 +35,35 @@ const tokenCache = {
 
 Sentry.init({
   dsn: Constants.expoConfig.extra.sentryDsn,
+  beforeBreadcrumb: excludeGraphQLFetch,
 });
 
 const AppWithQueryClient = () => {
   const toast = useToast();
   const { getToken } = useAuth();
 
-  const onError = (error: unknown) => {
+  const onError = (error?: unknown) => {
     toast.show({
-      render: ({ id }) => (
+      render: () => (
         <ToastAlert
           status="error"
-          title={"Oops, something went wrong. Please try again."}
+          title="Oops, something went wrong. Please try again."
           description={error?.message}
         />
       ),
       placement: "top",
     });
-    console.error(error);
-    Sentry.Native.captureException(error);
+    if (error) {
+      console.error(error);
+      Sentry.Native.captureException(error);
+    }
   };
 
   return (
     <ApolloProvider
       client={getApolloClient({
         getToken: () => getToken({ template: "hasura" }),
+        onError,
       })}
     >
       <QueryClientProvider client={getQueryClient(onError)}>

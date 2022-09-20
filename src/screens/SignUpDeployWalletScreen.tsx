@@ -12,10 +12,11 @@ import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
+import { useCreateVaultMutation } from "../graphql/types";
 import formatAmount from "../utils/formatAmount";
 
 const SignUpDeployWalletScreen = ({ route }) => {
-  const { salt, recoveryOwnerAddress } = route.params;
+  const { salt, recoveryOwnerAddress, vaultAddress } = route.params;
   const chainId = useSelector(selectChainId);
   const provider = useProvider({ chainId });
   const navigation = useNavigation();
@@ -31,7 +32,12 @@ const SignUpDeployWalletScreen = ({ route }) => {
     watch: true,
   });
 
-  const { mutate: onCreateWallet, isLoading: isCreating } = useMutation(
+  const [saveVault, { loading: isSavingVault }] = useCreateVaultMutation({
+    onCompleted: () => createVault(),
+    variables: { input: { address: vaultAddress, chain_id: chainId } },
+  });
+
+  const { mutate: createVault, isLoading: isCreatingVault } = useMutation(
     async () => {
       const privateKeys = await SecureStore.getItemAsync("privateKeys", {
         requireAuthentication: true,
@@ -136,8 +142,10 @@ const SignUpDeployWalletScreen = ({ route }) => {
             .mul(gasEstimate)
             .gt(balance.value)
         }
-        onPress={() => onCreateWallet()}
-        isLoading={isCreating}
+        onPress={() => {
+          saveVault();
+        }}
+        isLoading={isSavingVault || isCreatingVault}
       >
         Activate
       </Button>
@@ -145,7 +153,7 @@ const SignUpDeployWalletScreen = ({ route }) => {
         variant="subtle"
         mt="2"
         onPress={() => navigation.navigate("Home")}
-        isDisabled={isCreating}
+        isDisabled={isSavingVault || isCreatingVault}
       >
         Activate later
       </Button>

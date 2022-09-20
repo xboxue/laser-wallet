@@ -63,6 +63,7 @@ const VaultBackupPasswordScreen = () => {
       navigation.navigate("SignUpDeployWallet", {
         recoveryOwnerAddress: recoveryOwner.getAddressString(),
         salt,
+        vaultAddress,
       });
     },
     {

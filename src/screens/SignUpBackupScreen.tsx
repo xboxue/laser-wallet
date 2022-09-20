@@ -44,30 +44,30 @@ const SignUpBackupScreen = () => {
     }
   );
 
-  const { mutateAsync: signInAndCreateWallet, isLoading: isSigningIn } =
-    useMutation(
-      async () => {
-        if (Platform.OS === "android") {
-          GoogleSignin.configure({
-            scopes: ["https://www.googleapis.com/auth/drive.file"],
-          });
-          await GoogleSignin.hasPlayServices({
-            showPlayServicesUpdateDialog: true,
-          });
-          const isSignedIn = await GoogleSignin.isSignedIn();
-          if (!isSignedIn) {
-            await GoogleSignin.signIn();
-          }
-          await RNCloudFs.loginIfNeeded();
+  const { mutate: signInAndCreateWallet, isLoading: isSigningIn } = useMutation(
+    async () => {
+      if (Platform.OS === "android") {
+        GoogleSignin.configure({
+          scopes: ["https://www.googleapis.com/auth/drive.file"],
+        });
+        await GoogleSignin.hasPlayServices({
+          showPlayServicesUpdateDialog: true,
+        });
+        const isSignedIn = await GoogleSignin.isSignedIn();
+        if (!isSignedIn) {
+          await GoogleSignin.signIn();
         }
-
-        return createWallet();
-      },
-      {
-        onSuccess: (wallets) =>
-          navigation.navigate("SignUpBackupPassword", { wallets }),
+        await RNCloudFs.loginIfNeeded();
       }
-    );
+
+      return createWallet();
+    },
+    {
+      onSuccess: (wallets) =>
+        navigation.navigate("SignUpBackupPassword", { wallets }),
+      meta: { disableErrorToast: true },
+    }
+  );
 
   return (
     <Box p="4">

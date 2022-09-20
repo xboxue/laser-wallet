@@ -37,7 +37,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
           const clerkError = error?.errors?.[0] as ClerkAPIError;
           if (clerkError) formik.setFieldError("code", clerkError.longMessage);
         },
-        meta: { disableGlobalErrorHandler: true },
+        meta: { disableErrorToast: true },
       }
     );
 
@@ -63,7 +63,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
           const clerkError = error?.errors?.[0] as ClerkAPIError;
           if (clerkError) formik.setFieldError("code", clerkError.longMessage);
         },
-        meta: { disableGlobalErrorHandler: true },
+        meta: { disableErrorToast: true },
       }
     );
 
