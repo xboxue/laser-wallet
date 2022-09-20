@@ -27,7 +27,11 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   const pendingTxs = useMemo(
     () =>
       pendingTransactions
-        .filter((tx) => isEqualCaseInsensitive(tx.from, walletAddress))
+        .filter(
+          (tx) =>
+            isEqualCaseInsensitive(tx.from, walletAddress) ||
+            isEqualCaseInsensitive(tx.to, walletAddress)
+        )
         .reverse(),
     [pendingTransactions, walletAddress]
   );
