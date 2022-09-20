@@ -17,7 +17,8 @@
         "SENTRY_ORG": "laser",
         "SENTRY_PROJECT": "react-native",
         "VAULT_API": "https://laser-vault.herokuapp.com",
-        "CLERK_API": "clerk.eager.panda-0.lcl.dev"
+        "CLERK_API": "clerk.eager.panda-0.lcl.dev",
+        "GRAPHQL_API": "https://laser.hasura.app/v1/graphql"
       }
     },
     "preview": {
@@ -28,7 +29,8 @@
         "SENTRY_ORG": "laser",
         "SENTRY_PROJECT": "react-native",
         "VAULT_API": "https://laser-vault.herokuapp.com",
-        "CLERK_API": "clerk.eager.panda-0.lcl.dev"
+        "CLERK_API": "clerk.eager.panda-0.lcl.dev",
+        "GRAPHQL_API": "https://laser.hasura.app/v1/graphql"
       }
     },
     "production": {
@@ -38,7 +40,8 @@
         "SENTRY_ORG": "laser",
         "SENTRY_PROJECT": "react-native",
         "VAULT_API": "https://laser-vault.herokuapp.com",
-        "CLERK_API": "clerk.eager.panda-0.lcl.dev"
+        "CLERK_API": "clerk.eager.panda-0.lcl.dev",
+        "GRAPHQL_API": "https://laser.hasura.app/v1/graphql"
       }
     }
   },
