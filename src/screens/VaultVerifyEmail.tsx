@@ -3,13 +3,14 @@ import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { providers } from "ethers";
 import { useFormik } from "formik";
-import { Box, Button, Input, Text, useToast } from "native-base";
+import { Box, Button, FormControl, Input, Text, useToast } from "native-base";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
 import ToastAlert from "../components/ToastAlert/ToastAlert";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
 import useSendVaultEth from "../hooks/useSendVaultEth";
 import useSendVaultToken from "../hooks/useSendVaultToken";
+import { ClerkAPIError } from "@clerk/types";
 
 const VaultVerifyEmail = ({ route }) => {
   const clerk = useClerk();
@@ -54,9 +55,10 @@ const VaultVerifyEmail = ({ route }) => {
         else sendEth({ to, amount });
       },
       onError: (error) => {
-        const clerkError = error?.errors?.[0];
+        const clerkError = error?.errors?.[0] as ClerkAPIError;
         if (clerkError) formik.setFieldError("code", clerkError.longMessage);
       },
+      meta: { disableGlobalErrorHandler: true },
     }
   );
 
@@ -80,16 +82,20 @@ const VaultVerifyEmail = ({ route }) => {
       <Text mb="4">
         Please enter the verification code we sent to your email.
       </Text>
-      <Input
-        placeholder="Code"
-        value={formik.values.code}
-        onChangeText={formik.handleChange("code")}
-        onBlur={formik.handleBlur("code")}
-        keyboardType="number-pad"
-        autoFocus
-        size="lg"
-      />
-      {formik.errors.code && <Text mt="1">{formik.errors.code}</Text>}
+      <FormControl isInvalid={!!formik.errors.code}>
+        <Input
+          placeholder="Code"
+          value={formik.values.code}
+          onChangeText={formik.handleChange("code")}
+          onBlur={formik.handleBlur("code")}
+          keyboardType="number-pad"
+          autoFocus
+          size="lg"
+        />
+        <FormControl.ErrorMessage>
+          {formik.errors.code}
+        </FormControl.ErrorMessage>
+      </FormControl>
       <Button
         mt="4"
         onPress={formik.handleSubmit}

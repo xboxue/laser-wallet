@@ -22,15 +22,14 @@ import { WagmiConfig } from "wagmi";
 import ToastAlert from "./src/components/ToastAlert/ToastAlert";
 import AppNavigator from "./src/navigators/AppNavigator";
 import getApolloClient from "./src/services/apolloClient";
-import storage from "./src/services/mmkvStorage";
 import getQueryClient from "./src/services/queryClient";
 import wagmiClient from "./src/services/wagmiClient";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
 
 const tokenCache = {
-  getToken: (key: string) => storage.getString(key),
-  saveToken: (key: string, value: string) => storage.set(key, value),
+  getToken: (key: string) => AsyncStorage.getItem(key),
+  saveToken: (key: string, value: string) => AsyncStorage.setItem(key, value),
 };
 
 Sentry.init({
