@@ -14,7 +14,7 @@ import { useSelector } from "react-redux";
 import { useBalance } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
 import { selectChainId } from "../../features/network/networkSlice";
-import { selectIsWalletDeployed } from "../../features/wallet/walletSlice";
+import { selectVaultAddress } from "../../features/wallet/walletSlice";
 import useRefreshOnFocus from "../../hooks/useRefreshOnFocus";
 import useTokenBalances, { TokenBalance } from "../../hooks/useTokenBalances";
 import formatAmount from "../../utils/formatAmount";
@@ -34,7 +34,7 @@ interface Props {
 
 const TokenBalances = ({ walletAddress, onPress }: Props) => {
   const chainId = useSelector(selectChainId);
-  const isWalletDeployed = useSelector(selectIsWalletDeployed);
+  const vaultAddress = useSelector(selectVaultAddress);
   const navigation = useNavigation();
 
   const {
@@ -69,21 +69,29 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
         })
       }
     >
-      <Box flexDirection="row" alignItems="center" px="4" py="1.5">
-        <Image
-          source={{ uri: token.logoURI.replace("ipfs://", IPFS_GATEWAY_URL) }}
-          fallbackSource={ethIcon}
-          size="9"
-          alt="Token icon"
-        />
-        <Box ml="3">
-          <Text variant="subtitle1">{token.symbol}</Text>
-          <Text>{token.name}</Text>
+      {({ isPressed }) => (
+        <Box
+          flexDirection="row"
+          alignItems="center"
+          px="4"
+          py="1.5"
+          opacity={isPressed ? 0.3 : 1}
+        >
+          <Image
+            source={{ uri: token.logoURI.replace("ipfs://", IPFS_GATEWAY_URL) }}
+            fallbackSource={ethIcon}
+            size="9"
+            alt="Token icon"
+          />
+          <Box ml="3">
+            <Text variant="subtitle1">{token.symbol}</Text>
+            <Text>{token.name}</Text>
+          </Box>
+          <Text variant="subtitle1" ml="auto">
+            {formatAmount(token.balance, { decimals: token.decimals })}
+          </Text>
         </Box>
-        <Text variant="subtitle1" ml="auto">
-          {formatAmount(token.balance, { decimals: token.decimals })}
-        </Text>
-      </Box>
+      )}
     </Pressable>
   );
 
@@ -100,24 +108,32 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
           })
         }
       >
-        <Box flexDirection="row" alignItems="center" px="4" py="1.5">
-          <Image source={ethIcon} size="9" alt="Token icon" />
-          <Box ml="3">
-            <Text variant="subtitle1">{balance.symbol}</Text>
-            <Text>Ethereum</Text>
+        {({ isPressed }) => (
+          <Box
+            flexDirection="row"
+            alignItems="center"
+            px="4"
+            py="1.5"
+            opacity={isPressed ? 0.3 : 1}
+          >
+            <Image source={ethIcon} size="9" alt="Token icon" />
+            <Box ml="3">
+              <Text variant="subtitle1">{balance.symbol}</Text>
+              <Text>Ethereum</Text>
+            </Box>
+            <Text variant="subtitle1" ml="auto">
+              {formatAmount(balance.value, { decimals: balance.decimals })}
+            </Text>
           </Box>
-          <Text variant="subtitle1" ml="auto">
-            {formatAmount(balance.value, { decimals: balance.decimals })}
-          </Text>
-        </Box>
+        )}
       </Pressable>
     );
   };
 
   const renderActivateWallet = () => {
-    if (isWalletDeployed) return null;
+    if (vaultAddress) return null;
     return (
-      <Pressable>
+      <Pressable onPress={() => navigation.navigate("SignUpEmail")}>
         {({ isPressed }) => (
           <Box
             borderColor="gray.200"

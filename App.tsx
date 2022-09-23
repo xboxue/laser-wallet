@@ -1,4 +1,5 @@
-import { ClerkProvider } from "@clerk/clerk-expo";
+import { ApolloProvider } from "@apollo/client";
+import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -20,45 +21,57 @@ import * as Sentry from "sentry-expo";
 import { WagmiConfig } from "wagmi";
 import ToastAlert from "./src/components/ToastAlert/ToastAlert";
 import AppNavigator from "./src/navigators/AppNavigator";
+import getApolloClient from "./src/services/apolloClient";
 import getQueryClient from "./src/services/queryClient";
-import storage from "./src/services/mmkvStorage";
 import wagmiClient from "./src/services/wagmiClient";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
+import { excludeGraphQLFetch } from "apollo-link-sentry";
 
 const tokenCache = {
-  getToken: (key: string) => storage.getString(key),
-  saveToken: (key: string, value: string) => storage.set(key, value),
+  getToken: (key: string) => AsyncStorage.getItem(key),
+  saveToken: (key: string, value: string) => AsyncStorage.setItem(key, value),
 };
 
 Sentry.init({
   dsn: Constants.expoConfig.extra.sentryDsn,
+  beforeBreadcrumb: excludeGraphQLFetch,
 });
 
 const AppWithQueryClient = () => {
   const toast = useToast();
+  const { getToken } = useAuth();
 
-  const onError = (error: unknown) => {
+  const onError = (error?: unknown) => {
     toast.show({
-      render: ({ id }) => (
+      render: () => (
         <ToastAlert
           status="error"
-          title={"Oops, something went wrong. Please try again."}
+          title="Oops, something went wrong. Please try again."
           description={error?.message}
         />
       ),
       placement: "top",
     });
-    console.error(error);
-    Sentry.Native.captureException(error);
+    if (error) {
+      console.error(error);
+      Sentry.Native.captureException(error);
+    }
   };
 
   return (
-    <QueryClientProvider client={getQueryClient(onError)}>
-      <NavigationContainer theme={{ colors: { background: "white" } }}>
-        <AppNavigator />
-      </NavigationContainer>
-    </QueryClientProvider>
+    <ApolloProvider
+      client={getApolloClient({
+        getToken: () => getToken({ template: "hasura" }),
+        onError,
+      })}
+    >
+      <QueryClientProvider client={getQueryClient(onError)}>
+        <NavigationContainer theme={{ colors: { background: "white" } }}>
+          <AppNavigator />
+        </NavigationContainer>
+      </QueryClientProvider>
+    </ApolloProvider>
   );
 };
 
@@ -89,7 +102,7 @@ const App = () => {
       <PersistGate loading={null} persistor={getPersistor()}>
         <WagmiConfig client={wagmiClient}>
           <ClerkProvider
-            frontendApi="clerk.eager.panda-0.lcl.dev"
+            frontendApi={Constants.expoConfig.extra.clerkApi}
             tokenCache={tokenCache}
           >
             <NativeBaseProvider theme={theme}>

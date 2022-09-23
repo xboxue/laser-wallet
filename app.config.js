@@ -3,14 +3,14 @@ import "dotenv/config";
 export default {
   name: "Laser",
   slug: "laser-wallet",
-  version: "1.0.2",
+  version: "1.0.3",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",
-    backgroundColor: "#000000",
+    backgroundColor: "#111827",
   },
   updates: {
     fallbackToCacheTimeout: 0,
@@ -26,7 +26,7 @@ export default {
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
-      backgroundColor: "#000000",
+      backgroundColor: "#ffffff",
     },
     package: "com.laser.wallet",
   },
@@ -35,13 +35,16 @@ export default {
   },
   plugins: ["@react-native-google-signin/google-signin", "sentry-expo"],
   extra: {
-    relayerUrl: process.env.RELAYER_URL,
     infuraApiKey: process.env.INFURA_API_KEY,
     alchemyApiKey: process.env.ALCHEMY_API_KEY,
     etherscanApiKey: process.env.ETHERSCAN_API_KEY,
     laserGuardianAddress: process.env.LASER_GUARDIAN_ADDRESS,
     relayerAddress: process.env.RELAYER_ADDRESS,
     sentryDsn: process.env.SENTRY_DSN,
+    vaultApi: process.env.VAULT_API,
+    graphqlApi: process.env.GRAPHQL_API,
+    clerkApi: process.env.CLERK_API,
+    graphqlApi: process.env.GRAPHQL_API,
   },
   hooks: {
     postPublish: [

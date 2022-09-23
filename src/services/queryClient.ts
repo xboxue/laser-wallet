@@ -4,8 +4,16 @@ let queryClient: QueryClient;
 const getQueryClient = (onError: (error: unknown) => void) => {
   if (!queryClient) {
     queryClient = new QueryClient({
-      queryCache: new QueryCache({ onError }),
-      mutationCache: new MutationCache({ onError }),
+      queryCache: new QueryCache({
+        onError: (error, query) => {
+          if (!query?.meta?.disableErrorToast) onError(error);
+        },
+      }),
+      mutationCache: new MutationCache({
+        onError: (error, variables, context, mutation) => {
+          if (!mutation?.meta?.disableErrorToast) onError(error);
+        },
+      }),
     });
   }
   return queryClient;

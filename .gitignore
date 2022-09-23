@@ -1,3 +1,5 @@
+src/abis/types
+src/graphql/types.ts
 node_modules/
 .expo/
 dist/

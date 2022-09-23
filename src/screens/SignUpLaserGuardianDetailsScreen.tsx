@@ -28,6 +28,7 @@ const SignUpLaserGuardianDetailsScreen = () => {
           dispatch(setIsLaserGuardianEnabled(!isLaserGuardianEnabled));
           navigation.goBack();
         }}
+        isDisabled
       >
         {isLaserGuardianEnabled ? "Disable" : "Enable"}
       </Button>

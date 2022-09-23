@@ -1,35 +1,78 @@
-import { useClerk, useSignUp } from "@clerk/clerk-expo";
+import { useSignIn, useSignUp } from "@clerk/clerk-expo";
 import { StackActions, useNavigation } from "@react-navigation/native";
+import { useMutation } from "@tanstack/react-query";
 import { useFormik } from "formik";
 import { Box, Button, Input, Text } from "native-base";
-import { useMutation } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
 import * as yup from "yup";
+import { setEmail } from "../features/wallet/walletSlice";
+import { ClerkAPIError } from "@clerk/types";
 
-const SignUpVerifyEmailScreen = () => {
+const SignUpVerifyEmailScreen = ({ route }) => {
+  const { isSignUp } = route.params;
   const { signUp } = useSignUp();
-  const clerk = useClerk();
+  const { signIn } = useSignIn();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
-  const { mutate: verifyCode, isLoading } = useMutation(
-    (code: string) => {
-      if (!signUp) throw new Error();
-      return signUp.attemptEmailAddressVerification({ code });
-    },
-    {
-      onSuccess: (data) => {
-        clerk.setSession(data.createdSessionId);
-        navigation.dispatch(StackActions.replace("SignUpGuardians"));
+  const { mutate: verifySignInCode, isLoading: isVerifyingSignIn } =
+    useMutation(
+      async (code: string) => {
+        if (!signIn) throw new Error();
+        const signInAttempt = await signIn.attemptFirstFactor({
+          strategy: "email_code",
+          code,
+        });
+        if (signInAttempt.status !== "complete") {
+          throw new Error("Email verification failed");
+        }
+        return signInAttempt;
       },
-      onError: (error) => {
-        const clerkError = error?.errors?.[0];
-        if (clerkError) formik.setFieldError("code", clerkError.longMessage);
+      {
+        onSuccess: async (data) => {
+          dispatch(setEmail(data.identifier));
+          navigation.dispatch(StackActions.replace("SignUpGuardians"));
+        },
+        onError: (error) => {
+          const clerkError = error?.errors?.[0] as ClerkAPIError;
+          if (clerkError) formik.setFieldError("code", clerkError.longMessage);
+        },
+        meta: { disableErrorToast: true },
+      }
+    );
+
+  const { mutate: verifySignUpCode, isLoading: isVerifyingSignUp } =
+    useMutation(
+      async (code: string) => {
+        if (!signUp) throw new Error();
+        const signUpAttempt = await signUp.attemptEmailAddressVerification({
+          code,
+        });
+
+        if (signUpAttempt.verifications.emailAddress.status !== "verified") {
+          throw new Error("Email verification failed");
+        }
+        return signUpAttempt;
       },
-    }
-  );
+      {
+        onSuccess: async (data) => {
+          dispatch(setEmail(data.emailAddress));
+          navigation.dispatch(StackActions.replace("SignUpGuardians"));
+        },
+        onError: (error) => {
+          const clerkError = error?.errors?.[0] as ClerkAPIError;
+          if (clerkError) formik.setFieldError("code", clerkError.longMessage);
+        },
+        meta: { disableErrorToast: true },
+      }
+    );
 
   const formik = useFormik({
     initialValues: { code: "" },
-    onSubmit: (values) => verifyCode(values.code),
+    onSubmit: (values) => {
+      if (isSignUp) return verifySignUpCode(values.code);
+      verifySignInCode(values.code);
+    },
     validationSchema: yup.object().shape({
       code: yup.string().required("Required"),
     }),
@@ -52,7 +95,11 @@ const SignUpVerifyEmailScreen = () => {
         size="lg"
       />
       {formik.errors.code && <Text mt="1">{formik.errors.code}</Text>}
-      <Button mt="4" onPress={formik.handleSubmit} isLoading={isLoading}>
+      <Button
+        mt="4"
+        onPress={formik.handleSubmit}
+        isLoading={isVerifyingSignIn || isVerifyingSignUp}
+      >
         Next
       </Button>
     </Box>

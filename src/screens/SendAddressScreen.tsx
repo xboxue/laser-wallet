@@ -1,14 +1,42 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import { isAddress } from "ethers/lib/utils";
-import { Box, Icon, Input, Text } from "native-base";
+import { Box, Circle, Icon, Input, Pressable, Text } from "native-base";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import AddressPreviewContainer from "../components/AddressPreviewContainer/AddressPreviewContainer";
 import EnsPreviewContainer from "../components/EnsPreviewContainer/EnsPreviewContainer";
+import {
+  selectVaultAddress,
+  selectWalletAddress,
+  selectWallets,
+} from "../features/wallet/walletSlice";
+
+const Item = ({ onPress, icon, title, ...props }) => (
+  <Pressable onPress={onPress}>
+    {({ isPressed }) => (
+      <Box
+        flexDirection="row"
+        alignItems="center"
+        py="2"
+        opacity={isPressed ? 0.3 : 1}
+        {...props}
+      >
+        {icon}
+        <Box ml="3">
+          <Text variant="subtitle1">{title}</Text>
+        </Box>
+      </Box>
+    )}
+  </Pressable>
+);
 
 const SendAddressScreen = () => {
   const navigation = useNavigation();
   const [value, setValue] = useState("");
+  const vaultAddress = useSelector(selectVaultAddress);
+  const walletAddress = useSelector(selectWalletAddress);
+  const wallets = useSelector(selectWallets);
   const isEnsDomain = value.includes(".");
 
   const handlePress = (address: string, ensName?: string) => {
@@ -57,6 +85,41 @@ const SendAddressScreen = () => {
           mb="1"
         />
         {renderPreviewItem()}
+        {vaultAddress === walletAddress ? (
+          <Item
+            mt={2}
+            onPress={() =>
+              navigation.navigate("SendAsset", { address: wallets[0].address })
+            }
+            title="Send to Wallet 1"
+            icon={
+              <Circle bg="gray.800" size="9">
+                <Icon
+                  as={<Ionicons name="flash-outline" />}
+                  size="4"
+                  color="white"
+                />
+              </Circle>
+            }
+          />
+        ) : (
+          <Item
+            mt={2}
+            onPress={() =>
+              navigation.navigate("SendAsset", { address: vaultAddress })
+            }
+            title="Send to vault"
+            icon={
+              <Circle bg="gray.800" size="9">
+                <Icon
+                  as={<Ionicons name="flash-outline" />}
+                  size="4"
+                  color="white"
+                />
+              </Circle>
+            }
+          />
+        )}
       </Box>
     </Box>
   );

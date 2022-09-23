@@ -20,14 +20,23 @@ import SettingsScreen from "../screens/SettingsScreen";
 import SettingsSecurityScreen from "../screens/SettingsSecurityScreen";
 import SettingsWalletRecoveryScreen from "../screens/SettingsWalletRecoveryScreen";
 import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
+import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpAuthScreen from "../screens/SignUpAuthScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
 import SignUpBackupScreen from "../screens/SignUpBackupScreen";
 import SignUpDeployWalletScreen from "../screens/SignUpDeployWalletScreen";
+import SignUpEmailScreen from "../screens/SignUpEmailScreen";
+import SignUpGuardianDetailsScreen from "../screens/SignUpGuardianDetailsScreen";
+import SignUpGuardiansScreen from "../screens/SignUpGuardiansScreen";
+import SignUpLaserGuardianDetailsScreen from "../screens/SignUpLaserGuardianDetailsScreen";
 import SignUpPasscodeScreen from "../screens/SignUpPasscodeScreen";
+import SignUpVerifyEmailScreen from "../screens/SignUpVerifyEmail";
 import SignUpVerifySeedPhrase from "../screens/SignUpVerifySeedPhrase";
 import StartScreen from "../screens/StartScreen";
 import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
+import VaultBackupPasswordScreen from "../screens/VaultBackupPasswordScreen";
+import VaultBackupScreen from "../screens/VaultBackupScreen";
+import VaultVerifyEmail from "../screens/VaultVerifyEmail";
 
 const Stack = createStackNavigator();
 
@@ -68,6 +77,7 @@ const AppNavigator = () => {
             name="Home"
             component={HomeScreen}
             initialParams={{ tab: 0 }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="SignUpDeployWallet"
@@ -103,6 +113,33 @@ const AppNavigator = () => {
             name="TransactionDetails"
             component={TransactionDetailsScreen}
           />
+          <Stack.Screen name="SignUpEmail" component={SignUpEmailScreen} />
+          <Stack.Screen
+            name="SignUpVerifyEmail"
+            component={SignUpVerifyEmailScreen}
+          />
+          <Stack.Screen
+            name="SignUpGuardians"
+            component={SignUpGuardiansScreen}
+          />
+          <Stack.Screen
+            name="SignUpGuardianDetails"
+            component={SignUpGuardianDetailsScreen}
+          />
+          <Stack.Screen
+            name="SignUpLaserGuardianDetails"
+            component={SignUpLaserGuardianDetailsScreen}
+          />
+          <Stack.Screen
+            name="SignUpAddGuardian"
+            component={SignUpAddGuardianScreen}
+          />
+          <Stack.Screen name="VaultBackup" component={VaultBackupScreen} />
+          <Stack.Screen
+            name="VaultBackupPassword"
+            component={VaultBackupPasswordScreen}
+          />
+          <Stack.Screen name="VaultVerifyEmail" component={VaultVerifyEmail} />
         </>
       );
 

@@ -9,11 +9,11 @@ import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordF
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { setIsAuthenticated } from "../features/auth/authSlice";
 import { selectChainId } from "../features/network/networkSlice";
-import { setWalletAddress } from "../features/wallet/walletSlice";
+import { setWalletAddress, setWallets } from "../features/wallet/walletSlice";
 import { createBackup } from "../services/cloudBackup";
 
 const SignUpBackupPasswordScreen = ({ route }) => {
-  const { walletAddress } = route.params;
+  const { wallets } = route.params;
   const dispatch = useDispatch();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
   const navigation = useNavigation();
@@ -26,7 +26,8 @@ const SignUpBackupPasswordScreen = ({ route }) => {
 
       await SecureStore.setItemAsync("backupPassword", password);
       dispatch(setIsAuthenticated(true));
-      dispatch(setWalletAddress(walletAddress));
+      dispatch(setWalletAddress(wallets[0].address));
+      dispatch(setWallets(wallets));
     },
     {
       onSuccess: () => navigation.navigate("Home"),

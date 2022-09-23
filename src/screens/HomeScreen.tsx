@@ -1,15 +1,30 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import { Box, Button, Icon, IconButton, Pressable, Text } from "native-base";
+import {
+  Actionsheet,
+  Box,
+  Button,
+  ChevronDownIcon,
+  Icon,
+  IconButton,
+  Pressable,
+  Text,
+} from "native-base";
+import { useState } from "react";
 import { useWindowDimensions } from "react-native";
 import { NavigationState, Route, TabView } from "react-native-tab-view";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
 import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
-import { selectWalletAddress } from "../features/wallet/walletSlice";
+import {
+  selectVaultAddress,
+  selectWalletAddress,
+  selectWallets,
+  setWalletAddress,
+} from "../features/wallet/walletSlice";
 import useWalletConnectSubscription from "../hooks/useWalletConnectSubscription";
 import formatAddress from "../utils/formatAddress";
 
@@ -21,7 +36,11 @@ const routes = [
 const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
+  const vaultAddress = useSelector(selectVaultAddress);
   const window = useWindowDimensions();
+  const dispatch = useDispatch();
+  const wallets = useSelector(selectWallets);
+  const [walletSheetOpen, setWalletSheetOpen] = useState(false);
   useWalletConnectSubscription();
 
   if (!walletAddress) throw new Error();
@@ -63,30 +82,101 @@ const HomeScreen = ({ route }) => {
   };
 
   return (
-    <Box flex={1}>
-      <Box flexDir="row" justifyContent="space-between" px="1">
+    <Box flex={1} safeAreaTop pt={6}>
+      <Actionsheet
+        isOpen={walletSheetOpen}
+        onClose={() => setWalletSheetOpen(false)}
+      >
+        <Actionsheet.Content>
+          {vaultAddress && (
+            <Actionsheet.Item
+              onPress={() => dispatch(setWalletAddress(vaultAddress))}
+              _pressed={{ bgColor: "gray.200", rounded: "lg" }}
+              rightIcon={
+                walletAddress === vaultAddress ? (
+                  <>
+                    <Icon
+                      as={<Ionicons name="ios-checkmark-circle" />}
+                      size="6"
+                      color="green.500"
+                    />
+                    <CopyIconButton ml="auto" value={vaultAddress} />
+                  </>
+                ) : (
+                  <CopyIconButton value={vaultAddress} ml="auto" />
+                )
+              }
+            >
+              {`Vault (${formatAddress(vaultAddress)})`}
+            </Actionsheet.Item>
+          )}
+          {wallets.slice(0, 5).map((wallet, index) => (
+            <Actionsheet.Item
+              key={wallet.address}
+              onPress={() => dispatch(setWalletAddress(wallet.address))}
+              _pressed={{ bgColor: "gray.200", rounded: "lg" }}
+              endIcon={
+                walletAddress === wallet.address ? (
+                  <>
+                    <Icon
+                      as={<Ionicons name="ios-checkmark-circle" />}
+                      size="6"
+                      color="green.500"
+                    />
+                    <CopyIconButton ml="auto" value={wallet.address} />
+                  </>
+                ) : (
+                  <CopyIconButton value={wallet.address} ml="auto" />
+                )
+              }
+            >{`Wallet ${index + 1} (${formatAddress(
+              wallet.address
+            )})`}</Actionsheet.Item>
+          ))}
+        </Actionsheet.Content>
+      </Actionsheet>
+      <Box
+        flexDir="row"
+        justifyContent="space-between"
+        px="1"
+        alignItems="flex-start"
+      >
         <IconButton
           icon={<Icon as={Ionicons} name="settings-outline" />}
           onPress={() => navigation.navigate("Settings")}
         />
+        <Button
+          variant="outline"
+          _text={{ color: "black", fontSize: "sm" }}
+          rightIcon={<ChevronDownIcon size="3" color="black" />}
+          alignSelf="flex-start"
+          py="2"
+          bgColor="gray.100"
+          borderWidth="0"
+          onPress={() => setWalletSheetOpen(true)}
+          _pressed={{ bgColor: "gray.200" }}
+        >
+          {`${
+            walletAddress === vaultAddress
+              ? "Vault"
+              : `Wallet ${
+                  wallets.findIndex(
+                    (wallet) => wallet.address === walletAddress
+                  ) + 1
+                }`
+          } (${formatAddress(walletAddress)})`}
+        </Button>
         <IconButton
           icon={<Icon as={Ionicons} name="qr-code-outline" />}
           onPress={() => navigation.navigate("QRCodeScan")}
         />
       </Box>
-      <Box p="4">
-        <Box flexDirection="row" alignItems="center">
-          <Text mr="1">{formatAddress(walletAddress)}</Text>
-          <CopyIconButton value={walletAddress} />
-        </Box>
-
+      <Box px="4" my="8" display="flex" flexDir="column" alignItems="center">
         <WalletBalance walletAddress={walletAddress} />
         <Button
-          mt="4"
-          mb="5"
-          onPress={() => {
-            navigation.navigate("SendAddress");
-          }}
+          mt="5"
+          onPress={() => navigation.navigate("SendAddress")}
+          alignSelf="stretch"
         >
           Send
         </Button>

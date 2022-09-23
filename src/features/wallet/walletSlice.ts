@@ -1,88 +1,53 @@
-import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
 
 type Wallet = {
   address: string;
-  chainId: number;
-  // ownerAddress: string;
-  // recoveryOwnerAddress: string;
+  // chainId: number;
 };
 
 interface WalletState {
-  ownerAddress: string | null;
-  ownerPrivateKey: string | null;
   walletAddress: string | null;
-  recoveryOwnerAddress: string | null;
-  recoveryOwnerPrivateKey: string | null;
+  vaultAddress: string | null;
+  // vaults: Wallet[];
   wallets: Wallet[];
-  salt: number | null;
+  email: string | null;
 }
 
 const initialState: WalletState = {
-  ownerAddress: null,
-  ownerPrivateKey: null,
   walletAddress: null,
-  recoveryOwnerAddress: null,
-  recoveryOwnerPrivateKey: null,
+  vaultAddress: null,
   wallets: [],
-  salt: null,
+  email: null,
 };
 
 const walletSlice = createSlice({
   name: "wallet",
   initialState,
   reducers: {
-    setOwnerAddress: (state, action: PayloadAction<string>) => {
-      state.ownerAddress = action.payload;
-    },
-    setOwnerPrivateKey: (state, action: PayloadAction<string>) => {
-      state.ownerPrivateKey = action.payload;
-    },
     setWalletAddress: (state, action: PayloadAction<string>) => {
       state.walletAddress = action.payload;
     },
-    setRecoveryOwnerAddress: (state, action: PayloadAction<string>) => {
-      state.recoveryOwnerAddress = action.payload;
+    setVaultAddress: (state, action: PayloadAction<string>) => {
+      state.vaultAddress = action.payload;
     },
-    setRecoveryOwnerPrivateKey: (state, action: PayloadAction<string>) => {
-      state.recoveryOwnerPrivateKey = action.payload;
+    setWallets: (state, action: PayloadAction<Wallet[]>) => {
+      state.wallets = action.payload;
     },
-    setSalt: (state, action: PayloadAction<number>) => {
-      state.salt = action.payload;
-    },
-    addWallet: (state, action: PayloadAction<Wallet>) => {
-      state.wallets.push(action.payload);
+    setEmail: (state, action: PayloadAction<string>) => {
+      state.email = action.payload;
     },
   },
 });
 
-export const selectOwnerAddress = (state: RootState) =>
-  state.wallet.ownerAddress;
-export const selectOwnerPrivateKey = (state: RootState) =>
-  state.wallet.ownerPrivateKey;
+export const selectWallets = (state: RootState) => state.wallet.wallets;
 export const selectWalletAddress = (state: RootState) =>
   state.wallet.walletAddress;
-export const selectRecoveryOwnerAddress = (state: RootState) =>
-  state.wallet.recoveryOwnerAddress;
-export const selectRecoveryOwnerPrivateKey = (state: RootState) =>
-  state.wallet.recoveryOwnerPrivateKey;
-export const selectWallets = (state: RootState) => state.wallet.wallets;
-export const selectIsWalletDeployed = createSelector(
-  [selectWalletAddress, selectWallets],
-  (address, wallets) => {
-    return !!wallets.find((wallet) => wallet.address === address);
-  }
-);
-export const selectSalt = (state: RootState) => state.wallet.salt;
+export const selectVaultAddress = (state: RootState) =>
+  state.wallet.vaultAddress;
+export const selectEmail = (state: RootState) => state.wallet.email;
 
-export const {
-  setOwnerAddress,
-  setOwnerPrivateKey,
-  setWalletAddress,
-  setRecoveryOwnerAddress,
-  setRecoveryOwnerPrivateKey,
-  addWallet,
-  setSalt,
-} = walletSlice.actions;
+export const { setWalletAddress, setVaultAddress, setWallets, setEmail } =
+  walletSlice.actions;
 
 export default walletSlice.reducer;

@@ -1,5 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { providers } from "ethers";
+import { Interface } from "ethers/lib/utils";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider, useQuery, useWaitForTransaction } from "wagmi";
@@ -9,6 +10,7 @@ import {
   PendingTransaction,
   removePendingTransaction,
 } from "../../features/transactions/transactionsSlice";
+import { setVaultAddress } from "../../features/wallet/walletSlice";
 import { decodeTxDataByHash } from "../../utils/decodeTransactionData";
 import TokenTransactionItem from "../TokenTransactionItem/TokenTransactionItem";
 import WalletTransactionItem from "../WalletTransactionItem/WalletTransactionItem";
@@ -40,7 +42,13 @@ const PendingTransactionItem = ({
     if (receipt && txsByHash[transaction.hash]) {
       dispatch(removePendingTransaction(transaction.hash));
     }
-  }, [receipt, txsByHash]);
+
+    if (receipt && transaction.isDeployVault) {
+      const iface = new Interface(["event LaserCreated(address laser)"]);
+      const vaultAddress = iface.parseLog(receipt.logs[0]).args[0];
+      dispatch(setVaultAddress(vaultAddress));
+    }
+  }, [receipt, txsByHash, transaction]);
 
   const { data: txData, isLoading: txDataLoading } = useQuery(
     ["txData", transaction.hash, receipt],
