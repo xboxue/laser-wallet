@@ -8,6 +8,7 @@ import { Box, Button, Skeleton, Text, useToast } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useFeeData, useProvider } from "wagmi";
 import ToastAlert from "../components/ToastAlert/ToastAlert";
+import WalletSelector from "../components/WalletSelector/WalletSelector";
 import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
@@ -121,15 +122,18 @@ const SignUpDeployWalletScreen = ({ route }) => {
   return (
     <Box p="4">
       <Text variant="subtitle1">Activate vault</Text>
-      <Text>There is a one-time network fee to activate your vault.</Text>
-      <Text variant="subtitle2" mt="2">
-        Network fee:
+      <Text mb="4">
+        There is a one-time network fee to activate your vault.
       </Text>
-      {renderDeployFee()}
+      <WalletSelector />
       <Text variant="subtitle2" mt="2">
         Balance:
       </Text>
       {renderBalance()}
+      <Text variant="subtitle2" mt="2">
+        Network fee:
+      </Text>
+      {renderDeployFee()}
       <Button
         mt="4"
         isDisabled={

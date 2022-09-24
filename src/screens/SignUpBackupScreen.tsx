@@ -66,6 +66,7 @@ const SignUpBackupScreen = () => {
       <Button
         mt="6"
         isLoading={isSigningIn}
+        isDisabled={isCreating}
         onPress={() => signInAndCreateWallet()}
       >
         {`Back up on ${Platform.OS === "ios" ? "iCloud" : "Google Drive"}`}
@@ -75,6 +76,7 @@ const SignUpBackupScreen = () => {
         mt="2"
         onPress={() => createWallet()}
         isLoading={isCreating}
+        isDisabled={isSigningIn}
       >
         Back up manually
       </Button>

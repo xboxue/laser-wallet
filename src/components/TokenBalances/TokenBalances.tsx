@@ -152,7 +152,17 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
     if (vaultAddress && !isVaultLocked) return null;
     if (isVaultLocked)
       return (
-        <Pressable onPress={() => navigation.navigate("RecoveryRecoverVault")}>
+        <Pressable
+          onPress={() => {
+            if (
+              lockTimestamp &&
+              add(fromUnixTime(lockTimestamp.toNumber()), { days: 0 }) <
+                new Date()
+            ) {
+              navigation.navigate("RecoveryRecoverVault");
+            }
+          }}
+        >
           {({ isPressed }) => (
             <Box
               borderColor="gray.200"

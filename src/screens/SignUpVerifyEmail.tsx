@@ -33,7 +33,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
       {
         onSuccess: async (data) => {
           dispatch(setEmail(data.identifier));
-          navigation.dispatch(StackActions.replace("SignUpGuardians"));
+          navigation.dispatch(StackActions.replace("VaultBackup"));
         },
         onError: (error) => {
           const clerkError = error?.errors?.[0] as ClerkAPIError;
@@ -60,7 +60,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
       {
         onSuccess: async (data) => {
           dispatch(setEmail(data.emailAddress));
-          navigation.dispatch(StackActions.replace("SignUpGuardians"));
+          navigation.dispatch(StackActions.replace("VaultBackup"));
         },
         onError: (error) => {
           const clerkError = error?.errors?.[0] as ClerkAPIError;

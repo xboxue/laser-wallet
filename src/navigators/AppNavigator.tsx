@@ -205,6 +205,10 @@ const AppNavigator = () => {
             name="RecoveryVaultVerifyEmail"
             component={RecoveryVaultVerifyEmailScreen}
           />
+          <Stack.Screen
+            name="SignUpBackupPassword"
+            component={SignUpBackupPasswordScreen}
+          />
         </>
       );
 

@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Box, Button, Text } from "native-base";
 import { Platform } from "react-native";
 import RNCloudFs from "react-native-cloud-fs";
+import { BACKUP_PREFIX } from "../constants/backups";
 import { getBackups } from "../services/cloudBackup";
 
 const RecoveryImportSeedPhraseScreen = () => {
@@ -25,8 +26,8 @@ const RecoveryImportSeedPhraseScreen = () => {
       }
 
       const data = await getBackups();
-      return data.files.filter((backup) =>
-        backup.name.startsWith("laser/backup")
+      return data.filter((backup) =>
+        backup.name.startsWith(BACKUP_PREFIX.WALLET)
       );
     },
     {
@@ -34,7 +35,7 @@ const RecoveryImportSeedPhraseScreen = () => {
         if (!backups.length) throw new Error("No backups found");
         else if (backups.length >= 1)
           navigation.navigate("RecoverySeedPhrasePassword", {
-            backupName: backups[0].name.replace("laser/", ""),
+            backupName: backups[0].name,
           });
         else navigation.navigate("RecoveryBackupsScreen");
       },

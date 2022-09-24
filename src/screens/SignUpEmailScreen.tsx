@@ -76,7 +76,7 @@ const SignUpEmailScreen = () => {
     onSubmit: (values) => {
       if (isSignedIn) {
         dispatch(setIsLaserGuardianEnabled(true));
-        return navigation.navigate("SignUpGuardians");
+        return navigation.navigate("VaultBackup");
       }
       signUpWithEmail(values.email);
     },

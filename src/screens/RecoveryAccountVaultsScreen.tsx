@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Box, FlatList, Skeleton, Text } from "native-base";
 import VaultItem from "../components/VaultItem/VaultItem";
+import { BACKUP_PREFIX } from "../constants/backups";
 import { useGetVaultsQuery } from "../graphql/types";
 import { getBackups } from "../services/cloudBackup";
 import isEqualCaseInsensitive from "../utils/isEqualCaseInsensitive";
@@ -9,7 +10,10 @@ const RecoveryAccountVaultsScreen = () => {
   const { data: backups, isLoading: backupsLoading } = useQuery(
     ["backups"],
     () => getBackups(),
-    { select: (data) => data.files }
+    {
+      select: (data) =>
+        data.filter((backup) => backup.name.startsWith(BACKUP_PREFIX.VAULT)),
+    }
   );
 
   const { data, loading } = useGetVaultsQuery();
@@ -33,7 +37,7 @@ const RecoveryAccountVaultsScreen = () => {
                   recoveryOwners?.find((recoveryOwner) =>
                     isEqualCaseInsensitive(
                       recoveryOwner,
-                      backup.name.replace("laser/", "")
+                      backup.name.replace(`${BACKUP_PREFIX.VAULT}_`, "")
                     )
                   )
                 );

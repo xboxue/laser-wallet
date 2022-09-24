@@ -49,7 +49,7 @@ const VaultItem = ({ address, chainId, createdAt, getBackup }: Props) => {
           navigation.navigate("RecoveryBackupPassword", {
             address,
             chainId,
-            backupName: backup.name.replace("laser/", ""),
+            backupName: backup.name,
           });
       }}
     >

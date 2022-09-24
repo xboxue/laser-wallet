@@ -1,4 +1,4 @@
-import { useNavigation } from "@react-navigation/native";
+import { StackActions, useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { getUnixTime } from "date-fns";
 import * as SecureStore from "expo-secure-store";
@@ -12,7 +12,7 @@ import { setWalletAddress, setWallets } from "../features/wallet/walletSlice";
 import { createBackup } from "../services/cloudBackup";
 
 const SignUpBackupPasswordScreen = ({ route }) => {
-  const { wallets } = route.params;
+  const { wallets, isRecovery = false } = route.params;
   const dispatch = useDispatch();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
   const navigation = useNavigation();
@@ -24,7 +24,7 @@ const SignUpBackupPasswordScreen = ({ route }) => {
       await createBackup(
         JSON.stringify({ seedPhrase }),
         password,
-        `backup_${getUnixTime(new Date()).toString()}`
+        `wallet_${wallets[0].address}}`
       );
 
       await SecureStore.setItemAsync("backupPassword", password);
@@ -33,7 +33,10 @@ const SignUpBackupPasswordScreen = ({ route }) => {
       dispatch(setWallets(wallets));
     },
     {
-      onSuccess: () => navigation.navigate("Home"),
+      onSuccess: () =>
+        navigation.dispatch(
+          StackActions.replace(isRecovery ? "RecoveryImportVault" : "Home")
+        ),
       onError: (error) => {
         if (error instanceof Error && error.message === "iCloud not available")
           setICloudPromptOpen(true);

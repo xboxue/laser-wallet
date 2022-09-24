@@ -1,5 +1,6 @@
 declare module "react-native-cloud-fs" {
   type Scope = "visible" | "hidden";
+  type File = { name: string; id: string };
 
   function isAvailable(): Promise<boolean>;
 
@@ -19,9 +20,9 @@ declare module "react-native-cloud-fs" {
   function listFiles(options: {
     scope: Scope;
     targetPath: string;
-  }): Promise<{ files: any[] }>;
+  }): Promise<{ files: File[] }>;
 
-  function deleteFromCloud(file: any): Promise<boolean>;
+  function deleteFromCloud(file: File): Promise<boolean>;
 
   function loginIfNeeded(): Promise<boolean>;
 

@@ -4,21 +4,30 @@ import { Box, Button, Text } from "native-base";
 import { useState } from "react";
 import { Platform } from "react-native";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
-import { signInToCloud } from "../services/cloudBackup";
+import { BACKUP_PREFIX } from "../constants/backups";
+import { getBackups, signInToCloud } from "../services/cloudBackup";
 
 const RecoveryImportRecoveryKeyScreen = () => {
   const navigation = useNavigation();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
 
   const { mutate: signIn, isLoading: isSigningIn } = useMutation(
-    async () => signInToCloud(),
+    async () => {
+      await signInToCloud();
+      const data = await getBackups();
+      return data.filter((backup) =>
+        backup.name.startsWith(BACKUP_PREFIX.VAULT)
+      );
+    },
     {
-      onSuccess: () => navigation.navigate("RecoverySignIn"),
+      onSuccess: (backups) => {
+        if (!backups.length) throw new Error("No backups found");
+        navigation.navigate("RecoverySignIn");
+      },
       onError: (error) => {
         if (error instanceof Error && error.message === "iCloud not available")
           setICloudPromptOpen(true);
       },
-      meta: { disableErrorToast: true },
     }
   );
 

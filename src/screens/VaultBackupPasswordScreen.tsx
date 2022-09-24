@@ -2,26 +2,20 @@ import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import Wallet from "ethereumjs-wallet";
 import { ethers } from "ethers";
+import * as SecureStore from "expo-secure-store";
 import { LaserFactory } from "laser-sdk";
 import { random } from "lodash";
 import { Box, Text } from "native-base";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordForm";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
-import {
-  setBackupPassword,
-  setIsAuthenticated,
-} from "../features/auth/authSlice";
 import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
 import { selectChainId } from "../features/network/networkSlice";
-import { setWalletAddress } from "../features/wallet/walletSlice";
 import { createBackup } from "../services/cloudBackup";
-import * as SecureStore from "expo-secure-store";
 
 const VaultBackupPasswordScreen = () => {
-  const dispatch = useDispatch();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
   const guardianAddresses = useSelector(selectGuardianAddresses);
   const chainId = useSelector(selectChainId);
@@ -41,7 +35,6 @@ const VaultBackupPasswordScreen = () => {
 
       const factory = new LaserFactory(
         provider,
-        new ethers.Wallet(owner.getPrivateKeyString()),
         new ethers.Wallet(owner.getPrivateKeyString())
       );
 
@@ -55,10 +48,9 @@ const VaultBackupPasswordScreen = () => {
       await createBackup(
         JSON.stringify({
           privateKey: recoveryOwner.getPrivateKeyString(),
-          wallets: [{ address: vaultAddress, chainId }],
         }),
         password,
-        recoveryOwner.getAddressString()
+        `vault_${recoveryOwner.getAddressString()}`
       );
       navigation.navigate("SignUpDeployWallet", {
         recoveryOwnerAddress: recoveryOwner.getAddressString(),
