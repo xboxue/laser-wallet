@@ -6,14 +6,14 @@ import { Platform } from "react-native";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { signInToCloud } from "../services/cloudBackup";
 
-const VaultBackupScreen = () => {
+const RecoveryImportRecoveryKeyScreen = () => {
   const navigation = useNavigation();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
 
   const { mutate: signIn, isLoading: isSigningIn } = useMutation(
     async () => signInToCloud(),
     {
-      onSuccess: () => navigation.navigate("VaultBackupPassword"),
+      onSuccess: () => navigation.navigate("RecoverySignIn"),
       onError: (error) => {
         if (error instanceof Error && error.message === "iCloud not available")
           setICloudPromptOpen(true);
@@ -24,14 +24,10 @@ const VaultBackupScreen = () => {
 
   return (
     <Box p="4">
-      <Text variant="subtitle1">Back up your recovery key</Text>
-      <Text>
-        Your recovery key will be used to complete your wallet recovery in case
-        your device is lost.
-      </Text>
-
-      <Button mt="4" onPress={async () => signIn()} isLoading={isSigningIn}>
-        {`Back up on ${Platform.OS === "ios" ? "iCloud" : "Google Drive"}`}
+      <Text variant="subtitle1">Import your recovery key</Text>
+      <Text>Import the recovery key backup associated with your vault.</Text>
+      <Button mt="6" onPress={() => signIn()} isLoading={isSigningIn}>
+        {`Import from ${Platform.OS === "ios" ? "iCloud" : "Google Drive"}`}
       </Button>
       <EnableICloudPrompt
         open={iCloudPromptOpen}
@@ -41,4 +37,4 @@ const VaultBackupScreen = () => {
   );
 };
 
-export default VaultBackupScreen;
+export default RecoveryImportRecoveryKeyScreen;

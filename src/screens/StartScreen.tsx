@@ -12,7 +12,11 @@ const StartScreen = () => {
       <Button onPress={() => navigation.navigate("SignUpAuth")}>
         Create new wallet
       </Button>
-      <Button variant="subtle" mt="2">
+      <Button
+        variant="subtle"
+        mt="2"
+        onPress={() => navigation.navigate("RecoveryImportSeedPhrase")}
+      >
         I already have a wallet
       </Button>
     </Box>

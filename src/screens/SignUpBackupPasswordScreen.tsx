@@ -1,14 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
-import { formatISO } from "date-fns";
+import { getUnixTime } from "date-fns";
 import * as SecureStore from "expo-secure-store";
 import { Box, Text } from "native-base";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordForm";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { setIsAuthenticated } from "../features/auth/authSlice";
-import { selectChainId } from "../features/network/networkSlice";
 import { setWalletAddress, setWallets } from "../features/wallet/walletSlice";
 import { createBackup } from "../services/cloudBackup";
 
@@ -22,7 +21,11 @@ const SignUpBackupPasswordScreen = ({ route }) => {
     async (password: string) => {
       const seedPhrase = await SecureStore.getItemAsync("seedPhrase");
       if (!seedPhrase) throw new Error("No seed phrase");
-      await createBackup(seedPhrase, password, "backup");
+      await createBackup(
+        JSON.stringify({ seedPhrase }),
+        password,
+        `backup_${getUnixTime(new Date()).toString()}`
+      );
 
       await SecureStore.setItemAsync("backupPassword", password);
       dispatch(setIsAuthenticated(true));

@@ -1,5 +1,4 @@
 import axios from "axios";
-import { providers } from "ethers";
 import Constants from "expo-constants";
 import { defaultChains } from "wagmi";
 
@@ -44,21 +43,28 @@ interface GetTransactionsOptions {
 }
 
 const getUrl = (chainId: number) => {
-  if (!defaultChains.some((chain) => chain.id === chainId))
-    throw new Error("Unsupported network");
-  const chain = providers.getNetwork(chainId);
+  const chain = defaultChains.find((chain) => chain.id === chainId);
+  if (!chain) throw new Error("Unsupported network");
 
-  if (chain.name === "homestead") return "https://api.etherscan.io/api";
-  return `https://api-${chain.name}.etherscan.io/api`;
+  if (chain.network === "homestead") return "https://api.etherscan.io/api";
+  return `https://api-${chain.network}.etherscan.io/api`;
+};
+
+export const getAddressUrl = (chainId: number, address: string) => {
+  const chain = defaultChains.find((chain) => chain.id === chainId);
+  if (!chain) throw new Error("Unsupported network");
+
+  if (chain.network === "homestead")
+    return `https://etherscan.io/address/${address}`;
+  return `https://${chain.network}.etherscan.io/address/${address}`;
 };
 
 export const getTransactionUrl = (chainId: number, hash: string) => {
-  if (!defaultChains.some((chain) => chain.id === chainId))
-    throw new Error("Unsupported network");
-  const chain = providers.getNetwork(chainId);
+  const chain = defaultChains.find((chain) => chain.id === chainId);
+  if (!chain) throw new Error("Unsupported network");
 
-  if (chain.name === "homestead") return `https://etherscan.io/tx/${hash}`;
-  return `https://${chain.name}.etherscan.io/tx/${hash}`;
+  if (chain.network === "homestead") return `https://etherscan.io/tx/${hash}`;
+  return `https://${chain.network}.etherscan.io/tx/${hash}`;
 };
 
 export const getTransactions = async ({

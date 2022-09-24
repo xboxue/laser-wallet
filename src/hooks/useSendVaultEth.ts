@@ -12,7 +12,7 @@ import {
   selectWalletAddress,
   selectWallets,
 } from "../features/wallet/walletSlice";
-import { signHash } from "../services/vault";
+import { signTransaction } from "../services/vault";
 
 type SendEthArgs = { to: string; amount: string };
 
@@ -47,16 +47,10 @@ const useSendVaultEth = (
     const nonce = await laser.wallet.nonce();
 
     const transaction = await laser.sendEth(to, amount, nonce);
-    const hash = await laser.wallet.operationHash(
-      to,
-      transaction.value,
-      "0x",
-      nonce
-    );
     const token = await getToken();
     if (!token) throw new Error("Not authenticated");
 
-    const signatures = await signHash(hash, token);
+    const signatures = await signTransaction(transaction, token);
     const tx = bundleTransactions(transaction, {
       ...transaction,
       signatures,

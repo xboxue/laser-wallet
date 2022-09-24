@@ -7,6 +7,8 @@ export interface PendingTransaction extends providers.TransactionResponse {
   hash: string;
   callRequest?: CallRequest;
   isDeployVault?: boolean;
+  isLockVault?: boolean;
+  isRecoverVault?: boolean;
 }
 
 interface TransactionsState {

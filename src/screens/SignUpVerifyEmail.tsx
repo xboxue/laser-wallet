@@ -1,8 +1,8 @@
-import { useSignIn, useSignUp } from "@clerk/clerk-expo";
+import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-expo";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { useFormik } from "formik";
-import { Box, Button, Input, Text } from "native-base";
+import { Box, Button, FormControl, Input, Text } from "native-base";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
 import { setEmail } from "../features/wallet/walletSlice";
@@ -14,6 +14,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
   const { signIn } = useSignIn();
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const clerk = useClerk();
 
   const { mutate: verifySignInCode, isLoading: isVerifyingSignIn } =
     useMutation(
@@ -26,6 +27,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
         if (signInAttempt.status !== "complete") {
           throw new Error("Email verification failed");
         }
+        await clerk.setSession(signInAttempt.createdSessionId);
         return signInAttempt;
       },
       {
@@ -52,6 +54,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
         if (signUpAttempt.verifications.emailAddress.status !== "verified") {
           throw new Error("Email verification failed");
         }
+        await clerk.setSession(signUpAttempt.createdSessionId);
         return signUpAttempt;
       },
       {
@@ -85,16 +88,20 @@ const SignUpVerifyEmailScreen = ({ route }) => {
       <Text mb="4">
         Please enter the verification code we sent to your email.
       </Text>
-      <Input
-        placeholder="Code"
-        value={formik.values.code}
-        onChangeText={formik.handleChange("code")}
-        onBlur={formik.handleBlur("code")}
-        keyboardType="number-pad"
-        autoFocus
-        size="lg"
-      />
-      {formik.errors.code && <Text mt="1">{formik.errors.code}</Text>}
+      <FormControl isInvalid={formik.touched.code && !!formik.errors.code}>
+        <Input
+          placeholder="Code"
+          value={formik.values.code}
+          onChangeText={formik.handleChange("code")}
+          onBlur={formik.handleBlur("code")}
+          keyboardType="number-pad"
+          autoFocus
+          size="lg"
+        />
+        <FormControl.ErrorMessage>
+          {formik.errors.code}
+        </FormControl.ErrorMessage>
+      </FormControl>
       <Button
         mt="4"
         onPress={formik.handleSubmit}

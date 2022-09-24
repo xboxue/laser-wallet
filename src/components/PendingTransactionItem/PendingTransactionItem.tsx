@@ -10,7 +10,11 @@ import {
   PendingTransaction,
   removePendingTransaction,
 } from "../../features/transactions/transactionsSlice";
-import { setVaultAddress } from "../../features/wallet/walletSlice";
+import {
+  setIsVaultLocked,
+  setRecoverTx,
+  setVaultAddress,
+} from "../../features/wallet/walletSlice";
 import { decodeTxDataByHash } from "../../utils/decodeTransactionData";
 import TokenTransactionItem from "../TokenTransactionItem/TokenTransactionItem";
 import WalletTransactionItem from "../WalletTransactionItem/WalletTransactionItem";
@@ -38,6 +42,7 @@ const PendingTransactionItem = ({
     onSuccess,
   });
 
+  // TODO: Make this a global listener
   useEffect(() => {
     if (receipt && txsByHash[transaction.hash]) {
       dispatch(removePendingTransaction(transaction.hash));
@@ -47,6 +52,16 @@ const PendingTransactionItem = ({
       const iface = new Interface(["event LaserCreated(address laser)"]);
       const vaultAddress = iface.parseLog(receipt.logs[0]).args[0];
       dispatch(setVaultAddress(vaultAddress));
+    }
+
+    if (receipt && transaction.isLockVault) {
+      dispatch(setVaultAddress(transaction.to));
+      dispatch(setIsVaultLocked(true));
+    }
+
+    if (receipt && transaction.isRecoverVault) {
+      dispatch(setRecoverTx(null));
+      dispatch(setIsVaultLocked(false));
     }
   }, [receipt, txsByHash, transaction]);
 

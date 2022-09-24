@@ -2,6 +2,7 @@ import CryptoJS from "crypto-js";
 import { Platform } from "react-native";
 import RNCloudFs from "react-native-cloud-fs";
 import RNFS from "react-native-fs";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const BACKUP_DIR = "laser";
 
@@ -15,6 +16,11 @@ export const deleteBackups = async () => {
 };
 
 export const getBackups = async () => {
+  if (Platform.OS === "ios") {
+    const available = await RNCloudFs.isAvailable();
+    if (!available) throw new Error("iCloud not available");
+  }
+
   if (Platform.OS === "android") await RNCloudFs.loginIfNeeded();
 
   return RNCloudFs.listFiles({
@@ -91,4 +97,23 @@ export const getBackup = async (backupPassword: string, fileName: string) => {
 
 export const isValidPassword = (password: string) => {
   return password.length >= 8;
+};
+
+export const signInToCloud = async () => {
+  if (Platform.OS === "android") {
+    GoogleSignin.configure({
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    });
+    await GoogleSignin.hasPlayServices({
+      showPlayServicesUpdateDialog: true,
+    });
+    const isSignedIn = await GoogleSignin.isSignedIn();
+    if (!isSignedIn) {
+      await GoogleSignin.signIn();
+    }
+    await RNCloudFs.loginIfNeeded();
+  } else if (Platform.OS === "ios") {
+    const available = await RNCloudFs.isAvailable();
+    if (!available) throw new Error("iCloud not available");
+  }
 };

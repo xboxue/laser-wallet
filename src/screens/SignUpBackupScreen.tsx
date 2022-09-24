@@ -1,42 +1,23 @@
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { generateMnemonic, mnemonicToSeed } from "bip39";
-import { hdkey } from "ethereumjs-wallet";
-import { utils } from "ethers";
-import * as SecureStore from "expo-secure-store";
 import { Box, Button, Text } from "native-base";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Platform } from "react-native";
-import RNCloudFs from "react-native-cloud-fs";
 import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
+import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
+import { signInToCloud } from "../services/cloudBackup";
+import { createWallets } from "../utils/wallet";
 
 const SignUpBackupScreen = () => {
   const navigation = useNavigation();
   const seedPhrase = useMemo(() => generateMnemonic(), []);
+  const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
 
-  const createWallet = async () => {
-    const seed = await mnemonicToSeed(seedPhrase);
-    const hdwallet = hdkey.fromMasterSeed(seed);
-    const privateKeys: Record<string, string> = {};
-    const wallets = [];
-    for (let i = 0; i < 10; i++) {
-      const wallet = hdwallet
-        .derivePath(utils.defaultPath)
-        .deriveChild(i)
-        .getWallet();
-      privateKeys[wallet.getAddressString()] = wallet.getPrivateKeyString();
-      wallets.push({ address: wallet.getAddressString() });
-    }
-    await SecureStore.setItemAsync("seedPhrase", seedPhrase);
-    await SecureStore.setItemAsync("privateKeys", JSON.stringify(privateKeys));
-    return wallets;
-  };
-
-  const { mutate, isLoading: isCreating } = useMutation(
+  const { mutate: createWallet, isLoading: isCreating } = useMutation(
     async () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
-      return createWallet();
+      return createWallets(seedPhrase);
     },
     {
       onSuccess: (wallets) =>
@@ -46,25 +27,16 @@ const SignUpBackupScreen = () => {
 
   const { mutate: signInAndCreateWallet, isLoading: isSigningIn } = useMutation(
     async () => {
-      if (Platform.OS === "android") {
-        GoogleSignin.configure({
-          scopes: ["https://www.googleapis.com/auth/drive.file"],
-        });
-        await GoogleSignin.hasPlayServices({
-          showPlayServicesUpdateDialog: true,
-        });
-        const isSignedIn = await GoogleSignin.isSignedIn();
-        if (!isSignedIn) {
-          await GoogleSignin.signIn();
-        }
-        await RNCloudFs.loginIfNeeded();
-      }
-
-      return createWallet();
+      await signInToCloud();
+      return createWallets(seedPhrase);
     },
     {
       onSuccess: (wallets) =>
         navigation.navigate("SignUpBackupPassword", { wallets }),
+      onError: (error) => {
+        if (error instanceof Error && error.message === "iCloud not available")
+          setICloudPromptOpen(true);
+      },
       meta: { disableErrorToast: true },
     }
   );
@@ -101,11 +73,15 @@ const SignUpBackupScreen = () => {
       <Button
         variant="subtle"
         mt="2"
-        onPress={() => mutate()}
+        onPress={() => createWallet()}
         isLoading={isCreating}
       >
         Back up manually
       </Button>
+      <EnableICloudPrompt
+        open={iCloudPromptOpen}
+        onClose={() => setICloudPromptOpen(false)}
+      />
     </Box>
   );
 };

@@ -9,6 +9,16 @@ import { selectIsAuthenticated } from "../features/auth/authSlice";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
 import HomeScreen from "../screens/HomeScreen";
 import QRCodeScanScreen from "../screens/QRCodeScanScreen";
+import RecoveryAccountVaultsScreen from "../screens/RecoveryAccountVaultsScreen";
+import RecoveryBackupPasswordScreen from "../screens/RecoveryBackupPasswordScreen";
+import RecoveryBackupScreen from "../screens/RecoveryBackupScreen";
+import RecoveryEnterSeedPhraseScreen from "../screens/RecoveryEnterSeedPhraseScreen";
+import RecoveryImportVaultScreen from "../screens/RecoveryImportVaultScreen";
+import RecoveryLockVaultScreen from "../screens/RecoveryLockVaultScreen";
+import RecoverySeedPhrasePasswordScreen from "../screens/RecoverySeedPhrasePasswordScreen";
+import RecoveryImportSeedPhraseScreen from "../screens/RecoveryImportSeedPhraseScreen";
+import RecoverySignInScreen from "../screens/RecoverySignInScreen";
+import RecoveryVerifyEmailScreen from "../screens/RecoveryVerifyEmailScreen";
 import SendAddressScreen from "../screens/SendAddressScreen";
 import SendAmountScreen from "../screens/SendAmountScreen";
 import SendAssetScreen from "../screens/SendAssetScreen";
@@ -37,6 +47,9 @@ import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 import VaultBackupPasswordScreen from "../screens/VaultBackupPasswordScreen";
 import VaultBackupScreen from "../screens/VaultBackupScreen";
 import VaultVerifyEmail from "../screens/VaultVerifyEmail";
+import RecoveryImportRecoveryKeyScreen from "../screens/RecoveryImportRecoveryKeyScreen";
+import RecoveryRecoverVaultScreen from "../screens/RecoveryRecoverVaultScreen";
+import RecoveryVaultVerifyEmailScreen from "../screens/RecoveryVaultVerifyEmailScreen";
 
 const Stack = createStackNavigator();
 
@@ -66,6 +79,18 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SignUpBackupPassword"
             component={SignUpBackupPasswordScreen}
+          />
+          <Stack.Screen
+            name="RecoveryImportSeedPhrase"
+            component={RecoveryImportSeedPhraseScreen}
+          />
+          <Stack.Screen
+            name="RecoverySeedPhrasePassword"
+            component={RecoverySeedPhrasePasswordScreen}
+          />
+          <Stack.Screen
+            name="RecoveryEnterSeedPhrase"
+            component={RecoveryEnterSeedPhraseScreen}
           />
         </>
       );
@@ -140,6 +165,46 @@ const AppNavigator = () => {
             component={VaultBackupPasswordScreen}
           />
           <Stack.Screen name="VaultVerifyEmail" component={VaultVerifyEmail} />
+          <Stack.Screen
+            name="RecoveryBackup"
+            component={RecoveryBackupScreen}
+          />
+          <Stack.Screen
+            name="RecoveryImportVault"
+            component={RecoveryImportVaultScreen}
+          />
+          <Stack.Screen
+            name="RecoveryImportRecoveryKey"
+            component={RecoveryImportRecoveryKeyScreen}
+          />
+          <Stack.Screen
+            name="RecoverySignIn"
+            component={RecoverySignInScreen}
+          />
+          <Stack.Screen
+            name="RecoveryVerifyEmail"
+            component={RecoveryVerifyEmailScreen}
+          />
+          <Stack.Screen
+            name="RecoveryAccountVaults"
+            component={RecoveryAccountVaultsScreen}
+          />
+          <Stack.Screen
+            name="RecoveryBackupPassword"
+            component={RecoveryBackupPasswordScreen}
+          />
+          <Stack.Screen
+            name="RecoveryLockVault"
+            component={RecoveryLockVaultScreen}
+          />
+          <Stack.Screen
+            name="RecoveryRecoverVault"
+            component={RecoveryRecoverVaultScreen}
+          />
+          <Stack.Screen
+            name="RecoveryVaultVerifyEmail"
+            component={RecoveryVaultVerifyEmailScreen}
+          />
         </>
       );
 

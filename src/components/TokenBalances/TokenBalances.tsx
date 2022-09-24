@@ -1,5 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
+import { add, format, fromUnixTime } from "date-fns";
+import { LaserWallet__factory } from "laser-sdk/dist/typechain";
 import {
   Box,
   Circle,
@@ -11,10 +14,13 @@ import {
 } from "native-base";
 import { RefreshControl } from "react-native";
 import { useSelector } from "react-redux";
-import { useBalance } from "wagmi";
+import { useBalance, useProvider } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
 import { selectChainId } from "../../features/network/networkSlice";
-import { selectVaultAddress } from "../../features/wallet/walletSlice";
+import {
+  selectIsVaultLocked,
+  selectVaultAddress,
+} from "../../features/wallet/walletSlice";
 import useRefreshOnFocus from "../../hooks/useRefreshOnFocus";
 import useTokenBalances, { TokenBalance } from "../../hooks/useTokenBalances";
 import formatAmount from "../../utils/formatAmount";
@@ -36,6 +42,18 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   const chainId = useSelector(selectChainId);
   const vaultAddress = useSelector(selectVaultAddress);
   const navigation = useNavigation();
+  const isVaultLocked = useSelector(selectIsVaultLocked);
+  const provider = useProvider({ chainId });
+
+  const { data: lockTimestamp, isLoading: lockTimestampLoading } = useQuery(
+    ["lockTimestamp", vaultAddress],
+    () => {
+      if (!vaultAddress) throw new Error();
+      const vault = LaserWallet__factory.connect(vaultAddress, provider);
+      return vault.getConfigTimestamp();
+    },
+    { enabled: !!vaultAddress }
+  );
 
   const {
     data: balance,
@@ -131,7 +149,45 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   };
 
   const renderActivateWallet = () => {
-    if (vaultAddress) return null;
+    if (vaultAddress && !isVaultLocked) return null;
+    if (isVaultLocked)
+      return (
+        <Pressable onPress={() => navigation.navigate("RecoveryRecoverVault")}>
+          {({ isPressed }) => (
+            <Box
+              borderColor="gray.200"
+              borderBottomWidth="1"
+              pt="2"
+              p="4"
+              flexDir="row"
+              alignItems="center"
+              mb="1"
+              opacity={isPressed ? 0.3 : 1}
+            >
+              <Circle bg="gray.800" size="9">
+                <Icon
+                  as={Ionicons}
+                  color="white"
+                  name="ios-arrow-up"
+                  size="5"
+                />
+              </Circle>
+              <Box ml="3">
+                <Text variant="subtitle1">Complete vault transfer</Text>
+                <Text>
+                  Transfer after{" "}
+                  {lockTimestamp &&
+                    format(
+                      add(fromUnixTime(lockTimestamp.toNumber()), { days: 5 }),
+                      "LLL d, h:mm a"
+                    )}
+                </Text>
+              </Box>
+            </Box>
+          )}
+        </Pressable>
+      );
+
     return (
       <Pressable onPress={() => navigation.navigate("SignUpEmail")}>
         {({ isPressed }) => (
