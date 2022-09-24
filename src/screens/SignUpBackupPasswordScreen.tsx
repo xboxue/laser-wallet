@@ -27,7 +27,6 @@ const SignUpBackupPasswordScreen = ({ route }) => {
         `wallet_${wallets[0].address}}`
       );
 
-      await SecureStore.setItemAsync("backupPassword", password);
       dispatch(setIsAuthenticated(true));
       dispatch(setWalletAddress(wallets[0].address));
       dispatch(setWallets(wallets));

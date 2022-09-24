@@ -22,7 +22,6 @@ const RecoverySeedPhrasePasswordScreen = ({ route }) => {
       const { seedPhrase } = JSON.parse(backup);
       if (!isValidMnemonic(seedPhrase))
         throw new Error("Invalid recovery phrase");
-      await SecureStore.setItemAsync("backupPassword", password);
       return createWallets(seedPhrase);
     },
     {

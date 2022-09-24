@@ -50,6 +50,7 @@ import VaultVerifyEmail from "../screens/VaultVerifyEmail";
 import RecoveryImportRecoveryKeyScreen from "../screens/RecoveryImportRecoveryKeyScreen";
 import RecoveryRecoverVaultScreen from "../screens/RecoveryRecoverVaultScreen";
 import RecoveryVaultVerifyEmailScreen from "../screens/RecoveryVaultVerifyEmailScreen";
+import SettingsVaultScreen from "../screens/SettingsVaultScreen";
 
 const Stack = createStackNavigator();
 
@@ -134,6 +135,7 @@ const AppNavigator = () => {
             name="SettingsBackupPassword"
             component={SettingsBackupPasswordScreen}
           />
+          <Stack.Screen name="SettingsVault" component={SettingsVaultScreen} />
           <Stack.Screen
             name="TransactionDetails"
             component={TransactionDetailsScreen}
