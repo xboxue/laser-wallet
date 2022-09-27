@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import EmailCodeForm from "../components/EmailCodeForm.tsx/EmailCodeForm";
 import { setEmail } from "../features/wallet/walletSlice";
 
-const RecoveryVerifyEmailScreen = () => {
+const RecoveryVerifyEmailScreen = ({ route }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
@@ -17,7 +17,9 @@ const RecoveryVerifyEmailScreen = () => {
       <EmailCodeForm
         onSubmit={async (email) => {
           dispatch(setEmail(email));
-          navigation.dispatch(StackActions.replace("RecoveryAccountVaults"));
+          navigation.dispatch(
+            StackActions.replace("RecoveryAccountVaults", route.params)
+          );
         }}
       />
     </Box>

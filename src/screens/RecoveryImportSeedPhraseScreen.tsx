@@ -2,28 +2,20 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { Box, Button, Text } from "native-base";
+import { useState } from "react";
 import { Platform } from "react-native";
 import RNCloudFs from "react-native-cloud-fs";
+import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { BACKUP_PREFIX } from "../constants/backups";
-import { getBackups } from "../services/cloudBackup";
+import { getBackups, signInToCloud } from "../services/cloudBackup";
 
 const RecoveryImportSeedPhraseScreen = () => {
   const navigation = useNavigation();
+  const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
+
   const { mutate: getCloudBackups, isLoading } = useMutation(
     async () => {
-      if (Platform.OS === "android") {
-        GoogleSignin.configure({
-          scopes: ["https://www.googleapis.com/auth/drive.file"],
-        });
-        await GoogleSignin.hasPlayServices({
-          showPlayServicesUpdateDialog: true,
-        });
-        const isSignedIn = await GoogleSignin.isSignedIn();
-        if (!isSignedIn) {
-          await GoogleSignin.signIn();
-        }
-        await RNCloudFs.loginIfNeeded();
-      }
+      await signInToCloud();
 
       const data = await getBackups();
       return data.filter((backup) =>
@@ -39,12 +31,19 @@ const RecoveryImportSeedPhraseScreen = () => {
           });
         else navigation.navigate("RecoveryBackupsScreen");
       },
+      onError: (error) => {
+        if (error instanceof Error && error.message === "iCloud not available")
+          setICloudPromptOpen(true);
+      },
     }
   );
+
   return (
     <Box p="4">
       <Text variant="subtitle1">Import your wallet</Text>
-      <Text>Import your wallet with your 12 word recovery phrase.</Text>
+      <Text>
+        Import your wallet with your 12 word recovery phrase or from a backup.
+      </Text>
 
       <Button mt="6" isLoading={isLoading} onPress={() => getCloudBackups()}>
         {`Import from ${Platform.OS === "ios" ? "iCloud" : "Google Drive"}`}
@@ -56,6 +55,10 @@ const RecoveryImportSeedPhraseScreen = () => {
       >
         Enter recovery phrase
       </Button>
+      <EnableICloudPrompt
+        open={iCloudPromptOpen}
+        onClose={() => setICloudPromptOpen(false)}
+      />
     </Box>
   );
 };

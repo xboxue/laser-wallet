@@ -3,7 +3,6 @@ import { Actionsheet, Button, ChevronDownIcon, Icon } from "native-base";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  selectIsVaultLocked,
   selectVaultAddress,
   selectWalletAddress,
   selectWallets,
@@ -18,7 +17,6 @@ const WalletSelector = () => {
   const dispatch = useDispatch();
   const wallets = useSelector(selectWallets);
   const [walletSheetOpen, setWalletSheetOpen] = useState(false);
-  const isVaultLocked = useSelector(selectIsVaultLocked);
 
   return (
     <>
@@ -27,7 +25,7 @@ const WalletSelector = () => {
         onClose={() => setWalletSheetOpen(false)}
       >
         <Actionsheet.Content>
-          {vaultAddress && !isVaultLocked && (
+          {vaultAddress && (
             <Actionsheet.Item
               onPress={() => dispatch(setWalletAddress(vaultAddress))}
               _pressed={{ bgColor: "gray.200", rounded: "lg" }}

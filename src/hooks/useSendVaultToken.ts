@@ -13,6 +13,7 @@ import {
   selectWallets,
 } from "../features/wallet/walletSlice";
 import { signTransaction } from "../services/vault";
+import { getPrivateKey } from "../utils/wallet";
 
 type SendTokenArgs = { to: string; amount: string; token: any };
 
@@ -37,10 +38,9 @@ const useSendVaultToken = (
     const ownerPrivateKey = await SecureStore.getItemAsync("ownerPrivateKey", {
       requireAuthentication: true,
     });
-    const privateKeys = await SecureStore.getItemAsync("privateKeys", {
-      requireAuthentication: true,
-    });
-    if (!privateKeys || !ownerPrivateKey) throw new Error("No private key");
+    if (!ownerPrivateKey) throw new Error("No private key");
+
+    const privateKey = await getPrivateKey(wallets[0].address);
 
     const owner = new ethers.Wallet(ownerPrivateKey);
     const laser = new Laser(provider, owner, walletAddress);
@@ -62,10 +62,7 @@ const useSendVaultToken = (
       signer: "guardian",
     });
 
-    const wallet = new Wallet(
-      JSON.parse(privateKeys)[wallets[0].address],
-      provider
-    );
+    const wallet = new Wallet(privateKey, provider);
     return laser.execTransaction(tx, wallet, 100000);
   }, options);
 };

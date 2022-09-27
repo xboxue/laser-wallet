@@ -1,38 +1,27 @@
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
-import { generateMnemonic, mnemonicToSeed } from "bip39";
+import { generateMnemonic } from "bip39";
 import { Box, Button, Text } from "native-base";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Platform } from "react-native";
-import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { signInToCloud } from "../services/cloudBackup";
-import { createWallets } from "../utils/wallet";
+import * as SecureStore from "expo-secure-store";
 
-const SignUpBackupScreen = () => {
+const SignUpBackupScreen = ({ route }) => {
   const navigation = useNavigation();
-  const seedPhrase = useMemo(() => generateMnemonic(), []);
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
 
-  const { mutate: createWallet, isLoading: isCreating } = useMutation(
-    async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      return createWallets(seedPhrase);
-    },
-    {
-      onSuccess: (wallets) =>
-        navigation.navigate("SignUpVerifySeedPhrase", { wallets }),
-    }
-  );
-
-  const { mutate: signInAndCreateWallet, isLoading: isSigningIn } = useMutation(
+  const { mutate: signIn, isLoading } = useMutation(
     async () => {
       await signInToCloud();
-      return createWallets(seedPhrase);
+      const seedPhrase = generateMnemonic();
+      await SecureStore.setItemAsync("seedPhrase", seedPhrase);
     },
     {
-      onSuccess: (wallets) =>
-        navigation.navigate("SignUpBackupPassword", { wallets }),
+      onSuccess: () => {
+        navigation.navigate("SignUpBackupPassword", route.params);
+      },
       onError: (error) => {
         if (error instanceof Error && error.message === "iCloud not available")
           setICloudPromptOpen(true);
@@ -43,42 +32,13 @@ const SignUpBackupScreen = () => {
 
   return (
     <Box p="4">
-      <Text variant="subtitle1">Back up your recovery phrase</Text>
+      <Text variant="subtitle1">Back up your wallet</Text>
       <Text>
-        Your recovery phrase will be used to recover your wallet in case your
-        device is lost.
+        Your backup will be used to recover your wallet in case your device is
+        lost.
       </Text>
-      <Box
-        rounded="md"
-        borderWidth="1"
-        borderColor="gray.200"
-        p="3"
-        mt="5"
-        flexDir="row"
-        position="relative"
-        bgColor="gray.100"
-      >
-        <Text mr="1" flex="1">
-          {seedPhrase}
-        </Text>
-        <CopyIconButton value={seedPhrase} />
-      </Box>
-      <Button
-        mt="6"
-        isLoading={isSigningIn}
-        isDisabled={isCreating}
-        onPress={() => signInAndCreateWallet()}
-      >
+      <Button mt="6" isLoading={isLoading} onPress={() => signIn()}>
         {`Back up on ${Platform.OS === "ios" ? "iCloud" : "Google Drive"}`}
-      </Button>
-      <Button
-        variant="subtle"
-        mt="2"
-        onPress={() => createWallet()}
-        isLoading={isCreating}
-        isDisabled={isSigningIn}
-      >
-        Back up manually
       </Button>
       <EnableICloudPrompt
         open={iCloudPromptOpen}

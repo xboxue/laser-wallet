@@ -1,14 +1,19 @@
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
+import { ethers } from "ethers";
 import { isValidMnemonic } from "ethers/lib/utils";
 import { useFormik } from "formik";
 import { Box, Button, FormControl, Input, Text } from "native-base";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
 import { setIsAuthenticated } from "../features/auth/authSlice";
-import { setWalletAddress, setWallets } from "../features/wallet/walletSlice";
+import {
+  setOwnerAddress,
+  setRecoveryOwnerAddress,
+  setWalletAddress,
+  setWallets,
+} from "../features/wallet/walletSlice";
 import { getBackup } from "../services/cloudBackup";
-import * as SecureStore from "expo-secure-store";
 import { createWallets } from "../utils/wallet";
 
 const RecoverySeedPhrasePasswordScreen = ({ route }) => {
@@ -19,17 +24,23 @@ const RecoverySeedPhrasePasswordScreen = ({ route }) => {
   const { mutate: restoreBackup, isLoading: isRestoringBackup } = useMutation(
     async (password: string) => {
       const backup = await getBackup(password, backupName);
-      const { seedPhrase } = JSON.parse(backup);
+      const { seedPhrase, recoveryOwnerPrivateKey } = JSON.parse(backup);
       if (!isValidMnemonic(seedPhrase))
         throw new Error("Invalid recovery phrase");
-      return createWallets(seedPhrase);
+
+      const { wallets, ownerAddress } = await createWallets(seedPhrase);
+      const recoveryOwner = new ethers.Wallet(recoveryOwnerPrivateKey);
+
+      return { wallets, ownerAddress, recoveryOwner };
     },
     {
-      onSuccess: (wallets) => {
-        dispatch(setWallets(wallets));
+      onSuccess: ({ wallets, ownerAddress, recoveryOwner }) => {
+        dispatch(setOwnerAddress(ownerAddress));
+        dispatch(setRecoveryOwnerAddress(recoveryOwner.address));
         dispatch(setIsAuthenticated(true));
         dispatch(setWalletAddress(wallets[0].address));
-        navigation.navigate("RecoveryImportVault");
+        dispatch(setWallets(wallets));
+        navigation.navigate("RecoveryImportVault", { recoveryOwner });
       },
     }
   );

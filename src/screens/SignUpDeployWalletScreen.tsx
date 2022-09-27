@@ -4,6 +4,7 @@ import { Wallet } from "ethers";
 import * as SecureStore from "expo-secure-store";
 import { LaserFactory } from "laser-sdk";
 import { estimateDeployGas } from "laser-sdk/dist/utils";
+import { random } from "lodash";
 import { Box, Button, Skeleton, Text, useToast } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useFeeData, useProvider } from "wagmi";
@@ -12,15 +13,19 @@ import WalletSelector from "../components/WalletSelector/WalletSelector";
 import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
 import { selectChainId } from "../features/network/networkSlice";
 import { addPendingTransaction } from "../features/transactions/transactionsSlice";
-import { selectWalletAddress } from "../features/wallet/walletSlice";
+import {
+  selectRecoveryOwnerAddress,
+  selectWalletAddress,
+} from "../features/wallet/walletSlice";
 import { useCreateVaultMutation } from "../graphql/types";
 import formatAmount from "../utils/formatAmount";
+import { getPrivateKey } from "../utils/wallet";
 
-const SignUpDeployWalletScreen = ({ route }) => {
-  const { salt, recoveryOwnerAddress, vaultAddress } = route.params;
+const SignUpDeployWalletScreen = () => {
   const chainId = useSelector(selectChainId);
   const provider = useProvider({ chainId });
   const navigation = useNavigation();
+  const recoveryOwnerAddress = useSelector(selectRecoveryOwnerAddress);
   const dispatch = useDispatch();
 
   const walletAddress = useSelector(selectWalletAddress);
@@ -33,18 +38,11 @@ const SignUpDeployWalletScreen = ({ route }) => {
     watch: true,
   });
 
-  const [saveVault, { loading: isSavingVault }] = useCreateVaultMutation({
-    onCompleted: () => createVault(),
-    variables: { input: { address: vaultAddress, chain_id: chainId } },
-  });
+  const [saveVault] = useCreateVaultMutation();
 
   const { mutate: createVault, isLoading: isCreatingVault } = useMutation(
     async () => {
-      const privateKeys = await SecureStore.getItemAsync("privateKeys", {
-        requireAuthentication: true,
-      });
-      if (!privateKeys) throw new Error("No private key");
-      const privateKey = JSON.parse(privateKeys)[walletAddress];
+      const privateKey = await getPrivateKey(walletAddress);
       const ownerPrivateKey = await SecureStore.getItemAsync(
         "ownerPrivateKey",
         { requireAuthentication: true }
@@ -53,8 +51,19 @@ const SignUpDeployWalletScreen = ({ route }) => {
       if (!ownerPrivateKey || !privateKey) throw new Error("No private key");
 
       const owner = new Wallet(ownerPrivateKey);
+      const salt = random(0, 1000000);
 
       const factory = new LaserFactory(provider, owner);
+      const vaultAddress = await factory.preComputeAddress(
+        owner.address,
+        [recoveryOwnerAddress],
+        guardianAddresses,
+        salt
+      );
+      await saveVault({
+        variables: { input: { address: vaultAddress, chain_id: chainId } },
+      });
+
       return factory.createWallet(
         owner.address,
         [recoveryOwnerAddress],
@@ -146,10 +155,8 @@ const SignUpDeployWalletScreen = ({ route }) => {
             .mul(gasEstimate)
             .gt(balance.value)
         }
-        onPress={() => {
-          saveVault();
-        }}
-        isLoading={isSavingVault || isCreatingVault}
+        onPress={() => createVault()}
+        isLoading={isCreatingVault}
       >
         Activate
       </Button>
@@ -157,7 +164,7 @@ const SignUpDeployWalletScreen = ({ route }) => {
         variant="subtle"
         mt="2"
         onPress={() => navigation.navigate("Home")}
-        isDisabled={isSavingVault || isCreatingVault}
+        isDisabled={isCreatingVault}
       >
         Activate later
       </Button>

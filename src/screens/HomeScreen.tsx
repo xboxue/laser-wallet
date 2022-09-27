@@ -1,33 +1,16 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import {
-  Actionsheet,
-  Box,
-  Button,
-  ChevronDownIcon,
-  Icon,
-  IconButton,
-  Pressable,
-  Text,
-} from "native-base";
-import { useState } from "react";
+import { Box, Button, Icon, IconButton, Pressable, Text } from "native-base";
 import { useWindowDimensions } from "react-native";
 import { NavigationState, Route, TabView } from "react-native-tab-view";
-import { useDispatch, useSelector } from "react-redux";
-import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
+import { useSelector } from "react-redux";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
 import TransactionHistory from "../components/TransactionHistory/TransactionHistory";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
 import WalletSelector from "../components/WalletSelector/WalletSelector";
-import {
-  selectVaultAddress,
-  selectWalletAddress,
-  selectWallets,
-  setWalletAddress,
-} from "../features/wallet/walletSlice";
+import { selectWalletAddress } from "../features/wallet/walletSlice";
 import useWalletConnectSubscription from "../hooks/useWalletConnectSubscription";
-import formatAddress from "../utils/formatAddress";
 
 const routes = [
   { key: "first", title: "Tokens" },
@@ -37,14 +20,8 @@ const routes = [
 const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
-  const vaultAddress = useSelector(selectVaultAddress);
   const window = useWindowDimensions();
-  const dispatch = useDispatch();
-  const wallets = useSelector(selectWallets);
-  const [walletSheetOpen, setWalletSheetOpen] = useState(false);
   useWalletConnectSubscription();
-
-  if (!walletAddress) throw new Error();
 
   const tab = route?.params?.tab || 0;
 

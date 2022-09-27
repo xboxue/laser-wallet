@@ -1,4 +1,4 @@
-import { useAuth, useSignIn } from "@clerk/clerk-expo";
+import { useAuth, useSignIn, useUser } from "@clerk/clerk-expo";
 import { ClerkAPIError, EmailCodeFactor } from "@clerk/types";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
@@ -6,8 +6,9 @@ import { useFormik } from "formik";
 import { Box, Button, FormControl, Input, Text } from "native-base";
 import * as yup from "yup";
 
-const RecoverySignInScreen = () => {
-  const { isSignedIn } = useAuth();
+const RecoverySignInScreen = ({ route }) => {
+  const { user } = useUser();
+  const { isSignedIn, signOut } = useAuth();
   const { signIn } = useSignIn();
   const navigation = useNavigation();
 
@@ -29,7 +30,7 @@ const RecoverySignInScreen = () => {
       });
     },
     {
-      onSuccess: () => navigation.navigate("RecoveryVerifyEmail"),
+      onSuccess: () => navigation.navigate("RecoveryVerifyEmail", route.params),
       onError: (error) => {
         const clerkError = error?.errors?.[0] as ClerkAPIError;
         if (clerkError) formik.setFieldError("email", clerkError.longMessage);
@@ -40,8 +41,14 @@ const RecoverySignInScreen = () => {
 
   const formik = useFormik({
     initialValues: { email: "" },
-    onSubmit: (values) => {
-      if (isSignedIn) return navigation.navigate("RecoveryAccountVaults");
+    onSubmit: async (values) => {
+      if (isSignedIn && user) {
+        if (user.primaryEmailAddress?.emailAddress !== values.email) {
+          await signOut();
+        } else {
+          return navigation.navigate("RecoveryAccountVaults", route.params);
+        }
+      }
       signInWithEmail(values.email);
     },
     validationSchema: yup.object().shape({
@@ -55,7 +62,7 @@ const RecoverySignInScreen = () => {
     <Box p="4">
       <Text variant="subtitle1">Enter your email</Text>
       <Text mb="4">
-        This must match the email address used to secure your existing vault.
+        This must match the email address associated with your existing vault.
       </Text>
       <FormControl isInvalid={formik.touched.email && !!formik.errors.email}>
         <Input

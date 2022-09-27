@@ -1,4 +1,4 @@
-import { useAuth, useSignIn, useSignUp } from "@clerk/clerk-expo";
+import { useAuth, useSignIn, useSignUp, useUser } from "@clerk/clerk-expo";
 import { ClerkAPIError, EmailCodeFactor } from "@clerk/types";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
@@ -9,7 +9,8 @@ import * as yup from "yup";
 import { setIsLaserGuardianEnabled } from "../features/guardians/guardiansSlice";
 
 const SignUpEmailScreen = () => {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, signOut } = useAuth();
+  const { user } = useUser();
   const { signUp } = useSignUp();
   const { signIn } = useSignIn();
   const navigation = useNavigation();
@@ -73,10 +74,14 @@ const SignUpEmailScreen = () => {
 
   const formik = useFormik({
     initialValues: { email: "" },
-    onSubmit: (values) => {
-      if (isSignedIn) {
-        dispatch(setIsLaserGuardianEnabled(true));
-        return navigation.navigate("VaultBackup");
+    onSubmit: async (values) => {
+      if (isSignedIn && user) {
+        if (user.primaryEmailAddress?.emailAddress !== values.email) {
+          await signOut();
+        } else {
+          dispatch(setIsLaserGuardianEnabled(true));
+          return navigation.navigate("SignUpDeployWallet");
+        }
       }
       signUpWithEmail(values.email);
     },

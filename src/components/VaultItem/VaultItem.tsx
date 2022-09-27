@@ -1,19 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import * as WebBrowser from "expo-web-browser";
-import { LaserWallet__factory } from "laser-sdk/dist/typechain";
-import {
-  Badge,
-  Box,
-  Circle,
-  Icon,
-  Pressable,
-  Skeleton,
-  Text,
-} from "native-base";
-import { useMemo } from "react";
+import { Box, Circle, Icon, Pressable, Text } from "native-base";
 import { defaultChains, useProvider } from "wagmi";
 import { getAddressUrl } from "../../services/etherscan";
 import formatAddress from "../../utils/formatAddress";
@@ -22,37 +11,12 @@ interface Props {
   address: string;
   chainId: number;
   createdAt: string;
-  getBackup: (recoveryOwners: string[]) => { name: string } | undefined;
+  onPress: () => void;
 }
 
-const VaultItem = ({ address, chainId, createdAt, getBackup }: Props) => {
-  const navigation = useNavigation();
-  const provider = useProvider({ chainId });
-
-  const { data: recoveryOwners, isLoading: recoveryOwnersLoading } = useQuery(
-    ["vaultRecoveryOwners", address, chainId],
-    () => {
-      const vault = LaserWallet__factory.connect(address, provider);
-      return vault.getRecoveryOwners();
-    }
-  );
-  const backup = useMemo(
-    () => (recoveryOwners ? getBackup(recoveryOwners) : undefined),
-    [recoveryOwners]
-  );
-
+const VaultItem = ({ address, chainId, createdAt, onPress }: Props) => {
   return (
-    <Pressable
-      isDisabled={!backup}
-      onPress={() => {
-        if (backup)
-          navigation.navigate("RecoveryBackupPassword", {
-            address,
-            chainId,
-            backupName: backup.name,
-          });
-      }}
-    >
+    <Pressable onPress={onPress}>
       {({ isPressed }) => (
         <Box
           py={2}
@@ -90,27 +54,6 @@ const VaultItem = ({ address, chainId, createdAt, getBackup }: Props) => {
               {defaultChains.find((chain) => chain.id === chainId)?.name} ·{" "}
               {format(parseISO(createdAt), "LLL d")}
             </Text>
-          </Box>
-          <Box ml="auto">
-            {recoveryOwnersLoading ? (
-              <Skeleton w="16" h="5" />
-            ) : !!backup ? (
-              <Badge
-                _text={{ fontSize: "xs" }}
-                colorScheme="success"
-                rounded="md"
-              >
-                Backed up
-              </Badge>
-            ) : (
-              <Badge
-                _text={{ fontSize: "xs" }}
-                colorScheme="danger"
-                rounded="md"
-              >
-                No backup
-              </Badge>
-            )}
           </Box>
         </Box>
       )}

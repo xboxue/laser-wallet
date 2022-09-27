@@ -1,6 +1,6 @@
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
-import { getUnixTime } from "date-fns";
+import Wallet from "ethereumjs-wallet";
 import * as SecureStore from "expo-secure-store";
 import { Box, Text } from "native-base";
 import { useState } from "react";
@@ -8,11 +8,17 @@ import { useDispatch } from "react-redux";
 import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordForm";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { setIsAuthenticated } from "../features/auth/authSlice";
-import { setWalletAddress, setWallets } from "../features/wallet/walletSlice";
+import {
+  setOwnerAddress,
+  setRecoveryOwnerAddress,
+  setWalletAddress,
+  setWallets,
+} from "../features/wallet/walletSlice";
 import { createBackup } from "../services/cloudBackup";
+import { createWallets } from "../utils/wallet";
 
 const SignUpBackupPasswordScreen = ({ route }) => {
-  const { wallets, isRecovery = false } = route.params;
+  const { nextScreen = "Home" } = route.params || {};
   const dispatch = useDispatch();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
   const navigation = useNavigation();
@@ -21,21 +27,27 @@ const SignUpBackupPasswordScreen = ({ route }) => {
     async (password: string) => {
       const seedPhrase = await SecureStore.getItemAsync("seedPhrase");
       if (!seedPhrase) throw new Error("No seed phrase");
+
+      const { wallets, ownerAddress } = await createWallets(seedPhrase);
+      const recoveryOwner = Wallet.generate();
+
       await createBackup(
-        JSON.stringify({ seedPhrase }),
+        JSON.stringify({
+          seedPhrase,
+          recoveryOwnerPrivateKey: recoveryOwner.getPrivateKeyString(),
+        }),
         password,
-        `wallet_${wallets[0].address}}`
+        `wallet_${wallets[0].address}_${recoveryOwner.getAddressString()}`
       );
 
+      dispatch(setOwnerAddress(ownerAddress));
+      dispatch(setRecoveryOwnerAddress(recoveryOwner.getAddressString()));
       dispatch(setIsAuthenticated(true));
       dispatch(setWalletAddress(wallets[0].address));
       dispatch(setWallets(wallets));
     },
     {
-      onSuccess: () =>
-        navigation.dispatch(
-          StackActions.replace(isRecovery ? "RecoveryImportVault" : "Home")
-        ),
+      onSuccess: () => navigation.dispatch(StackActions.replace(nextScreen)),
       onError: (error) => {
         if (error instanceof Error && error.message === "iCloud not available")
           setICloudPromptOpen(true);

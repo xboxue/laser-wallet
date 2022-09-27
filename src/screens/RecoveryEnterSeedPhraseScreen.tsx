@@ -1,37 +1,21 @@
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { isValidMnemonic } from "ethers/lib/utils";
+import * as SecureStore from "expo-secure-store";
 import { useFormik } from "formik";
 import { Box, Button, FormControl, Text, TextArea } from "native-base";
-import { useDispatch } from "react-redux";
-import { setIsAuthenticated } from "../features/auth/authSlice";
-import { setWalletAddress, setWallets } from "../features/wallet/walletSlice";
-import { createWallets } from "../utils/wallet";
 
 const RecoveryEnterSeedPhraseScreen = () => {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
 
   const { mutate, isLoading } = useMutation(
-    async (seedPhrase: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      return createWallets(seedPhrase);
-    },
-    {
-      onSuccess: (wallets) => {
-        dispatch(setIsAuthenticated(true));
-        dispatch(setWalletAddress(wallets[0].address));
-        dispatch(setWallets(wallets));
-        navigation.navigate("RecoveryBackup", { wallets });
-      },
-    }
+    (seedPhrase: string) => SecureStore.setItemAsync("seedPhrase", seedPhrase),
+    { onSuccess: () => navigation.navigate("SignUpBackup") }
   );
 
   const formik = useFormik({
     initialValues: { seedPhrase: "" },
-    onSubmit: async ({ seedPhrase }) => {
-      mutate(seedPhrase);
-    },
+    onSubmit: async ({ seedPhrase }) => mutate(seedPhrase),
     validate: ({ seedPhrase }) => {
       const errors = {};
       if (!seedPhrase) errors.seedPhrase = "Required";

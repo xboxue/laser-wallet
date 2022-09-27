@@ -1,6 +1,5 @@
 import { useFormik } from "formik";
 import { Box, Button, FormControl, Input } from "native-base";
-import { isValidPassword } from "../../services/cloudBackup";
 
 interface Props {
   onSubmit: (password: string) => void;
@@ -50,7 +49,6 @@ const BackupPasswordForm = ({ onSubmit, submitting }: Props) => {
         }
       >
         <Input
-          isDisabled={!isValidPassword(formik.values.password)}
           type="password"
           mt="3"
           placeholder="Confirm password"

@@ -10,11 +10,7 @@ import {
   PendingTransaction,
   removePendingTransaction,
 } from "../../features/transactions/transactionsSlice";
-import {
-  setIsVaultLocked,
-  setRecoverTx,
-  setVaultAddress,
-} from "../../features/wallet/walletSlice";
+import { setVaultAddress } from "../../features/wallet/walletSlice";
 import { decodeTxDataByHash } from "../../utils/decodeTransactionData";
 import TokenTransactionItem from "../TokenTransactionItem/TokenTransactionItem";
 import WalletTransactionItem from "../WalletTransactionItem/WalletTransactionItem";
@@ -56,12 +52,6 @@ const PendingTransactionItem = ({
 
     if (receipt && transaction.isLockVault) {
       dispatch(setVaultAddress(transaction.to));
-      dispatch(setIsVaultLocked(true));
-    }
-
-    if (receipt && transaction.isRecoverVault) {
-      dispatch(setRecoverTx(null));
-      dispatch(setIsVaultLocked(false));
     }
   }, [receipt, txsByHash, transaction]);
 

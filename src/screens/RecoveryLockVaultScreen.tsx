@@ -1,39 +1,38 @@
 import { useAuth } from "@clerk/clerk-expo";
+import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { providers, Wallet } from "ethers";
+import { Wallet } from "ethers";
 import { Laser } from "laser-sdk";
 import { bundleTransactions } from "laser-sdk/dist/utils";
 import { Box, Button, Skeleton, Text, useToast } from "native-base";
-import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useFeeData, useProvider } from "wagmi";
+import ToastAlert from "../components/ToastAlert/ToastAlert";
 import WalletSelector from "../components/WalletSelector/WalletSelector";
-import { selectWalletAddress } from "../features/wallet/walletSlice";
+import { setChainId } from "../features/network/networkSlice";
+import { addPendingTransaction } from "../features/transactions/transactionsSlice";
+import {
+  selectOwnerAddress,
+  selectWalletAddress,
+} from "../features/wallet/walletSlice";
 import { signTransaction } from "../services/vault";
 import formatAmount from "../utils/formatAmount";
-import * as SecureStore from "expo-secure-store";
-import ToastAlert from "../components/ToastAlert/ToastAlert";
-import { addPendingTransaction } from "../features/transactions/transactionsSlice";
-import { useNavigation } from "@react-navigation/native";
-import { setChainId } from "../features/network/networkSlice";
+import { getPrivateKey } from "../utils/wallet";
 
 const RecoveryLockVaultScreen = ({ route }) => {
-  const { transaction } = route.params;
+  const { recoveryOwner, vault } = route.params;
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { getToken } = useAuth();
-  const chainId = useMemo(
-    () => providers.getNetwork(transaction.chain).chainId,
-    [transaction.chain]
-  );
-  const provider = useProvider({ chainId });
+  const provider = useProvider({ chainId: vault.chain_id });
+  const ownerAddress = useSelector(selectOwnerAddress);
 
   const walletAddress = useSelector(selectWalletAddress);
   const toast = useToast();
 
   const { data: balance, isLoading: balanceLoading } = useBalance({
     addressOrName: walletAddress,
-    chainId,
+    chainId: vault.chain_id,
     watch: true,
   });
 
@@ -49,27 +48,24 @@ const RecoveryLockVaultScreen = ({ route }) => {
 
   const { mutate: lockWallet, isLoading: isLockingWallet } = useMutation(
     async () => {
-      const privateKeys = await SecureStore.getItemAsync("privateKeys", {
-        requireAuthentication: true,
-      });
-      if (!privateKeys) throw new Error("No private key");
-
       const token = await getToken();
       if (!token) throw new Error("Not authenticated");
 
-      const signatures = await signTransaction(transaction, token);
-      const tx = bundleTransactions(transaction, {
-        ...transaction,
+      const laser = new Laser(provider, recoveryOwner, vault.address);
+      const nonce = await laser.wallet.nonce();
+      const tx = await laser.recover(ownerAddress, nonce);
+
+      const privateKey = await getPrivateKey(walletAddress);
+
+      const signatures = await signTransaction(tx, token);
+      const bundledTx = bundleTransactions(tx, {
+        ...tx,
         signatures,
         signer: "guardian",
       });
 
-      const sender = new Wallet(
-        JSON.parse(privateKeys)[walletAddress],
-        provider
-      );
-      const laser = new Laser(provider, sender, tx.wallet);
-      return laser.execTransaction(tx, sender, 150000);
+      const sender = new Wallet(privateKey, provider);
+      return laser.execTransaction(bundledTx, sender, 150000);
     },
     {
       onSuccess: (transaction) => {
@@ -78,7 +74,7 @@ const RecoveryLockVaultScreen = ({ route }) => {
             <ToastAlert status="success" title="Transaction sent" />
           ),
         });
-        dispatch(setChainId(chainId));
+        dispatch(setChainId(vault.chain_id));
         dispatch(addPendingTransaction({ ...transaction, isLockVault: true }));
         navigation.navigate("Home", { tab: 1 });
       },
@@ -113,8 +109,7 @@ const RecoveryLockVaultScreen = ({ route }) => {
     <Box p="4">
       <Text variant="subtitle1">Transfer your vault</Text>
       <Text mb="4">
-        For security, your vault will be locked for 5 days before you can
-        complete the transfer.
+        For security, your vault will be locked for 2 days after the transfer.
       </Text>
       <WalletSelector />
       <Text variant="subtitle2" mt="2">
