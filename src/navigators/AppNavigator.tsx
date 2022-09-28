@@ -30,6 +30,7 @@ import SettingsScreen from "../screens/SettingsScreen";
 import SettingsSecurityScreen from "../screens/SettingsSecurityScreen";
 import SettingsVaultScreen from "../screens/SettingsVaultScreen";
 import SettingsWalletRecoveryScreen from "../screens/SettingsWalletRecoveryScreen";
+import SignInBiometricsScreen from "../screens/SignInBiometricsScreen";
 import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpAuthScreen from "../screens/SignUpAuthScreen";
@@ -180,7 +181,11 @@ const AppNavigator = () => {
       );
 
     return (
-      <Stack.Screen name="SignInPasscode" component={SignInPasscodeScreen} />
+      <Stack.Screen
+        name="SignInBiometrics"
+        component={SignInBiometricsScreen}
+        options={{ headerShown: false }}
+      />
     );
   };
 

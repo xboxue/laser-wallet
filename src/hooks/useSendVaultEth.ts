@@ -2,7 +2,6 @@ import { useAuth } from "@clerk/clerk-expo";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import axios from "axios";
 import { ethers, providers, Wallet } from "ethers";
-import * as SecureStore from "expo-secure-store";
 import { Laser } from "laser-sdk";
 import { bundleTransactions } from "laser-sdk/dist/utils";
 import { useSelector } from "react-redux";
@@ -12,6 +11,7 @@ import {
   selectWalletAddress,
   selectWallets,
 } from "../features/wallet/walletSlice";
+import { getItem } from "../services/keychain";
 import { signTransaction } from "../services/vault";
 import { getPrivateKey } from "../utils/wallet";
 
@@ -35,9 +35,7 @@ const useSendVaultEth = (
   const { getToken } = useAuth();
 
   return useMutation(async ({ to, amount }: SendEthArgs) => {
-    const ownerPrivateKey = await SecureStore.getItemAsync("ownerPrivateKey", {
-      requireAuthentication: true,
-    });
+    const ownerPrivateKey = await getItem("ownerPrivateKey");
     if (!ownerPrivateKey) throw new Error("No private key");
 
     const privateKey = await getPrivateKey(wallets[0].address);

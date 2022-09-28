@@ -9,18 +9,21 @@ import PasscodeNumberPad from "../components/PasscodeNumberPad/PasscodeNumberPad
 import { PASSCODE_LENGTH } from "../constants/auth";
 import {
   selectIsBiometricsEnabled,
-  selectPasscode,
   setIsAuthenticated,
 } from "../features/auth/authSlice";
 import useBiometricTypes from "../hooks/useBiometricTypes";
 import theme from "../styles/theme";
 
+import { getItem } from "../services/keychain";
+
 const SignInPasscodeScreen = () => {
-  const passcode = useSelector(selectPasscode);
   const isBiometricsEnabled = useSelector(selectIsBiometricsEnabled);
   const [passcodeAttempt, setPasscodeAttempt] = useState("");
   const [error, setError] = useState("");
   const dispatch = useDispatch();
+  const { data: passcode } = useQuery(["passcode"], () => {
+    return getItem("passcode");
+  });
 
   const { data: biometricTypes } = useBiometricTypes(isBiometricsEnabled);
 
@@ -37,6 +40,7 @@ const SignInPasscodeScreen = () => {
   }, [biometricTypes]);
 
   useEffect(() => {
+    if (!passcode) return;
     if (passcodeAttempt.length > 0 && error) setError("");
     if (passcodeAttempt.length !== PASSCODE_LENGTH) return;
 

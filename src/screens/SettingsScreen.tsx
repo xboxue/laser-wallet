@@ -12,13 +12,13 @@ const SettingsScreen = () => {
       icon: <Icon as={Ionicons} color="white" name="planet-outline" size="5" />,
       onPress: () => navigation.navigate("SettingsNetwork"),
     },
-    {
-      title: "App security",
-      icon: (
-        <Icon as={Ionicons} color="white" name="settings-outline" size="5" />
-      ),
-      onPress: () => navigation.navigate("SettingsSecurity"),
-    },
+    // {
+    //   title: "App security",
+    //   icon: (
+    //     <Icon as={Ionicons} color="white" name="settings-outline" size="5" />
+    //   ),
+    //   onPress: () => navigation.navigate("SettingsSecurity"),
+    // },
     // {
     //   title: "Wallet recovery",
     //   icon: <Icon as={Ionicons} color="white" name="md-refresh" size="5" />,

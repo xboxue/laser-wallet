@@ -6,18 +6,13 @@ import { useState } from "react";
 import { Platform } from "react-native";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { signInToCloud } from "../services/cloudBackup";
-import * as SecureStore from "expo-secure-store";
 
 const SignUpBackupScreen = ({ route }) => {
   const navigation = useNavigation();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
 
   const { mutate: signIn, isLoading } = useMutation(
-    async () => {
-      await signInToCloud();
-      const seedPhrase = generateMnemonic();
-      await SecureStore.setItemAsync("seedPhrase", seedPhrase);
-    },
+    async () => await signInToCloud(),
     {
       onSuccess: () => {
         navigation.navigate("SignUpBackupPassword", route.params);
@@ -26,7 +21,7 @@ const SignUpBackupScreen = ({ route }) => {
         if (error instanceof Error && error.message === "iCloud not available")
           setICloudPromptOpen(true);
       },
-      meta: { disableErrorToast: true },
+      // meta: { disableErrorToast: true },
     }
   );
 

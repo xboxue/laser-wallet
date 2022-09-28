@@ -1,21 +1,15 @@
 import { useNavigation } from "@react-navigation/native";
-import { useMutation } from "@tanstack/react-query";
 import { isValidMnemonic } from "ethers/lib/utils";
-import * as SecureStore from "expo-secure-store";
 import { useFormik } from "formik";
 import { Box, Button, FormControl, Text, TextArea } from "native-base";
 
 const RecoveryEnterSeedPhraseScreen = () => {
   const navigation = useNavigation();
 
-  const { mutate, isLoading } = useMutation(
-    (seedPhrase: string) => SecureStore.setItemAsync("seedPhrase", seedPhrase),
-    { onSuccess: () => navigation.navigate("SignUpBackup") }
-  );
-
   const formik = useFormik({
     initialValues: { seedPhrase: "" },
-    onSubmit: async ({ seedPhrase }) => mutate(seedPhrase),
+    onSubmit: async ({ seedPhrase }) =>
+      navigation.navigate("SignUpBackup", { importedSeedPhrase: seedPhrase }),
     validate: ({ seedPhrase }) => {
       const errors = {};
       if (!seedPhrase) errors.seedPhrase = "Required";

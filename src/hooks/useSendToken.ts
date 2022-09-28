@@ -1,7 +1,6 @@
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { ethers, providers } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import * as SecureStore from "expo-secure-store";
 import { useSelector } from "react-redux";
 import { useProvider } from "wagmi";
 import { Erc20__factory } from "../abis/types";

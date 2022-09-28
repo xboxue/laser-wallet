@@ -1,7 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Wallet } from "ethers";
-import * as SecureStore from "expo-secure-store";
 import { LaserFactory } from "laser-sdk";
 import { estimateDeployGas } from "laser-sdk/dist/utils";
 import { random } from "lodash";
@@ -18,6 +17,7 @@ import {
   selectWalletAddress,
 } from "../features/wallet/walletSlice";
 import { useCreateVaultMutation } from "../graphql/types";
+import { getItem } from "../services/keychain";
 import formatAmount from "../utils/formatAmount";
 import { getPrivateKey } from "../utils/wallet";
 
@@ -43,10 +43,7 @@ const SignUpDeployWalletScreen = () => {
   const { mutate: createVault, isLoading: isCreatingVault } = useMutation(
     async () => {
       const privateKey = await getPrivateKey(walletAddress);
-      const ownerPrivateKey = await SecureStore.getItemAsync(
-        "ownerPrivateKey",
-        { requireAuthentication: true }
-      );
+      const ownerPrivateKey = await getItem("ownerPrivateKey");
 
       if (!ownerPrivateKey || !privateKey) throw new Error("No private key");
 

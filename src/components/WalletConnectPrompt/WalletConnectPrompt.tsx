@@ -1,7 +1,6 @@
 import { signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
 import { useMutation } from "@tanstack/react-query";
 import { ethers, utils } from "ethers";
-import * as SecureStore from "expo-secure-store";
 import { useToast } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider } from "wagmi";

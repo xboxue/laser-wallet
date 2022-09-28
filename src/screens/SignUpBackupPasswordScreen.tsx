@@ -1,7 +1,7 @@
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
+import { generateMnemonic } from "bip39";
 import Wallet from "ethereumjs-wallet";
-import * as SecureStore from "expo-secure-store";
 import { Box, Text } from "native-base";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -18,16 +18,16 @@ import { createBackup } from "../services/cloudBackup";
 import { createWallets } from "../utils/wallet";
 
 const SignUpBackupPasswordScreen = ({ route }) => {
-  const { nextScreen = "Home" } = route.params || {};
+  const { importedSeedPhrase } = route.params || {};
   const dispatch = useDispatch();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
   const navigation = useNavigation();
 
+  console.log("importedSeedPhrase", importedSeedPhrase);
   const { mutate: onBackup, isLoading } = useMutation(
     async (password: string) => {
-      const seedPhrase = await SecureStore.getItemAsync("seedPhrase");
-      if (!seedPhrase) throw new Error("No seed phrase");
-
+      // await new Promise((resolve) => setTimeout(resolve, 10));
+      const seedPhrase = importedSeedPhrase || generateMnemonic();
       const { wallets, ownerAddress } = await createWallets(seedPhrase);
       const recoveryOwner = Wallet.generate();
 
@@ -47,7 +47,7 @@ const SignUpBackupPasswordScreen = ({ route }) => {
       dispatch(setWallets(wallets));
     },
     {
-      onSuccess: () => navigation.dispatch(StackActions.replace(nextScreen)),
+      onSuccess: () => navigation.dispatch(StackActions.replace("Home")),
       onError: (error) => {
         if (error instanceof Error && error.message === "iCloud not available")
           setICloudPromptOpen(true);

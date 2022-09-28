@@ -22,7 +22,11 @@ const StartScreen = () => {
       <Button
         variant="subtle"
         mt="2"
-        onPress={() => navigation.navigate("RecoveryImportSeedPhrase")}
+        onPress={() =>
+          navigation.navigate("SignUpAuth", {
+            nextScreen: "RecoveryImportSeedPhrase",
+          })
+        }
       >
         I already have a wallet
       </Button>

@@ -1,13 +1,12 @@
-import { generateMnemonic, mnemonicToSeed } from "bip39";
+import { mnemonicToSeed } from "bip39";
 import Wallet, { hdkey } from "ethereumjs-wallet";
 import { utils } from "ethers";
-import * as SecureStore from "expo-secure-store";
+import { ACCESS_CONTROL } from "react-native-keychain";
+
+import { getItem, setItem } from "../services/keychain";
 
 export const getPrivateKey = async (walletAddress: string) => {
-  const privateKey = await SecureStore.getItemAsync(
-    `privateKey_${walletAddress}`,
-    { requireAuthentication: true }
-  );
+  const privateKey = await getItem(`privateKey_${walletAddress}`);
   if (!privateKey) throw new Error("No private key");
   return privateKey;
 };
@@ -23,21 +22,24 @@ export const createWallets = async (seedPhrase: string) => {
       .deriveChild(i)
       .getWallet();
     promises.push(
-      SecureStore.setItemAsync(
+      setItem(
         `privateKey_${wallet.getAddressString()}`,
-        wallet.getPrivateKeyString()
+        wallet.getPrivateKeyString(),
+        { accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET }
       )
     );
     wallets.push({ address: wallet.getAddressString() });
   }
-  await Promise.all(promises);
-
   const owner = Wallet.generate();
-  await SecureStore.setItemAsync(
-    "ownerPrivateKey",
-    owner.getPrivateKeyString()
-  );
+  await Promise.all([
+    ...promises,
+    setItem("ownerPrivateKey", owner.getPrivateKeyString(), {
+      accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+    }),
+    setItem("seedPhrase", seedPhrase, {
+      accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+    }),
+  ]);
 
-  await SecureStore.setItemAsync("seedPhrase", seedPhrase);
   return { wallets, ownerAddress: owner.getAddressString() };
 };

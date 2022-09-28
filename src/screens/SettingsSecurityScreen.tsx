@@ -19,6 +19,7 @@ const SettingsSecurityScreen = () => {
         justifyContent="space-between"
         py="3"
       >
+        {/* TODO */}
         <Text variant="subtitle1">Enable fingerprint</Text>
         <Switch
           size="lg"
