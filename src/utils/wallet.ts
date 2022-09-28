@@ -1,7 +1,7 @@
 import { mnemonicToSeed } from "bip39";
 import Wallet, { hdkey } from "ethereumjs-wallet";
 import { utils } from "ethers";
-import { ACCESS_CONTROL } from "react-native-keychain";
+import { ACCESSIBLE, ACCESS_CONTROL } from "react-native-keychain";
 
 import { getItem, setItem } from "../services/keychain";
 
@@ -25,7 +25,10 @@ export const createWallets = async (seedPhrase: string) => {
       setItem(
         `privateKey_${wallet.getAddressString()}`,
         wallet.getPrivateKeyString(),
-        { accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET }
+        {
+          accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+          accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+        }
       )
     );
     wallets.push({ address: wallet.getAddressString() });
@@ -33,11 +36,13 @@ export const createWallets = async (seedPhrase: string) => {
   const owner = Wallet.generate();
   await Promise.all([
     ...promises,
-    setItem("ownerPrivateKey", owner.getPrivateKeyString(), {
+    setItem("ownerKey", owner.getPrivateKeyString(), {
       accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+      accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
     }),
     setItem("seedPhrase", seedPhrase, {
       accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+      accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
     }),
   ]);
 

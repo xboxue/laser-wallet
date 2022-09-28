@@ -23,10 +23,9 @@ const SignUpBackupPasswordScreen = ({ route }) => {
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
   const navigation = useNavigation();
 
-  console.log("importedSeedPhrase", importedSeedPhrase);
   const { mutate: onBackup, isLoading } = useMutation(
     async (password: string) => {
-      // await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       const seedPhrase = importedSeedPhrase || generateMnemonic();
       const { wallets, ownerAddress } = await createWallets(seedPhrase);
       const recoveryOwner = Wallet.generate();
