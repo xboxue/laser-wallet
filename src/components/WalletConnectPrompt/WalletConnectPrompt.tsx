@@ -1,7 +1,6 @@
 import { signTypedData, SignTypedDataVersion } from "@metamask/eth-sig-util";
 import { useMutation } from "@tanstack/react-query";
 import { ethers, utils } from "ethers";
-import * as SecureStore from "expo-secure-store";
 import { useToast } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider } from "wagmi";
@@ -15,6 +14,7 @@ import {
   selectSessionRequest,
   setCallRequest,
 } from "../../features/walletConnect/walletConnectSlice";
+import { getPrivateKey } from "../../utils/wallet";
 import ToastAlert from "../ToastAlert/ToastAlert";
 import WalletConnectRequestPrompt from "./WalletConnectRequestPrompt/WalletConnectRequestPrompt";
 import WalletConnectSessionPrompt from "./WalletConnectSessionPrompt/WalletConnectSessionPrompt";
@@ -43,12 +43,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
     async () => {
       if (!callRequest) throw new Error("No call request");
 
-      const privateKeys = await SecureStore.getItemAsync("privateKeys", {
-        requireAuthentication: true,
-      });
-      if (!privateKeys) throw new Error("No private key");
-      const privateKey = JSON.parse(privateKeys)[walletAddress];
-      if (!privateKey) throw new Error("No private key");
+      const privateKey = await getPrivateKey(walletAddress);
 
       const connector = getConnector(callRequest.peerId);
       if (!connector) throw new Error("No connector");

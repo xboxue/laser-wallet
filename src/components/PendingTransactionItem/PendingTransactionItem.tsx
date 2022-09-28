@@ -38,6 +38,7 @@ const PendingTransactionItem = ({
     onSuccess,
   });
 
+  // TODO: Make this a global listener
   useEffect(() => {
     if (receipt && txsByHash[transaction.hash]) {
       dispatch(removePendingTransaction(transaction.hash));
@@ -47,6 +48,10 @@ const PendingTransactionItem = ({
       const iface = new Interface(["event LaserCreated(address laser)"]);
       const vaultAddress = iface.parseLog(receipt.logs[0]).args[0];
       dispatch(setVaultAddress(vaultAddress));
+    }
+
+    if (receipt && transaction.isLockVault) {
+      dispatch(setVaultAddress(transaction.to));
     }
   }, [receipt, txsByHash, transaction]);
 

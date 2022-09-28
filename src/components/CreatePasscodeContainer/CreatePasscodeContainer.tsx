@@ -8,9 +8,9 @@ import { PASSCODE_LENGTH } from "../../constants/auth";
 import {
   selectIsBiometricsEnabled,
   setIsBiometricsEnabled,
-  setPasscode,
 } from "../../features/auth/authSlice";
 import useBiometricTypes from "../../hooks/useBiometricTypes";
+import { setItem } from "../../services/keychain";
 import PasscodeNumberPad from "../PasscodeNumberPad/PasscodeNumberPad";
 
 interface Props {
@@ -78,8 +78,7 @@ const CreatePasscodeContainer = ({ onSuccess }: Props) => {
     if (currentPasscode === passcodeToConfirm) {
       setCurrentPasscode("");
       setPasscodeToConfirm("");
-      dispatch(setPasscode(currentPasscode));
-      onSuccess();
+      setItem("passcode", currentPasscode).then(() => onSuccess());
       return;
     } else {
       setCurrentPasscode("");

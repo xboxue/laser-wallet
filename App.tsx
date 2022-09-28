@@ -12,7 +12,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import AppLoading from "expo-app-loading";
 import Constants from "expo-constants";
-import * as SecureStore from "expo-secure-store";
+
 import { NativeBaseProvider, useToast } from "native-base";
 import { useEffect } from "react";
 import { Provider } from "react-redux";
@@ -82,18 +82,6 @@ const App = () => {
     Inter_600SemiBold,
     Inter_700Bold,
   });
-
-  useEffect(() => {
-    const reset = async () => {
-      const isStoreReset = await AsyncStorage.getItem("isStoreReset");
-      if (!isStoreReset) {
-        await SecureStore.deleteItemAsync("persist_auth");
-        AsyncStorage.setItem("isStoreReset", "true");
-      }
-    };
-
-    reset();
-  }, []);
 
   if (!loaded) return <AppLoading />;
 

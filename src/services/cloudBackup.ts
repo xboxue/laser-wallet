@@ -2,6 +2,7 @@ import CryptoJS from "crypto-js";
 import { Platform } from "react-native";
 import RNCloudFs from "react-native-cloud-fs";
 import RNFS from "react-native-fs";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const BACKUP_DIR = "laser";
 
@@ -9,18 +10,25 @@ export const deleteBackups = async () => {
   if (Platform.OS === "android") await RNCloudFs.loginIfNeeded();
 
   const backups = await getBackups();
-  return Promise.all(
-    backups.files.map((file) => RNCloudFs.deleteFromCloud(file))
-  );
+  return Promise.all(backups.map((file) => RNCloudFs.deleteFromCloud(file)));
 };
 
 export const getBackups = async () => {
+  if (Platform.OS === "ios") {
+    const available = await RNCloudFs.isAvailable();
+    if (!available) throw new Error("iCloud not available");
+  }
+
   if (Platform.OS === "android") await RNCloudFs.loginIfNeeded();
 
-  return RNCloudFs.listFiles({
+  const data = await RNCloudFs.listFiles({
     scope: "hidden",
     targetPath: BACKUP_DIR,
   });
+  return data.files.map((file) => ({
+    ...file,
+    name: file.name.replace(`${BACKUP_DIR}/`, ""),
+  }));
 };
 
 export const createBackup = async (
@@ -61,17 +69,9 @@ export const createBackup = async (
 
 export const getBackup = async (backupPassword: string, fileName: string) => {
   const backups = await getBackups();
-  if (!backups?.files?.length) throw new Error("No backups found");
+  if (!backups.length) throw new Error("No backups found");
 
-  let backupFile;
-  if (Platform.OS === "ios") {
-    backupFile = backups.files.find((file) => file.name === fileName);
-  } else {
-    backupFile = backups.files.find(
-      (file) => file.name === `${BACKUP_DIR}/${fileName}`
-    );
-  }
-
+  const backupFile = backups.find((file) => file.name === fileName);
   if (!backupFile) throw new Error("Backup file not found");
 
   const encryptedData =
@@ -91,4 +91,23 @@ export const getBackup = async (backupPassword: string, fileName: string) => {
 
 export const isValidPassword = (password: string) => {
   return password.length >= 8;
+};
+
+export const signInToCloud = async () => {
+  if (Platform.OS === "android") {
+    GoogleSignin.configure({
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    });
+    await GoogleSignin.hasPlayServices({
+      showPlayServicesUpdateDialog: true,
+    });
+    const isSignedIn = await GoogleSignin.isSignedIn();
+    if (!isSignedIn) {
+      await GoogleSignin.signIn();
+    }
+    await RNCloudFs.loginIfNeeded();
+  } else if (Platform.OS === "ios") {
+    const available = await RNCloudFs.isAvailable();
+    if (!available) throw new Error("iCloud not available");
+  }
 };

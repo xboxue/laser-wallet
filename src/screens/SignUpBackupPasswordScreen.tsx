@@ -1,36 +1,52 @@
-import { useNavigation } from "@react-navigation/native";
+import { StackActions, useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
-import { formatISO } from "date-fns";
-import * as SecureStore from "expo-secure-store";
+import { generateMnemonic } from "bip39";
+import Wallet from "ethereumjs-wallet";
 import { Box, Text } from "native-base";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import BackupPasswordForm from "../components/BackupPasswordForm/BackupPasswordForm";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import { setIsAuthenticated } from "../features/auth/authSlice";
-import { selectChainId } from "../features/network/networkSlice";
-import { setWalletAddress, setWallets } from "../features/wallet/walletSlice";
+import {
+  setOwnerAddress,
+  setRecoveryOwnerAddress,
+  setWalletAddress,
+  setWallets,
+} from "../features/wallet/walletSlice";
 import { createBackup } from "../services/cloudBackup";
+import { createWallets } from "../utils/wallet";
 
 const SignUpBackupPasswordScreen = ({ route }) => {
-  const { wallets } = route.params;
+  const { importedSeedPhrase } = route.params || {};
   const dispatch = useDispatch();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
   const navigation = useNavigation();
 
   const { mutate: onBackup, isLoading } = useMutation(
     async (password: string) => {
-      const seedPhrase = await SecureStore.getItemAsync("seedPhrase");
-      if (!seedPhrase) throw new Error("No seed phrase");
-      await createBackup(seedPhrase, password, "backup");
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      const seedPhrase = importedSeedPhrase || generateMnemonic();
+      const { wallets, ownerAddress } = await createWallets(seedPhrase);
+      const recoveryOwner = Wallet.generate();
 
-      await SecureStore.setItemAsync("backupPassword", password);
+      await createBackup(
+        JSON.stringify({
+          seedPhrase,
+          recoveryOwnerPrivateKey: recoveryOwner.getPrivateKeyString(),
+        }),
+        password,
+        `wallet_${wallets[0].address}_${recoveryOwner.getAddressString()}`
+      );
+
+      dispatch(setOwnerAddress(ownerAddress));
+      dispatch(setRecoveryOwnerAddress(recoveryOwner.getAddressString()));
       dispatch(setIsAuthenticated(true));
       dispatch(setWalletAddress(wallets[0].address));
       dispatch(setWallets(wallets));
     },
     {
-      onSuccess: () => navigation.navigate("Home"),
+      onSuccess: () => navigation.dispatch(StackActions.replace("Home")),
       onError: (error) => {
         if (error instanceof Error && error.message === "iCloud not available")
           setICloudPromptOpen(true);

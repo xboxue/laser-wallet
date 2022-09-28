@@ -6,9 +6,19 @@ import { ChevronLeftIcon } from "native-base";
 import { Platform } from "react-native";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../features/auth/authSlice";
-import { selectWalletAddress } from "../features/wallet/walletSlice";
+import { selectWallets } from "../features/wallet/walletSlice";
 import HomeScreen from "../screens/HomeScreen";
 import QRCodeScanScreen from "../screens/QRCodeScanScreen";
+import RecoveryAccountVaultsScreen from "../screens/RecoveryAccountVaultsScreen";
+import RecoveryBackupPasswordScreen from "../screens/RecoveryBackupPasswordScreen";
+import RecoveryBackupScreen from "../screens/RecoveryBackupScreen";
+import RecoveryEnterSeedPhraseScreen from "../screens/RecoveryEnterSeedPhraseScreen";
+import RecoveryImportSeedPhraseScreen from "../screens/RecoveryImportSeedPhraseScreen";
+import RecoveryImportVaultScreen from "../screens/RecoveryImportVaultScreen";
+import RecoveryLockVaultScreen from "../screens/RecoveryLockVaultScreen";
+import RecoverySeedPhrasePasswordScreen from "../screens/RecoverySeedPhrasePasswordScreen";
+import RecoverySignInScreen from "../screens/RecoverySignInScreen";
+import RecoveryVerifyEmailScreen from "../screens/RecoveryVerifyEmailScreen";
 import SendAddressScreen from "../screens/SendAddressScreen";
 import SendAmountScreen from "../screens/SendAmountScreen";
 import SendAssetScreen from "../screens/SendAssetScreen";
@@ -18,7 +28,9 @@ import SettingsNetworkScreen from "../screens/SettingsNetworkScreen";
 import SettingsPasscodeScreen from "../screens/SettingsPasscodeScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import SettingsSecurityScreen from "../screens/SettingsSecurityScreen";
+import SettingsVaultScreen from "../screens/SettingsVaultScreen";
 import SettingsWalletRecoveryScreen from "../screens/SettingsWalletRecoveryScreen";
+import SignInBiometricsScreen from "../screens/SignInBiometricsScreen";
 import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpAuthScreen from "../screens/SignUpAuthScreen";
@@ -31,21 +43,18 @@ import SignUpGuardiansScreen from "../screens/SignUpGuardiansScreen";
 import SignUpLaserGuardianDetailsScreen from "../screens/SignUpLaserGuardianDetailsScreen";
 import SignUpPasscodeScreen from "../screens/SignUpPasscodeScreen";
 import SignUpVerifyEmailScreen from "../screens/SignUpVerifyEmail";
-import SignUpVerifySeedPhrase from "../screens/SignUpVerifySeedPhrase";
 import StartScreen from "../screens/StartScreen";
 import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
-import VaultBackupPasswordScreen from "../screens/VaultBackupPasswordScreen";
-import VaultBackupScreen from "../screens/VaultBackupScreen";
 import VaultVerifyEmail from "../screens/VaultVerifyEmail";
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  const walletAddress = useSelector(selectWalletAddress);
+  const wallets = useSelector(selectWallets);
   const authenticated = useSelector(selectIsAuthenticated);
 
   const renderScreens = () => {
-    if (!walletAddress)
+    if (!wallets.length)
       return (
         <>
           <Stack.Screen
@@ -60,12 +69,20 @@ const AppNavigator = () => {
           />
           <Stack.Screen name="SignUpBackup" component={SignUpBackupScreen} />
           <Stack.Screen
-            name="SignUpVerifySeedPhrase"
-            component={SignUpVerifySeedPhrase}
-          />
-          <Stack.Screen
             name="SignUpBackupPassword"
             component={SignUpBackupPasswordScreen}
+          />
+          <Stack.Screen
+            name="RecoveryImportSeedPhrase"
+            component={RecoveryImportSeedPhraseScreen}
+          />
+          <Stack.Screen
+            name="RecoverySeedPhrasePassword"
+            component={RecoverySeedPhrasePasswordScreen}
+          />
+          <Stack.Screen
+            name="RecoveryEnterSeedPhrase"
+            component={RecoveryEnterSeedPhraseScreen}
           />
         </>
       );
@@ -109,6 +126,7 @@ const AppNavigator = () => {
             name="SettingsBackupPassword"
             component={SettingsBackupPasswordScreen}
           />
+          <Stack.Screen name="SettingsVault" component={SettingsVaultScreen} />
           <Stack.Screen
             name="TransactionDetails"
             component={TransactionDetailsScreen}
@@ -134,17 +152,40 @@ const AppNavigator = () => {
             name="SignUpAddGuardian"
             component={SignUpAddGuardianScreen}
           />
-          <Stack.Screen name="VaultBackup" component={VaultBackupScreen} />
-          <Stack.Screen
-            name="VaultBackupPassword"
-            component={VaultBackupPasswordScreen}
-          />
           <Stack.Screen name="VaultVerifyEmail" component={VaultVerifyEmail} />
+          <Stack.Screen
+            name="RecoveryImportVault"
+            component={RecoveryImportVaultScreen}
+          />
+          <Stack.Screen
+            name="RecoverySignIn"
+            component={RecoverySignInScreen}
+          />
+          <Stack.Screen
+            name="RecoveryVerifyEmail"
+            component={RecoveryVerifyEmailScreen}
+          />
+          <Stack.Screen
+            name="RecoveryAccountVaults"
+            component={RecoveryAccountVaultsScreen}
+          />
+          <Stack.Screen
+            name="RecoveryBackupPassword"
+            component={RecoveryBackupPasswordScreen}
+          />
+          <Stack.Screen
+            name="RecoveryLockVault"
+            component={RecoveryLockVaultScreen}
+          />
         </>
       );
 
     return (
-      <Stack.Screen name="SignInPasscode" component={SignInPasscodeScreen} />
+      <Stack.Screen
+        name="SignInBiometrics"
+        component={SignInBiometricsScreen}
+        options={{ headerShown: false }}
+      />
     );
   };
 
