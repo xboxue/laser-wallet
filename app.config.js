@@ -22,6 +22,7 @@ export default {
     supportsTablet: false,
     buildNumber: "1",
     bundleIdentifier: "com.laser.wallet",
+    config: { usesNonExemptEncryption: false },
   },
   android: {
     adaptiveIcon: {
