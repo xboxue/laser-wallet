@@ -13,12 +13,20 @@ export const setItem = async (
 ) => {
   try {
     await setInternetCredentials(key, key, value, options);
+    Sentry.Native.addBreadcrumb({
+      message: `Keychain: saved string for key: ${key}`,
+      level: Sentry.Native.Severity.Info,
+    });
   } catch (error) {
     Sentry.Native.captureMessage("Keychain write first attempt failed");
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     try {
       await setInternetCredentials(key, key, value, options);
+      Sentry.Native.addBreadcrumb({
+        message: `Keychain: saved string for key on second attempt: ${key}`,
+        level: Sentry.Native.Severity.Info,
+      });
     } catch (error) {
       Sentry.Native.captureMessage("Keychain write second attempt failed");
       Sentry.Native.captureException(error);
@@ -41,8 +49,17 @@ export const getItem = async (
 
   try {
     const credentials = await getInternetCredentials(key, options);
-    if (!credentials) return null;
-    return credentials.password;
+    if (credentials) {
+      Sentry.Native.addBreadcrumb({
+        message: `Keychain: loaded string for key: ${key}`,
+        level: Sentry.Native.Severity.Info,
+      });
+      return credentials.password;
+    }
+    Sentry.Native.addBreadcrumb({
+      message: `Keychain: string does not exist for key: ${key}`,
+      level: Sentry.Native.Severity.Info,
+    });
   } catch (error) {
     if (
       error.message ===
@@ -53,8 +70,17 @@ export const getItem = async (
 
       try {
         const credentials = await getInternetCredentials(key, options);
-        if (!credentials) return null;
-        return credentials.password;
+        if (credentials) {
+          Sentry.Native.addBreadcrumb({
+            message: `Keychain: loaded string for key on second attempt: ${key}`,
+            level: Sentry.Native.Severity.Info,
+          });
+          return credentials.password;
+        }
+        Sentry.Native.addBreadcrumb({
+          message: `Keychain: string does not exist for key: ${key}`,
+          level: Sentry.Native.Severity.Info,
+        });
       } catch (error) {
         Sentry.Native.captureMessage("Keychain read second attempt failed");
         Sentry.Native.captureException(error);
@@ -63,4 +89,5 @@ export const getItem = async (
     }
     throw error;
   }
+  return null;
 };
