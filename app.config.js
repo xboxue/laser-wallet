@@ -13,7 +13,7 @@ export default {
     backgroundColor: "#111827",
   },
   updates: {
-    fallbackToCacheTimeout: 0,
+    fallbackToCacheTimeout: 5000,
     url: "https://u.expo.dev/7a661128-fd6d-4dce-b72e-2f5f2ead8a58",
   },
   assetBundlePatterns: ["**/*"],
