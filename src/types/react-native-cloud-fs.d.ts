@@ -29,4 +29,6 @@ declare module "react-native-cloud-fs" {
   function getIcloudDocument(fileName: string): Promise<string>;
 
   function getGoogleDriveDocument(id: string): Promise<string>;
+
+  function syncCloud(): Promise<boolean>;
 }
