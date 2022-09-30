@@ -33,7 +33,7 @@ export const createWallets = async (seedPhrase: string) => {
   }
   const owner = Wallet.generate();
 
-  await setItem("ownerKey", owner.getPrivateKeyString(), {
+  await setItem("ownerPrivateKey", owner.getPrivateKeyString(), {
     accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
     accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
   });
