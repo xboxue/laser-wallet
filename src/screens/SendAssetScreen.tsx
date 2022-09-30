@@ -9,7 +9,7 @@ const SendAssetScreen = ({ route }) => {
   const walletAddress = useSelector(selectWalletAddress);
 
   return (
-    <Box>
+    <Box flex={1}>
       <Text variant="subtitle1" p="4" pb="0">
         Choose asset
       </Text>

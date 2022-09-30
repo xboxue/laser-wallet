@@ -27,6 +27,8 @@ import wagmiClient from "./src/services/wagmiClient";
 import { getPersistor, store } from "./src/store";
 import theme from "./src/styles/theme";
 import { excludeGraphQLFetch } from "apollo-link-sentry";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 const tokenCache = {
   getToken: (key: string) => AsyncStorage.getItem(key),
@@ -51,7 +53,6 @@ const AppWithQueryClient = () => {
           description={error?.message}
         />
       ),
-      placement: "top",
     });
     if (error) {
       console.error(error);
@@ -68,7 +69,11 @@ const AppWithQueryClient = () => {
     >
       <QueryClientProvider client={getQueryClient(onError)}>
         <NavigationContainer theme={{ colors: { background: "white" } }}>
-          <AppNavigator />
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <BottomSheetModalProvider>
+              <AppNavigator />
+            </BottomSheetModalProvider>
+          </GestureHandlerRootView>
         </NavigationContainer>
       </QueryClientProvider>
     </ApolloProvider>

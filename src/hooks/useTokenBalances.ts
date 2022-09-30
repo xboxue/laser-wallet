@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { erc20ABI, useContractReads } from "wagmi";
 import { tokens } from "@uniswap/default-token-list";
 import { selectChainId } from "../features/network/networkSlice";
+import { useMemo } from "react";
 
 export type TokenBalance = typeof tokens[number] & {
   balance: BigNumber;
@@ -10,7 +11,10 @@ export type TokenBalance = typeof tokens[number] & {
 
 const useTokenBalances = (walletAddress: string) => {
   const chainId = useSelector(selectChainId);
-  const chainTokens = tokens.filter((token) => token.chainId === chainId);
+  const chainTokens = useMemo(
+    () => tokens.filter((token) => token.chainId === chainId),
+    [chainId]
+  );
 
   return useContractReads({
     contracts: chainTokens.map((token) => ({

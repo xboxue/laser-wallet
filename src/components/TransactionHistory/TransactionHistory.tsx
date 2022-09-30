@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { keyBy } from "lodash";
 import { SectionList, useToast } from "native-base";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { RefreshControl } from "react-native";
 import { useSelector } from "react-redux";
 import { useBalance } from "wagmi";
@@ -58,30 +58,32 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     refetchBalance();
   };
 
-  const renderTransaction = ({ item: transaction }: { item: Transaction }) => {
-    return <TransactionItemContainer transaction={transaction} />;
-  };
+  const renderTransaction = useCallback(
+    ({ item: transaction }: { item: Transaction }) => {
+      return <TransactionItemContainer transaction={transaction} />;
+    },
+    []
+  );
 
-  const renderPendingTransaction = ({
-    item: transaction,
-  }: {
-    item: PendingTransaction;
-  }) => {
-    return (
-      <PendingTransactionItem
-        txsByHash={txsByHash}
-        transaction={transaction}
-        onSuccess={() => {
-          toast.show({
-            render: () => (
-              <ToastAlert status="success" title="Transaction confirmed" />
-            ),
-          });
-          handleRefresh();
-        }}
-      />
-    );
-  };
+  const renderPendingTransaction = useCallback(
+    ({ item: transaction }: { item: PendingTransaction }) => {
+      return (
+        <PendingTransactionItem
+          txsByHash={txsByHash}
+          transaction={transaction}
+          onSuccess={() => {
+            toast.show({
+              render: () => (
+                <ToastAlert status="success" title="Transaction confirmed" />
+              ),
+            });
+            handleRefresh();
+          }}
+        />
+      );
+    },
+    []
+  );
 
   return (
     <>

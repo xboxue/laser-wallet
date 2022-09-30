@@ -164,15 +164,18 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
           isConnecting={isConnecting}
         />
       )}
-      {callRequest && callRequest.method !== REQUEST_TYPES.SEND_TRANSACTION && (
-        <WalletConnectRequestPrompt
-          onApprove={approveCallRequest}
-          onReject={rejectCallRequest}
-          onClose={rejectCallRequest}
-          peerMeta={callRequest.peerMeta}
-          callRequest={callRequest}
-        />
-      )}
+      {callRequest &&
+        callRequest.method !== REQUEST_TYPES.SEND_TRANSACTION &&
+        callRequest.method !== REQUEST_TYPES.SIGN_TRANSACTION && (
+          <WalletConnectRequestPrompt
+            onApprove={approveCallRequest}
+            onReject={rejectCallRequest}
+            onClose={rejectCallRequest}
+            peerMeta={callRequest.peerMeta}
+            callRequest={callRequest}
+            isLoading={isLoading}
+          />
+        )}
       {(callRequest?.method === REQUEST_TYPES.SEND_TRANSACTION ||
         callRequest?.method === REQUEST_TYPES.SIGN_TRANSACTION) && (
         <WalletConnectTransactionPrompt

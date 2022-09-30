@@ -1,7 +1,3 @@
-import {
-  createStackNavigator,
-  TransitionPresets,
-} from "@react-navigation/stack";
 import { ChevronLeftIcon } from "native-base";
 import { Platform } from "react-native";
 import { useSelector } from "react-redux";
@@ -46,8 +42,10 @@ import SignUpVerifyEmailScreen from "../screens/SignUpVerifyEmail";
 import StartScreen from "../screens/StartScreen";
 import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 import VaultVerifyEmail from "../screens/VaultVerifyEmail";
+import TabNavigator from "./TabNavigator";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   const wallets = useSelector(selectWallets);
@@ -92,8 +90,7 @@ const AppNavigator = () => {
         <>
           <Stack.Screen
             name="Home"
-            component={HomeScreen}
-            initialParams={{ tab: 0 }}
+            component={TabNavigator}
             options={{ headerShown: false }}
           />
           <Stack.Screen
@@ -104,7 +101,14 @@ const AppNavigator = () => {
           <Stack.Screen name="SendAsset" component={SendAssetScreen} />
           <Stack.Screen name="SendAmount" component={SendAmountScreen} />
           <Stack.Screen name="SendConfirm" component={SendConfirmScreen} />
-          <Stack.Screen name="QRCodeScan" component={QRCodeScanScreen} />
+          <Stack.Screen
+            name="QRCodeScan"
+            component={QRCodeScanScreen}
+            options={{
+              headerTransparent: true,
+              headerStyle: { backgroundColor: "transparent" },
+            }}
+          />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen
             name="SettingsNetwork"
@@ -192,14 +196,16 @@ const AppNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...TransitionPresets.SlideFromRightIOS,
+        // ...TransitionPresets.SlideFromRightIOS,
+        // ...(Platform.OS === "ios" && {
+        //   headerBackImage: () => (
+        //     <ChevronLeftIcon size="5" color="black" ml="4" />
+        //   ),
+        // }),
+        headerBackTitleVisible: false,
         headerTitle: "",
-        ...(Platform.OS === "ios" && {
-          headerBackTitleVisible: false,
-          headerBackImage: () => (
-            <ChevronLeftIcon size="5" color="black" ml="4" />
-          ),
-        }),
+        headerStyle: { backgroundColor: "white" },
+        headerShadowVisible: false,
       }}
     >
       {renderScreens()}
