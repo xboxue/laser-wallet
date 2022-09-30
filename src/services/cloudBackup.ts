@@ -17,6 +17,7 @@ export const getBackups = async () => {
   if (Platform.OS === "ios") {
     const available = await RNCloudFs.isAvailable();
     if (!available) throw new Error("iCloud not available");
+    await RNCloudFs.syncCloud();
   }
 
   if (Platform.OS === "android") await RNCloudFs.loginIfNeeded();

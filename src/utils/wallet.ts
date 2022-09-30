@@ -15,36 +15,32 @@ export const createWallets = async (seedPhrase: string) => {
   const seed = await mnemonicToSeed(seedPhrase);
   const hdwallet = hdkey.fromMasterSeed(seed);
   const wallets = [];
-  const promises = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     const wallet = hdwallet
       .derivePath(utils.defaultPath)
       .deriveChild(i)
       .getWallet();
-    promises.push(
-      setItem(
-        `privateKey_${wallet.getAddressString()}`,
-        wallet.getPrivateKeyString(),
-        {
-          accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
-          accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-        }
-      )
+
+    await setItem(
+      `privateKey_${wallet.getAddressString()}`,
+      wallet.getPrivateKeyString(),
+      {
+        accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+        accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+      }
     );
     wallets.push({ address: wallet.getAddressString() });
   }
   const owner = Wallet.generate();
-  await Promise.all([
-    ...promises,
-    setItem("ownerKey", owner.getPrivateKeyString(), {
-      accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
-      accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-    }),
-    setItem("seedPhrase", seedPhrase, {
-      accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
-      accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-    }),
-  ]);
+
+  await setItem("ownerPrivateKey", owner.getPrivateKeyString(), {
+    accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+    accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  });
+  await setItem("seedPhrase", seedPhrase, {
+    accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+    accessible: ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  });
 
   return { wallets, ownerAddress: owner.getAddressString() };
 };
