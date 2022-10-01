@@ -19,7 +19,7 @@ const VaultVerifyEmail = ({ route }) => {
       render: () => <ToastAlert status="success" title="Transaction sent" />,
     });
     dispatch(addPendingTransaction(transaction));
-    navigation.navigate("Home", { tab: 1 });
+    navigation.navigate("Activity");
   };
 
   const { mutate: sendEth, isLoading: isSendingEth } = useSendVaultEth({

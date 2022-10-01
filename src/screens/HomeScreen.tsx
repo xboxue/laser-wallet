@@ -42,13 +42,6 @@ const HomeScreen = ({ route }) => {
           Send
         </Button>
       </Box>
-      {/* <TabView
-        navigationState={{ index: tab, routes }}
-        renderScene={renderScene}
-        renderTabBar={renderTabBar}
-        onIndexChange={(index) => navigation.setParams({ tab: index })}
-        initialLayout={{ width: window.width }}
-      /> */}
       <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
       <WalletConnectPrompt walletAddress={walletAddress} />
     </Box>

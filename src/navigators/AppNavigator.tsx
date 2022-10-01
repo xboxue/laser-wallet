@@ -1,13 +1,12 @@
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ChevronLeftIcon } from "native-base";
 import { Platform } from "react-native";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../features/auth/authSlice";
 import { selectWallets } from "../features/wallet/walletSlice";
-import HomeScreen from "../screens/HomeScreen";
 import QRCodeScanScreen from "../screens/QRCodeScanScreen";
 import RecoveryAccountVaultsScreen from "../screens/RecoveryAccountVaultsScreen";
 import RecoveryBackupPasswordScreen from "../screens/RecoveryBackupPasswordScreen";
-import RecoveryBackupScreen from "../screens/RecoveryBackupScreen";
 import RecoveryEnterSeedPhraseScreen from "../screens/RecoveryEnterSeedPhraseScreen";
 import RecoveryImportSeedPhraseScreen from "../screens/RecoveryImportSeedPhraseScreen";
 import RecoveryImportVaultScreen from "../screens/RecoveryImportVaultScreen";
@@ -27,7 +26,6 @@ import SettingsSecurityScreen from "../screens/SettingsSecurityScreen";
 import SettingsVaultScreen from "../screens/SettingsVaultScreen";
 import SettingsWalletRecoveryScreen from "../screens/SettingsWalletRecoveryScreen";
 import SignInBiometricsScreen from "../screens/SignInBiometricsScreen";
-import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpAuthScreen from "../screens/SignUpAuthScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
@@ -43,7 +41,6 @@ import StartScreen from "../screens/StartScreen";
 import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 import VaultVerifyEmail from "../screens/VaultVerifyEmail";
 import TabNavigator from "./TabNavigator";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 const Stack = createNativeStackNavigator();
 
@@ -196,12 +193,11 @@ const AppNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        // ...TransitionPresets.SlideFromRightIOS,
-        // ...(Platform.OS === "ios" && {
-        //   headerBackImage: () => (
-        //     <ChevronLeftIcon size="5" color="black" ml="4" />
-        //   ),
-        // }),
+        ...(Platform.OS === "ios" && {
+          headerBackImage: () => (
+            <ChevronLeftIcon size="5" color="black" ml="4" />
+          ),
+        }),
         headerBackTitleVisible: false,
         headerTitle: "",
         headerStyle: { backgroundColor: "white" },

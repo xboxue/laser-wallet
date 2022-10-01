@@ -83,6 +83,16 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
     if (vaultConfig?._isLocked)
       return [
         {
+          icon: (
+            <Circle bg="gray.800" size="9">
+              <Icon
+                as={Ionicons}
+                color="white"
+                name="lock-closed-outline"
+                size="4"
+              />
+            </Circle>
+          ),
           title: "Vault is locked",
           subtitle: `Vault will be unlocked on ${format(
             add(fromUnixTime(vaultConfig.configTimestamp.toNumber()), {

@@ -78,7 +78,7 @@ const SignUpDeployWalletScreen = () => {
         dispatch(
           addPendingTransaction({ ...transaction, isDeployVault: true })
         );
-        navigation.navigate("Home", { tab: 1 });
+        navigation.navigate("Activity");
       },
     }
   );
