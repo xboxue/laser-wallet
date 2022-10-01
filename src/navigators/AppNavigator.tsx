@@ -194,7 +194,7 @@ const AppNavigator = () => {
     <Stack.Navigator
       screenOptions={{
         ...(Platform.OS === "ios" && {
-          headerBackImage: () => (
+          headerBackImageSource: () => (
             <ChevronLeftIcon size="5" color="black" ml="4" />
           ),
         }),

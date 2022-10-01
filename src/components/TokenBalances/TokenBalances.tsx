@@ -121,13 +121,14 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
           alt="Token icon"
         />
       ),
-      onPress: onPress({
-        address: token.address,
-        balance: token.balance.toString(),
-        symbol: token.symbol,
-        decimals: token.decimals,
-        isToken: true,
-      }),
+      onPress: () =>
+        onPress({
+          address: token.address,
+          balance: token.balance.toString(),
+          symbol: token.symbol,
+          decimals: token.decimals,
+          isToken: true,
+        }),
     }));
   }, [tokens]);
 
