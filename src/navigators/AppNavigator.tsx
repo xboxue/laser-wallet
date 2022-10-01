@@ -193,11 +193,6 @@ const AppNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...(Platform.OS === "ios" && {
-          headerBackImageSource: () => (
-            <ChevronLeftIcon size="5" color="black" ml="4" />
-          ),
-        }),
         headerBackTitleVisible: false,
         headerTitle: "",
         headerStyle: { backgroundColor: "white" },
