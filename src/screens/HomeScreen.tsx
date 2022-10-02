@@ -7,12 +7,14 @@ import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
 import WalletSelector from "../components/WalletSelector/WalletSelector";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
+import usePendingTxSubscription from "../hooks/usePendingTxSubscription";
 import useWalletConnectSubscription from "../hooks/useWalletConnectSubscription";
 
 const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
   useWalletConnectSubscription();
+  usePendingTxSubscription();
 
   return (
     <Box flex={1} safeAreaTop pt={6}>

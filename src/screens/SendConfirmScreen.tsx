@@ -37,6 +37,7 @@ const SendConfirmScreen = ({ route }) => {
   const onSuccess = (transaction: providers.TransactionResponse) => {
     toast.show({
       render: () => <ToastAlert status="success" title="Transaction sent" />,
+      duration: 2000,
     });
     dispatch(addPendingTransaction(transaction));
     navigation.navigate("Activity");

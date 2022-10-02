@@ -53,6 +53,7 @@ const AppWithQueryClient = () => {
           description={error?.message}
         />
       ),
+      duration: 2000,
     });
     if (error) {
       console.error(error);

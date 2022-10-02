@@ -17,7 +17,7 @@ const TokenItem = ({ onPress, subtitle, title, rightText, icon }: Props) => {
           flexDirection="row"
           alignItems="center"
           px="4"
-          py="2"
+          py="2.5"
           opacity={pressed ? 0.3 : 1}
           bgColor="gray.50"
           rounded="xl"
@@ -27,9 +27,9 @@ const TokenItem = ({ onPress, subtitle, title, rightText, icon }: Props) => {
           {icon}
           <Box ml="3" flex={1}>
             <Text variant="subtitle1">{title}</Text>
-            <Text>{subtitle}</Text>
+            <Text color="text.500">{subtitle}</Text>
           </Box>
-          {rightText && <Text variant="subtitle1">{rightText}</Text>}
+          {rightText && <Text variant="subtitle2">{rightText}</Text>}
         </Box>
       )}
     </Pressable>

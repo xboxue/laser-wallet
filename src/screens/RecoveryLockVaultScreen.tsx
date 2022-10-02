@@ -73,6 +73,7 @@ const RecoveryLockVaultScreen = ({ route }) => {
           render: () => (
             <ToastAlert status="success" title="Transaction sent" />
           ),
+          duration: 2000,
         });
         dispatch(setChainId(vault.chain_id));
         dispatch(addPendingTransaction({ ...transaction, isLockVault: true }));

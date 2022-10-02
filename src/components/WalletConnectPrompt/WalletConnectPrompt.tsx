@@ -108,6 +108,7 @@ const WalletConnectPrompt = ({ walletAddress }: Props) => {
             render: () => (
               <ToastAlert status="success" title="Transaction sent" />
             ),
+            duration: 2000,
           });
         } else if (callRequest.method === REQUEST_TYPES.SWITCH_ETHEREUM_CHAIN) {
           const id = parseInt(callRequest.params[0].chainId, 16);

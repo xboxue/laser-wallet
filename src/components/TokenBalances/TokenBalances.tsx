@@ -108,8 +108,8 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
 
   const tokenData = useMemo(() => {
     return tokens.map((token) => ({
-      title: token.symbol,
-      subtitle: token.name,
+      title: token.name,
+      subtitle: token.symbol,
       rightText: formatAmount(token.balance, { decimals: token.decimals }),
       icon: (
         <Image
@@ -136,8 +136,8 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
     if (!balance) return [];
     return [
       {
-        title: balance.symbol,
-        subtitle: "Ethereum",
+        title: "Ethereum",
+        subtitle: balance.symbol,
         rightText: formatAmount(balance.value, {
           decimals: balance.decimals,
         }),
@@ -161,7 +161,7 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   return (
     <FlashList
       data={items}
-      estimatedItemSize={75}
+      estimatedItemSize={77}
       renderItem={({ item }) => <TokenItem {...item} />}
       contentContainerStyle={{ paddingTop: 8 }}
       refreshControl={

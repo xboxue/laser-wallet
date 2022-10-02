@@ -93,6 +93,21 @@ export const getTransactions = async ({
   return data.result;
 };
 
+export const getTransaction = async (hash: string, chainId: number) => {
+  const { data } = await axios.get<{ result: { status: number } }>(
+    getUrl(chainId),
+    {
+      params: {
+        module: "transaction",
+        apikey: Constants.expoConfig.extra.etherscanApiKey,
+        action: "getstatus",
+        txhash: hash,
+      },
+    }
+  );
+  return data.result;
+};
+
 export const getERC20Transfers = async (address: string, chainId: number) => {
   const { data } = await axios.get<{ result: TransactionERC20[] }>(
     getUrl(chainId),

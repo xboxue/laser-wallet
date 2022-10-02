@@ -8,7 +8,7 @@ export interface PendingTransaction extends providers.TransactionResponse {
   callRequest?: CallRequest;
   isDeployVault?: boolean;
   isLockVault?: boolean;
-  isRecoverVault?: boolean;
+  confirmed?: boolean;
 }
 
 interface TransactionsState {
@@ -34,13 +34,23 @@ const transactionsSlice = createSlice({
         (transaction) => transaction.hash !== action.payload
       );
     },
+    setTransactionConfirmed: (state, action: PayloadAction<string>) => {
+      const pendingTx = state.pendingTransactions.find(
+        (tx) => tx.hash === action.payload
+      );
+      if (!pendingTx) throw new Error("No pending transaction found");
+      pendingTx.confirmed = true;
+    },
   },
 });
 
 export const selectPendingTransactions = (state: RootState) =>
   state.transactions.pendingTransactions;
 
-export const { addPendingTransaction, removePendingTransaction } =
-  transactionsSlice.actions;
+export const {
+  addPendingTransaction,
+  removePendingTransaction,
+  setTransactionConfirmed,
+} = transactionsSlice.actions;
 
 export default transactionsSlice.reducer;
