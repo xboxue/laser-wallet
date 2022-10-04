@@ -61,7 +61,7 @@ const useSendVaultToken = (
     });
 
     const wallet = new Wallet(privateKey, provider);
-    return laser.execTransaction(tx, wallet, 100000);
+    return laser.execTransaction(tx, wallet, 150000);
   }, options);
 };
 

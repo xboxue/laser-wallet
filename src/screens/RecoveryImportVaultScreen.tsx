@@ -23,11 +23,15 @@ const RecoveryImportVaultScreen = ({ route }) => {
       {
         onSuccess: (backups) => {
           if (!backups.length) throw new Error("No backups found");
-          else if (backups.length >= 1)
+          else if (backups.length === 1)
             navigation.navigate("RecoveryBackupPassword", {
               backupName: backups[0].name,
             });
-          // else navigation.navigate("RecoveryBackupsScreen");
+          else
+            navigation.navigate("RecoveryBackups", {
+              backups,
+              nextScreen: "RecoveryBackupPassword",
+            });
         },
         onError: (error) => {
           if (

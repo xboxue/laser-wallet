@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import {
   setInternetCredentials,
   Options,
@@ -46,6 +47,10 @@ export const getItem = async (
       ...authenticationPrompt,
     },
   };
+  // https://github.com/oblador/react-native-keychain/issues/525
+  if (Platform.OS === "android") {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
 
   try {
     const credentials = await getInternetCredentials(key, options);

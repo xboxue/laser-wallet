@@ -31,12 +31,12 @@ const SignUpAuthScreen = ({ route }) => {
   return (
     <Box p="4">
       <Text variant="subtitle1">Protect your wallet</Text>
-      <Text mb="4">
+      <Text>
         Add an extra layer of security to prevent someone with your phone from
         accessing your wallet.
       </Text>
       <Button
-        mt="4"
+        mt="6"
         onPress={async () => authenticate()}
         isLoading={isAuthenticating}
       >

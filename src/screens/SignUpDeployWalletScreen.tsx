@@ -44,8 +44,7 @@ const SignUpDeployWalletScreen = () => {
     async () => {
       const privateKey = await getPrivateKey(walletAddress);
       const ownerPrivateKey = await getItem("ownerPrivateKey");
-
-      if (!ownerPrivateKey || !privateKey) throw new Error("No private key");
+      if (!ownerPrivateKey) throw new Error("No owner private key");
 
       const owner = new Wallet(ownerPrivateKey);
       const salt = random(0, 1000000);
@@ -75,11 +74,12 @@ const SignUpDeployWalletScreen = () => {
           render: () => (
             <ToastAlert status="success" title="Transaction sent" />
           ),
+          duration: 2000,
         });
         dispatch(
           addPendingTransaction({ ...transaction, isDeployVault: true })
         );
-        navigation.navigate("Home", { tab: 1 });
+        navigation.navigate("Activity");
       },
     }
   );

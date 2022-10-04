@@ -43,7 +43,7 @@ const RecoveryEnterSeedPhraseScreen = () => {
           {formik.errors.seedPhrase}
         </FormControl.ErrorMessage>
       </FormControl>
-      <Button mt="6" onPress={formik.handleSubmit} isLoading={isLoading}>
+      <Button mt="6" onPress={formik.handleSubmit}>
         Next
       </Button>
     </Box>

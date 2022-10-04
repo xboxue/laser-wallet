@@ -1,17 +1,13 @@
-import {
-  createStackNavigator,
-  TransitionPresets,
-} from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ChevronLeftIcon } from "native-base";
 import { Platform } from "react-native";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../features/auth/authSlice";
 import { selectWallets } from "../features/wallet/walletSlice";
-import HomeScreen from "../screens/HomeScreen";
 import QRCodeScanScreen from "../screens/QRCodeScanScreen";
 import RecoveryAccountVaultsScreen from "../screens/RecoveryAccountVaultsScreen";
 import RecoveryBackupPasswordScreen from "../screens/RecoveryBackupPasswordScreen";
-import RecoveryBackupScreen from "../screens/RecoveryBackupScreen";
+import RecoveryBackupsScreen from "../screens/RecoveryBackupsScreen";
 import RecoveryEnterSeedPhraseScreen from "../screens/RecoveryEnterSeedPhraseScreen";
 import RecoveryImportSeedPhraseScreen from "../screens/RecoveryImportSeedPhraseScreen";
 import RecoveryImportVaultScreen from "../screens/RecoveryImportVaultScreen";
@@ -31,7 +27,6 @@ import SettingsSecurityScreen from "../screens/SettingsSecurityScreen";
 import SettingsVaultScreen from "../screens/SettingsVaultScreen";
 import SettingsWalletRecoveryScreen from "../screens/SettingsWalletRecoveryScreen";
 import SignInBiometricsScreen from "../screens/SignInBiometricsScreen";
-import SignInPasscodeScreen from "../screens/SignInPasscodeScreen";
 import SignUpAddGuardianScreen from "../screens/SignUpAddGuardianScreen";
 import SignUpAuthScreen from "../screens/SignUpAuthScreen";
 import SignUpBackupPasswordScreen from "../screens/SignUpBackupPasswordScreen";
@@ -46,8 +41,9 @@ import SignUpVerifyEmailScreen from "../screens/SignUpVerifyEmail";
 import StartScreen from "../screens/StartScreen";
 import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 import VaultVerifyEmail from "../screens/VaultVerifyEmail";
+import TabNavigator from "./TabNavigator";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   const wallets = useSelector(selectWallets);
@@ -68,6 +64,10 @@ const AppNavigator = () => {
             component={SignUpPasscodeScreen}
           />
           <Stack.Screen name="SignUpBackup" component={SignUpBackupScreen} />
+          <Stack.Screen
+            name="RecoveryBackups"
+            component={RecoveryBackupsScreen}
+          />
           <Stack.Screen
             name="SignUpBackupPassword"
             component={SignUpBackupPasswordScreen}
@@ -92,8 +92,7 @@ const AppNavigator = () => {
         <>
           <Stack.Screen
             name="Home"
-            component={HomeScreen}
-            initialParams={{ tab: 0 }}
+            component={TabNavigator}
             options={{ headerShown: false }}
           />
           <Stack.Screen
@@ -104,7 +103,14 @@ const AppNavigator = () => {
           <Stack.Screen name="SendAsset" component={SendAssetScreen} />
           <Stack.Screen name="SendAmount" component={SendAmountScreen} />
           <Stack.Screen name="SendConfirm" component={SendConfirmScreen} />
-          <Stack.Screen name="QRCodeScan" component={QRCodeScanScreen} />
+          <Stack.Screen
+            name="QRCodeScan"
+            component={QRCodeScanScreen}
+            options={{
+              headerTransparent: true,
+              headerStyle: { backgroundColor: "transparent" },
+            }}
+          />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen
             name="SettingsNetwork"
@@ -170,6 +176,10 @@ const AppNavigator = () => {
             component={RecoveryAccountVaultsScreen}
           />
           <Stack.Screen
+            name="RecoveryBackups"
+            component={RecoveryBackupsScreen}
+          />
+          <Stack.Screen
             name="RecoveryBackupPassword"
             component={RecoveryBackupPasswordScreen}
           />
@@ -192,14 +202,10 @@ const AppNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        ...TransitionPresets.SlideFromRightIOS,
+        headerBackTitleVisible: false,
         headerTitle: "",
-        ...(Platform.OS === "ios" && {
-          headerBackTitleVisible: false,
-          headerBackImage: () => (
-            <ChevronLeftIcon size="5" color="black" ml="4" />
-          ),
-        }),
+        headerStyle: { backgroundColor: "white" },
+        headerShadowVisible: false,
       }}
     >
       {renderScreens()}

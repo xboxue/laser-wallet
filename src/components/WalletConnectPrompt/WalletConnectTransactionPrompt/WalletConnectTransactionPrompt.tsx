@@ -16,6 +16,7 @@ import { selectChainId } from "../../../features/network/networkSlice";
 import { decodePendingTxData } from "../../../utils/decodeTransactionData";
 import formatAddress from "../../../utils/formatAddress";
 import formatAmount from "../../../utils/formatAmount";
+import BottomSheet from "../../BottomSheet/BottomSheet";
 import WalletConnectApprovePrompt from "../WalletConnectApprovePrompt/WalletConnectApprovePrompt";
 
 interface Props {
@@ -127,32 +128,30 @@ const WalletConnectTransactionPrompt = ({
   };
 
   return (
-    <Actionsheet isOpen onClose={onClose}>
-      <Actionsheet.Content>
-        <Box width="100%" px="4" py="2">
-          <Image
-            source={{ uri: peerMeta.icons[0] }}
-            alt="logo"
-            size="10"
-            alignSelf="center"
-            mb="4"
-          />
-          {renderContent()}
-          <Stack space="1" mt="5">
-            <Button
-              isLoading={loading}
-              isDisabled={gasEstimateLoading}
-              onPress={() => onApprove()}
-            >
-              Approve
-            </Button>
-            <Button isDisabled={loading} variant="subtle" onPress={onReject}>
-              Reject
-            </Button>
-          </Stack>
-        </Box>
-      </Actionsheet.Content>
-    </Actionsheet>
+    <BottomSheet isOpen onClose={onClose}>
+      <Box width="100%" p="4">
+        <Image
+          source={{ uri: peerMeta.icons[0] }}
+          alt="logo"
+          size="10"
+          alignSelf="center"
+          mb="4"
+        />
+        {renderContent()}
+        <Stack space="1" mt="5">
+          <Button
+            isLoading={loading}
+            isDisabled={gasEstimateLoading}
+            onPress={() => onApprove()}
+          >
+            Approve
+          </Button>
+          <Button isDisabled={loading} variant="subtle" onPress={onReject}>
+            Reject
+          </Button>
+        </Stack>
+      </Box>
+    </BottomSheet>
   );
 };
 

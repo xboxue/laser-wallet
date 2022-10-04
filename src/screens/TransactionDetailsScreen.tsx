@@ -11,7 +11,7 @@ import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
 
 const TransactionDetailsScreen = ({ route }) => {
-  const { receipt, hash, txData } = route.params;
+  const { txData } = route.params;
   const chainId = useSelector(selectChainId);
 
   return (
@@ -28,7 +28,7 @@ const TransactionDetailsScreen = ({ route }) => {
         >
           <Text variant="subtitle2">Status</Text>
           <Text variant="subtitle2">
-            {!receipt ? (
+            {!txData.receipt ? (
               <Badge _text={{ fontSize: "sm" }}>Pending</Badge>
             ) : txData.isError ? (
               <Badge _text={{ fontSize: "sm" }} colorScheme="danger">
@@ -77,12 +77,14 @@ const TransactionDetailsScreen = ({ route }) => {
             <Text variant="subtitle2">{formatAmount(txData.value)} ETH</Text>
           </Box>
         )}
-        {receipt?.gasPrice && receipt?.gasUsed && (
+        {txData.receipt?.gasPrice && txData.receipt?.gasUsed && (
           <Box flexDirection="row" justifyContent="space-between" h="5">
             <Text variant="subtitle2">Network fee</Text>
             <Text variant="subtitle2">
               {formatAmount(
-                BigNumber.from(receipt.gasPrice).mul(receipt.gasUsed),
+                BigNumber.from(txData.receipt.gasPrice).mul(
+                  txData.receipt.gasUsed
+                ),
                 {
                   precision: 6,
                 }
@@ -94,7 +96,9 @@ const TransactionDetailsScreen = ({ route }) => {
         <Button
           mt="2"
           onPress={() => {
-            WebBrowser.openBrowserAsync(getTransactionUrl(chainId, hash));
+            WebBrowser.openBrowserAsync(
+              getTransactionUrl(chainId, txData.hash)
+            );
           }}
           endIcon={<Icon as={<Ionicons name="open-outline" />} size="4" />}
         >

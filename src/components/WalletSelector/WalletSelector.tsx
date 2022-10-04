@@ -1,5 +1,4 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { Actionsheet, Button, ChevronDownIcon, Icon } from "native-base";
+import { Box, Button, ChevronDownIcon } from "native-base";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -9,7 +8,8 @@ import {
   setWalletAddress,
 } from "../../features/wallet/walletSlice";
 import formatAddress from "../../utils/formatAddress";
-import CopyIconButton from "../CopyIconButton/CopyIconButton";
+import AddressItem from "../AddressItem/AddressItem";
+import BottomSheet from "../BottomSheet/BottomSheet";
 
 const WalletSelector = () => {
   const walletAddress = useSelector(selectWalletAddress);
@@ -20,58 +20,30 @@ const WalletSelector = () => {
 
   return (
     <>
-      <Actionsheet
+      <BottomSheet
         isOpen={walletSheetOpen}
         onClose={() => setWalletSheetOpen(false)}
       >
-        <Actionsheet.Content>
+        <Box p="2" py="4">
           {vaultAddress && (
-            <Actionsheet.Item
+            <AddressItem
               onPress={() => dispatch(setWalletAddress(vaultAddress))}
-              _pressed={{ bgColor: "gray.200", rounded: "lg" }}
-              rightIcon={
-                walletAddress === vaultAddress ? (
-                  <>
-                    <Icon
-                      as={<Ionicons name="ios-checkmark-circle" />}
-                      size="6"
-                      color="green.500"
-                    />
-                    <CopyIconButton ml="auto" value={vaultAddress} />
-                  </>
-                ) : (
-                  <CopyIconButton value={vaultAddress} ml="auto" />
-                )
-              }
-            >
-              {`Vault (${formatAddress(vaultAddress)})`}
-            </Actionsheet.Item>
+              selected={walletAddress === vaultAddress}
+              address={vaultAddress}
+              title={`Vault (${formatAddress(vaultAddress)})`}
+            />
           )}
-          {wallets.slice(0, 5).map((wallet, index) => (
-            <Actionsheet.Item
+          {wallets.slice(0, 2).map((wallet, index) => (
+            <AddressItem
               key={wallet.address}
               onPress={() => dispatch(setWalletAddress(wallet.address))}
-              _pressed={{ bgColor: "gray.200", rounded: "lg" }}
-              endIcon={
-                walletAddress === wallet.address ? (
-                  <>
-                    <Icon
-                      as={<Ionicons name="ios-checkmark-circle" />}
-                      size="6"
-                      color="green.500"
-                    />
-                    <CopyIconButton ml="auto" value={wallet.address} />
-                  </>
-                ) : (
-                  <CopyIconButton value={wallet.address} ml="auto" />
-                )
-              }
-            >{`Wallet ${index + 1} (${formatAddress(
-              wallet.address
-            )})`}</Actionsheet.Item>
+              selected={walletAddress === wallet.address}
+              address={wallet.address}
+              title={`Wallet ${index + 1} (${formatAddress(wallet.address)})`}
+            />
           ))}
-        </Actionsheet.Content>
-      </Actionsheet>
+        </Box>
+      </BottomSheet>
       <Button
         variant="outline"
         _text={{ color: "black", fontSize: "sm" }}

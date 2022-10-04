@@ -25,11 +25,15 @@ const RecoveryImportSeedPhraseScreen = () => {
     {
       onSuccess: (backups) => {
         if (!backups.length) throw new Error("No backups found");
-        else if (backups.length >= 1)
+        else if (backups.length === 1)
           navigation.navigate("RecoverySeedPhrasePassword", {
             backupName: backups[0].name,
           });
-        else navigation.navigate("RecoveryBackupsScreen");
+        else
+          navigation.navigate("RecoveryBackups", {
+            backups,
+            nextScreen: "RecoverySeedPhrasePassword",
+          });
       },
       onError: (error) => {
         if (error instanceof Error && error.message === "iCloud not available")

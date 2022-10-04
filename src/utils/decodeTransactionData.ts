@@ -27,6 +27,8 @@ export const decodeTxDataByHash = async (
         (await provider.getBlock(receipt.blockNumber)).timestamp
       ),
     }),
+    hash,
+    receipt,
   };
 
   if (tx.data === "0x") return { type: TRANSACTION_TYPES.SEND, ...baseData };
