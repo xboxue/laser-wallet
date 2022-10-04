@@ -77,7 +77,7 @@ const RecoveryLockVaultScreen = ({ route }) => {
         });
         dispatch(setChainId(vault.chain_id));
         dispatch(addPendingTransaction({ ...transaction, isLockVault: true }));
-        navigation.navigate("Activity");
+        navigation.navigate("Home", { screen: "Activity" });
       },
     }
   );

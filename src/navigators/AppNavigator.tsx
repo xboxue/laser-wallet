@@ -7,6 +7,7 @@ import { selectWallets } from "../features/wallet/walletSlice";
 import QRCodeScanScreen from "../screens/QRCodeScanScreen";
 import RecoveryAccountVaultsScreen from "../screens/RecoveryAccountVaultsScreen";
 import RecoveryBackupPasswordScreen from "../screens/RecoveryBackupPasswordScreen";
+import RecoveryBackupsScreen from "../screens/RecoveryBackupsScreen";
 import RecoveryEnterSeedPhraseScreen from "../screens/RecoveryEnterSeedPhraseScreen";
 import RecoveryImportSeedPhraseScreen from "../screens/RecoveryImportSeedPhraseScreen";
 import RecoveryImportVaultScreen from "../screens/RecoveryImportVaultScreen";
@@ -63,6 +64,10 @@ const AppNavigator = () => {
             component={SignUpPasscodeScreen}
           />
           <Stack.Screen name="SignUpBackup" component={SignUpBackupScreen} />
+          <Stack.Screen
+            name="RecoveryBackups"
+            component={RecoveryBackupsScreen}
+          />
           <Stack.Screen
             name="SignUpBackupPassword"
             component={SignUpBackupPasswordScreen}
@@ -169,6 +174,10 @@ const AppNavigator = () => {
           <Stack.Screen
             name="RecoveryAccountVaults"
             component={RecoveryAccountVaultsScreen}
+          />
+          <Stack.Screen
+            name="RecoveryBackups"
+            component={RecoveryBackupsScreen}
           />
           <Stack.Screen
             name="RecoveryBackupPassword"

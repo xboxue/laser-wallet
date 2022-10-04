@@ -138,10 +138,12 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   const renderEmptyComponent = useCallback(() => {
     return (
       <Box justifyContent="center" alignItems="center" flex={1}>
-        <Text variant="subtitle1">No transactions</Text>
+        {!txsLoading && !results.some((result) => result.isLoading) && (
+          <Text variant="subtitle1">No transactions</Text>
+        )}
       </Box>
     );
-  }, []);
+  }, [results]);
 
   return (
     <FlashList
