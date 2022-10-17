@@ -67,7 +67,7 @@
     "formik": "^2.2.9",
     "graphql": "^16.6.0",
     "https-browserify": "~0.0.0",
-    "laser-sdk": "^0.8.1",
+    "laser-sdk": "^0.8.2",
     "lodash": "^4.17.21",
     "native-base": "^3.4.5",
     "path-browserify": "0.0.0",
