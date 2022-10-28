@@ -148,13 +148,13 @@ const SendConfirmScreen = ({ route }) => {
         </Box>
         <Button
           onPress={async () => {
-            if (walletAddress === vaultAddress) {
-              sendEmailCode();
-              return navigation.navigate("VaultVerifyEmail", route.params);
-            }
+            // if (walletAddress === vaultAddress) {
+            sendEmailCode();
+            return navigation.navigate("VaultVerifyEmail", route.params);
+            // }
 
-            if (token.isToken) sendToken({ to, amount, token });
-            else sendEth({ to, amount });
+            // if (token.isToken) sendToken({ to, amount, token });
+            // else sendEth({ to, amount });
           }}
           isLoading={isSendingEth || isSendingToken || isSendingEmailCode}
           isDisabled={gasEstimateLoading}

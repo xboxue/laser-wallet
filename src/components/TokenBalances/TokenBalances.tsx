@@ -36,16 +36,6 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   const navigation = useNavigation();
   const provider = useProvider({ chainId });
 
-  const { data: vaultConfig, isLoading: vaultConfigLoading } = useQuery(
-    ["vaultConfig", vaultAddress],
-    () => {
-      if (!vaultAddress) throw new Error();
-      const vault = LaserWallet__factory.connect(vaultAddress, provider);
-      return vault.getConfig();
-    },
-    { enabled: !!vaultAddress }
-  );
-
   const {
     data: balance,
     isLoading: balanceLoading,
@@ -64,47 +54,6 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
 
   useRefreshOnFocus(refetchBalance);
   useRefreshOnFocus(refetchTokens);
-
-  const notifications = useMemo(() => {
-    if (!vaultAddress)
-      return [
-        {
-          icon: (
-            <Circle bg="gray.800" size="9">
-              <Icon as={Ionicons} color="white" name="ios-arrow-up" size="5" />
-            </Circle>
-          ),
-          title: "Activate vault",
-          subtitle: "Secure your wallet with your vault.",
-          onPress: () => navigation.navigate("SignUpEmail"),
-        },
-      ];
-
-    if (vaultConfig?._isLocked)
-      return [
-        {
-          icon: (
-            <Circle bg="gray.800" size="9">
-              <Icon
-                as={Ionicons}
-                color="white"
-                name="lock-closed-outline"
-                size="4"
-              />
-            </Circle>
-          ),
-          title: "Vault is locked",
-          subtitle: `Vault will be unlocked on ${format(
-            add(fromUnixTime(vaultConfig.configTimestamp.toNumber()), {
-              days: 2,
-            }),
-            "LLL d, h:mm a"
-          )}`,
-        },
-      ];
-
-    return [];
-  }, [vaultConfig]);
 
   const tokenData = useMemo(() => {
     return tokens.map((token) => ({
@@ -154,8 +103,8 @@ const TokenBalances = ({ walletAddress, onPress }: Props) => {
   }, [balance]);
 
   const items = useMemo(
-    () => [...notifications, ...balanceData, ...tokenData],
-    [balanceData, tokenData, notifications]
+    () => [...balanceData, ...tokenData],
+    [balanceData, tokenData]
   );
 
   return (

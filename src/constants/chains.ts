@@ -1,1 +1,1 @@
-export const DEFAULT_CHAIN = 1;
+export const DEFAULT_CHAIN = 5;

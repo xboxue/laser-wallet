@@ -1,8 +1,13 @@
 import { extendTheme } from "native-base";
 
 const theme = extendTheme({
+  useSystemColorMode: false,
+  initialColorMode: "dark",
   components: {
     Text: {
+      baseStyle: {
+        color: "white",
+      },
       variants: {
         h3: {
           fontSize: "3xl",
@@ -44,15 +49,21 @@ const theme = extendTheme({
         },
       },
     },
+    Input: {
+      baseStyle: {
+        bgColor: "gray.800",
+        color: "white",
+      },
+    },
     Button: {
       baseStyle: {
         borderRadius: "3",
       },
       variants: {
         solid: {
-          bgColor: "gray.900",
+          bgColor: "gray.800",
           _pressed: {
-            bgColor: "gray.700",
+            opacity: 0.8,
           },
         },
         subtle: {

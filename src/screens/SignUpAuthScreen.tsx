@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { setIsBiometricsEnabled } from "../features/auth/authSlice";
 
 const SignUpAuthScreen = ({ route }) => {
-  const { nextScreen = "SignUpBackup" } = route.params || {};
+  const { nextScreen = "SignUpEmail" } = route.params || {};
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { mutate: authenticate, isLoading: isAuthenticating } = useMutation(

@@ -1,20 +1,20 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import { Box, Button, Icon, IconButton } from "native-base";
+import { Box, Button, Icon, IconButton, Stack, Text } from "native-base";
 import { useSelector } from "react-redux";
+import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
 import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
-import WalletSelector from "../components/WalletSelector/WalletSelector";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
 import usePendingTxSubscription from "../hooks/usePendingTxSubscription";
 import useWalletConnectSubscription from "../hooks/useWalletConnectSubscription";
+import formatAddress from "../utils/formatAddress";
 
-const HomeScreen = ({ route }) => {
+const HomeScreen = () => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
-  useWalletConnectSubscription();
-  usePendingTxSubscription();
+  // usePendingTxSubscription();
 
   return (
     <Box flex={1} safeAreaTop pt={6}>
@@ -28,21 +28,32 @@ const HomeScreen = ({ route }) => {
           icon={<Icon as={Ionicons} name="settings-outline" />}
           onPress={() => navigation.navigate("Settings")}
         />
-        <WalletSelector />
-        <IconButton
-          icon={<Icon as={Ionicons} name="qr-code-outline" />}
-          onPress={() => navigation.navigate("QRCodeScan")}
-        />
       </Box>
       <Box px="4" my="8" display="flex" flexDir="column" alignItems="center">
         <WalletBalance walletAddress={walletAddress} />
-        <Button
-          mt="5"
-          onPress={() => navigation.navigate("SendAddress")}
-          alignSelf="stretch"
-        >
-          Send
-        </Button>
+
+        <Box flexDirection="row" alignItems="center">
+          <Text mr="1">{formatAddress(walletAddress)}</Text>
+          <CopyIconButton value={walletAddress} />
+        </Box>
+        <Stack direction="row" space={5}>
+          <Button
+            mt="5"
+            onPress={() => navigation.navigate("SendAddress")}
+            flex={1}
+            rounded="full"
+          >
+            Buy
+          </Button>
+          <Button
+            mt="5"
+            onPress={() => navigation.navigate("SendAddress")}
+            flex={1}
+            rounded="full"
+          >
+            Send
+          </Button>
+        </Stack>
       </Box>
       <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
       <WalletConnectPrompt walletAddress={walletAddress} />

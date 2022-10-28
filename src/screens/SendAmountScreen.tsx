@@ -15,9 +15,11 @@ const SendAmountScreen = ({ route }) => {
     <Box flex="1">
       <Box p="4" flex="1">
         <Text variant="subtitle1">Choose amount</Text>
-        <Text variant="h4" mt="2">
-          {amount}
-        </Text>
+        <Box flexDir="row">
+          <Text variant="h4" mt="2">
+            {amount}
+          </Text>
+        </Box>
         <Text>
           {token.symbol} balance:{" "}
           {formatAmount(token.balance, { decimals: token.decimals })}

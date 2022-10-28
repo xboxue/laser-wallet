@@ -85,7 +85,7 @@ const SendAddressScreen = () => {
           mb="1"
         />
         {renderPreviewItem()}
-        {vaultAddress === walletAddress && (
+        {/* {vaultAddress === walletAddress && (
           <Item
             mt={2}
             onPress={() =>
@@ -120,7 +120,7 @@ const SendAddressScreen = () => {
               </Circle>
             }
           />
-        )}
+        )} */}
       </Box>
     </Box>
   );

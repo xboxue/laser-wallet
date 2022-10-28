@@ -1,4 +1,4 @@
-import { useClerk, useSignIn } from "@clerk/clerk-expo";
+import { useAuth, useClerk, useSignIn, useUser } from "@clerk/clerk-expo";
 import { SignInResource } from "@clerk/types";
 import { ClerkAPIError } from "@clerk/types";
 import { useMutation } from "@tanstack/react-query";
@@ -14,9 +14,12 @@ interface Props {
 const EmailCodeForm = ({ onSubmit, isSubmitting = false }: Props) => {
   const { signIn } = useSignIn();
   const clerk = useClerk();
+  const { isSignedIn, user } = useUser();
 
   const { mutate: verifyCode, isLoading: isVerifying } = useMutation(
     async (code: string) => {
+      if (isSignedIn && user.primaryEmailAddress?.emailAddress)
+        return user.primaryEmailAddress.emailAddress;
       if (!signIn) throw new Error();
       const signInAttempt = await signIn.attemptFirstFactor({
         strategy: "email_code",

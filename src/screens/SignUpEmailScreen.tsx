@@ -80,7 +80,7 @@ const SignUpEmailScreen = () => {
           await signOut();
         } else {
           dispatch(setIsLaserGuardianEnabled(true));
-          return navigation.navigate("SignUpDeployWallet");
+          return navigation.navigate("SignUpBackup");
         }
       }
       signUpWithEmail(values.email);
@@ -94,9 +94,10 @@ const SignUpEmailScreen = () => {
 
   return (
     <Box p="4">
-      <Text variant="subtitle1">Create account</Text>
+      <Text variant="subtitle1">Enter your email</Text>
       <Text mb="4">
-        You'll be able to easily recover your wallet using your account.
+        We use your email for 2-step verification when you withdraw from your
+        account.
       </Text>
       <FormControl isInvalid={formik.touched.email && !!formik.errors.email}>
         <Input

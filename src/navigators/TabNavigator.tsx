@@ -14,12 +14,12 @@ const TabNavigator = () => {
         headerShown: false,
         tabBarStyle: {
           elevation: 0,
-          borderTopColor: theme.colors.gray[200],
+          // borderTopColor: theme.colors.gray[200],
           paddingBottom: 8,
           paddingTop: 8,
           height: 60,
         },
-        tabBarActiveTintColor: theme.colors.gray[800],
+        tabBarActiveTintColor: theme.colors.gray[200],
         tabBarInactiveTintColor: theme.colors.gray[400],
       }}
     >

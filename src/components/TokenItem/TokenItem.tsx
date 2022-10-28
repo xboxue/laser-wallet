@@ -1,3 +1,4 @@
+import { random } from "lodash";
 import { Box, Text } from "native-base";
 import { Pressable } from "react-native";
 
@@ -16,13 +17,11 @@ const TokenItem = ({ onPress, subtitle, title, rightText, icon }: Props) => {
         <Box
           flexDirection="row"
           alignItems="center"
-          px="4"
-          py="2.5"
+          px="2"
+          py="2"
           opacity={pressed ? 0.3 : 1}
-          bgColor="gray.50"
           rounded="xl"
           mx="3"
-          my="1"
         >
           {icon}
           <Box ml="3" flex={1}>

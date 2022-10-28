@@ -3,7 +3,11 @@ import { ChevronLeftIcon } from "native-base";
 import { Platform } from "react-native";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../features/auth/authSlice";
-import { selectWallets } from "../features/wallet/walletSlice";
+import {
+  selectVaultAddress,
+  selectWalletAddress,
+  selectWallets,
+} from "../features/wallet/walletSlice";
 import QRCodeScanScreen from "../screens/QRCodeScanScreen";
 import RecoveryAccountVaultsScreen from "../screens/RecoveryAccountVaultsScreen";
 import RecoveryBackupPasswordScreen from "../screens/RecoveryBackupPasswordScreen";
@@ -46,11 +50,11 @@ import TabNavigator from "./TabNavigator";
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
-  const wallets = useSelector(selectWallets);
+  const walletAddress = useSelector(selectWalletAddress);
   const authenticated = useSelector(selectIsAuthenticated);
 
   const renderScreens = () => {
-    if (!wallets.length)
+    if (!walletAddress)
       return (
         <>
           <Stack.Screen
@@ -71,6 +75,15 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SignUpBackupPassword"
             component={SignUpBackupPasswordScreen}
+          />
+          <Stack.Screen name="SignUpEmail" component={SignUpEmailScreen} />
+          <Stack.Screen
+            name="SignUpVerifyEmail"
+            component={SignUpVerifyEmailScreen}
+          />
+          <Stack.Screen
+            name="SignUpDeployWallet"
+            component={SignUpDeployWalletScreen}
           />
           <Stack.Screen
             name="RecoveryImportSeedPhrase"
@@ -94,10 +107,6 @@ const AppNavigator = () => {
             name="Home"
             component={TabNavigator}
             options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="SignUpDeployWallet"
-            component={SignUpDeployWalletScreen}
           />
           <Stack.Screen name="SendAddress" component={SendAddressScreen} />
           <Stack.Screen name="SendAsset" component={SendAssetScreen} />
@@ -136,11 +145,6 @@ const AppNavigator = () => {
           <Stack.Screen
             name="TransactionDetails"
             component={TransactionDetailsScreen}
-          />
-          <Stack.Screen name="SignUpEmail" component={SignUpEmailScreen} />
-          <Stack.Screen
-            name="SignUpVerifyEmail"
-            component={SignUpVerifyEmailScreen}
           />
           <Stack.Screen
             name="SignUpGuardians"
@@ -204,7 +208,7 @@ const AppNavigator = () => {
       screenOptions={{
         headerBackTitleVisible: false,
         headerTitle: "",
-        headerStyle: { backgroundColor: "white" },
+        // headerStyle: { backgroundColor: "white" },
         headerShadowVisible: false,
       }}
     >

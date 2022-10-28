@@ -52,7 +52,7 @@ const walletSlice = createSlice({
 
 export const selectWallets = (state: RootState) => state.wallet.wallets;
 export const selectWalletAddress = (state: RootState) => {
-  if (!state.wallet.walletAddress) throw new Error("Wallet address not set");
+  // if (!state.wallet.walletAddress) throw new Error("Wallet address not set");
   return state.wallet.walletAddress;
 };
 export const selectVaultAddress = (state: RootState) =>

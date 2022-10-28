@@ -12,7 +12,7 @@ import {
   selectWallets,
 } from "../features/wallet/walletSlice";
 import { getItem } from "../services/keychain";
-import { signTransaction } from "../services/vault";
+import { signTransaction } from "../services/emailGuardian";
 import { getPrivateKey } from "../utils/wallet";
 
 type SendTokenArgs = { to: string; amount: string; token: any };
