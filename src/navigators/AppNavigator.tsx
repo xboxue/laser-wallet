@@ -46,6 +46,7 @@ import StartScreen from "../screens/StartScreen";
 import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 import VaultVerifyEmail from "../screens/VaultVerifyEmail";
 import TabNavigator from "./TabNavigator";
+import * as Device from "expo-device";
 
 const Stack = createNativeStackNavigator();
 
@@ -100,7 +101,7 @@ const AppNavigator = () => {
         </>
       );
 
-    if (authenticated)
+    if (authenticated || !Device.isDevice)
       return (
         <>
           <Stack.Screen
