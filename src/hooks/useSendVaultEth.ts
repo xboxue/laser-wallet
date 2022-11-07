@@ -1,108 +1,112 @@
 import { useAuth } from "@clerk/clerk-expo";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { BigNumber, ethers, providers } from "ethers";
-import { arrayify, parseEther, splitSignature } from "ethers/lib/utils";
-import { orderBy, sortBy } from "lodash";
+import { parseEther } from "ethers/lib/utils";
+import Constants from "expo-constants";
 import { useSelector } from "react-redux";
+import { Safe } from "safe-sdk-wrapper";
 import { useProvider } from "wagmi";
-import { GnosisSafe__factory } from "../abis/types";
 import { selectChainId } from "../features/network/networkSlice";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
 import { signTransaction } from "../services/emailGuardian";
 import { getItem } from "../services/keychain";
-import { estimateGas, sendTransaction } from "../services/safe";
+import {
+  createMultisigTx,
+  estimateGas,
+  getMultsigTxSignatures,
+  sendTransaction,
+} from "../services/safe";
 
 type SendEthArgs = { to: string; amount: string };
 
 const useSendVaultEth = (
-  options?: Omit<
-    UseMutationOptions<any, unknown, SendEthArgs, unknown>,
-    "mutationFn" | "mutationKey"
-  >
+  onSuccess: ({
+    hash,
+    infuraHash,
+  }: {
+    hash: string;
+    infuraHash: string;
+  }) => void
 ) => {
   const chainId = useSelector(selectChainId);
   const walletAddress = useSelector(selectWalletAddress);
   const provider = useProvider({ chainId });
   const { getToken } = useAuth();
 
-  return useMutation(async ({ to, amount }: SendEthArgs) => {
-    const ownerPrivateKey = await getItem("ownerPrivateKey");
-    if (!ownerPrivateKey) throw new Error("No private key");
+  return useMutation(
+    async ({ to, amount }: SendEthArgs) => {
+      const ownerPrivateKey = await getItem("ownerPrivateKey");
+      if (!ownerPrivateKey) throw new Error("No private key");
 
-    const token = await getToken();
-    if (!token) throw new Error("Not authenticated");
+      const token = await getToken();
+      if (!token) throw new Error("Not authenticated");
 
-    const owner = new ethers.Wallet(ownerPrivateKey);
-    const gasData = await estimateGas({
-      safe: walletAddress,
-      to,
-      value: parseEther(amount).toString(),
-      operation: 0,
-      data: "0x",
-    });
+      const owner = new ethers.Wallet(ownerPrivateKey);
+      try {
+        const { safeTxGas } = await estimateGas({
+          safe: walletAddress,
+          to,
+          value: parseEther(amount).toString(),
+          operation: 0,
+          data: "0x",
+        });
 
-    const safe = GnosisSafe__factory.connect(walletAddress, provider);
-    const safeTxHash = await safe.getTransactionHash(
-      to,
-      parseEther(amount),
-      "0x",
-      0,
-      gasData.safeTxGas,
-      gasData.baseGas,
-      gasData.gasPrice,
-      gasData.gasToken,
-      gasData.refundReceiver,
-      gasData.lastUsedNonce === null ? 0 : gasData.lastUsedNonce + 1
-    );
+        const safe = new Safe(provider, owner, walletAddress);
+        const tx = await safe.sendEth(to, amount, {
+          gasLimit: safeTxGas,
+          relayer: Constants.expoConfig.extra.relayerAddress,
+        });
+        await createMultisigTx({
+          ...tx,
+          baseGas: tx.baseGas.toString(),
+          gasPrice: tx.gasPrice.toString(),
+          safeTxGas: tx.safeTxGas.toString(),
+          nonce: tx.nonce.toString(),
+          value: tx.value.toString(),
+          safe: walletAddress,
+          contractTransactionHash: tx.hash,
+          signature: tx.signatures,
+          sender: owner.address,
+        });
 
-    const signature = (await owner.signMessage(arrayify(safeTxHash)))
-      .replace(/1b$/, "1f")
-      .replace(/1c$/, "20");
+        await signTransaction(tx.hash, token);
+        const signatures = await getMultsigTxSignatures(tx.hash);
 
-    const guardianSignature = await signTransaction(
-      {
-        safe: walletAddress,
-        chainId,
-        hash: safeTxHash,
-        to,
-        value: parseEther(amount).toString(),
-        data: "0x",
-        operation: 0,
-        safeTxGas: gasData.safeTxGas,
-        baseGas: gasData.baseGas,
-        gasPrice: gasData.gasPrice,
-        gasToken: gasData.gasToken,
-        refundReceiver: gasData.refundReceiver,
-        nonce: gasData.lastUsedNonce === null ? 0 : gasData.lastUsedNonce + 1,
-      },
-      token
-    );
+        const { relayTransactionHash } = await sendTransaction({
+          ...tx,
+          signatures,
+          sender: walletAddress,
+          chainId,
+        });
 
-    const { ethereumTx } = await sendTransaction({
-      safe: walletAddress,
-      to,
-      value: parseEther(amount).toString(),
-      data: "0x",
-      operation: 0,
-      signatures: sortBy([signature, guardianSignature], (signature) =>
-        parseInt(signature, 16)
-      ).map((signature) => {
-        const { r, s, v } = splitSignature(signature);
+        const infuraProvider = new providers.InfuraProvider(
+          chainId,
+          Constants.manifest?.extra?.infuraApiKey
+        );
+
+        let broadcasts;
+        while (true) {
+          broadcasts = (
+            await infuraProvider.send("relay_getTransactionStatus", [
+              relayTransactionHash,
+            ])
+          ).broadcasts;
+          if (broadcasts) break;
+
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+
         return {
-          r: BigNumber.from(r).toString(),
-          s: BigNumber.from(s).toString(),
-          v,
+          infuraHash: relayTransactionHash,
+          hash: broadcasts[0].ethTxHash,
         };
-      }),
-      safeTxGas: gasData.safeTxGas,
-      dataGas: gasData.dataGas,
-      gasPrice: gasData.gasPrice,
-      gasToken: gasData.gasToken,
-      refundReceiver: gasData.refundReceiver,
-      nonce: gasData.lastUsedNonce === null ? 0 : gasData.lastUsedNonce + 1,
-    });
-    return ethereumTx;
-  }, options);
+      } catch (e) {
+        console.log(e.response);
+        throw e;
+      }
+    },
+    { onSuccess }
+  );
 };
 
 export default useSendVaultEth;

@@ -46,7 +46,8 @@ export default {
     graphqlApi: process.env.GRAPHQL_API,
     clerkApi: process.env.CLERK_API,
     graphqlApi: process.env.GRAPHQL_API,
-    safeRelayApi: process.env.SAFE_RELAY_API,
+    relayerApi: process.env.RELAYER_API,
+    safeTransactionApi: process.env.SAFE_TRANSACTION_API,
   },
   hooks: {
     postPublish: [

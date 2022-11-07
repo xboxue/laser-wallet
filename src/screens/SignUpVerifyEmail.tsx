@@ -83,20 +83,24 @@ const SignUpVerifyEmailScreen = ({ route }) => {
   });
 
   return (
-    <Box p="4">
-      <Text variant="subtitle1">Verify your email</Text>
-      <Text mb="4">
-        Please enter the verification code we sent to your email.
+    <Box p="4" flexDir="column" h="100%">
+      <Text variant="h4" mb="1">
+        Enter your confirmation code
       </Text>
-      <FormControl isInvalid={formik.touched.code && !!formik.errors.code}>
+      <Text fontSize="lg" mb="10">
+        Please enter the confirmation code we sent to your email.
+      </Text>
+      <FormControl
+        isInvalid={formik.touched.code && !!formik.errors.code}
+        flex={1}
+      >
         <Input
-          placeholder="Code"
+          placeholder="Confirmation Code"
           value={formik.values.code}
           onChangeText={formik.handleChange("code")}
           onBlur={formik.handleBlur("code")}
           keyboardType="number-pad"
           autoFocus
-          size="lg"
         />
         <FormControl.ErrorMessage>
           {formik.errors.code}
@@ -106,6 +110,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
         mt="4"
         onPress={formik.handleSubmit}
         isLoading={isVerifyingSignIn || isVerifyingSignUp}
+        _text={{ fontSize: "xl" }}
       >
         Next
       </Button>

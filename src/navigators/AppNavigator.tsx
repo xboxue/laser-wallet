@@ -47,6 +47,8 @@ import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 import VaultVerifyEmail from "../screens/VaultVerifyEmail";
 import TabNavigator from "./TabNavigator";
 import * as Device from "expo-device";
+import SignUpConfirmPasswordScreen from "../screens/SignUpConfirmPasswordScreen";
+import SignUpCreatingWalletScreen from "../screens/SignUpCreatingWalletScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -76,6 +78,14 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SignUpBackupPassword"
             component={SignUpBackupPasswordScreen}
+          />
+          <Stack.Screen
+            name="SignUpConfirmPassword"
+            component={SignUpConfirmPasswordScreen}
+          />
+          <Stack.Screen
+            name="SignUpCreatingWallet"
+            component={SignUpCreatingWalletScreen}
           />
           <Stack.Screen name="SignUpEmail" component={SignUpEmailScreen} />
           <Stack.Screen

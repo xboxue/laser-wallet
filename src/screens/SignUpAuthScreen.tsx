@@ -31,14 +31,17 @@ const SignUpAuthScreen = ({ route }) => {
   );
 
   return (
-    <Box p="4">
-      <Text variant="subtitle1">Protect your wallet</Text>
-      <Text>
+    <Box p="4" flexDir="column" height="100%" pb="5">
+      <Text variant="h4" mb={1}>
+        Enable Face ID
+      </Text>
+      <Text fontSize="lg" flex={1}>
         Add an extra layer of security to prevent someone with your phone from
         accessing your wallet.
       </Text>
       <Button
-        mt="6"
+        size="lg"
+        _text={{ fontSize: "xl" }}
         onPress={async () => authenticate()}
         isLoading={isAuthenticating}
       >

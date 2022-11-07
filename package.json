@@ -99,6 +99,7 @@
     "react-redux": "^8.0.2",
     "readable-stream": "1.0.33",
     "redux-persist": "^6.0.0",
+    "safe-sdk-wrapper": "../safe-sdk-wrapper/",
     "sentry-expo": "^4.2.0",
     "stream-browserify": "^1.0.0",
     "string_decoder": "~0.10.25",

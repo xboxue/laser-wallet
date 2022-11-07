@@ -9,6 +9,10 @@ const theme = extendTheme({
         color: "white",
       },
       variants: {
+        h2: {
+          fontSize: 40,
+          fontWeight: 700,
+        },
         h3: {
           fontSize: "3xl",
           fontWeight: 700,
@@ -50,18 +54,29 @@ const theme = extendTheme({
       },
     },
     Input: {
+      defaultProps: {
+        selectionColor: "#2432FF",
+        p: 0,
+        size: "2xl",
+        borderWidth: 0,
+      },
       baseStyle: {
-        bgColor: "gray.800",
         color: "white",
       },
     },
     Button: {
+      defaultProps: {
+        _text: {
+          fontWeight: 600,
+          fontSize: "md",
+        },
+      },
       baseStyle: {
-        borderRadius: "3",
+        rounded: "full",
       },
       variants: {
         solid: {
-          bgColor: "gray.800",
+          bgColor: "#2432FF",
           _pressed: {
             opacity: 0.8,
           },

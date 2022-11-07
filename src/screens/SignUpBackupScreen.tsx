@@ -26,13 +26,19 @@ const SignUpBackupScreen = ({ route }) => {
   );
 
   return (
-    <Box p="4">
-      <Text variant="subtitle1">Back up your wallet</Text>
-      <Text>
+    <Box p="4" height="100%">
+      <Text variant="h4" mb={1}>
+        Back up your wallet
+      </Text>
+      <Text fontSize="lg" flex={1}>
         Your backup will be used to recover your wallet in case your device is
         lost.
       </Text>
-      <Button mt="6" isLoading={isLoading} onPress={() => signIn()}>
+      <Button
+        _text={{ fontSize: "xl" }}
+        isLoading={isLoading}
+        onPress={() => signIn()}
+      >
         {`Back up on ${Platform.OS === "ios" ? "iCloud" : "Google Drive"}`}
       </Button>
       <EnableICloudPrompt

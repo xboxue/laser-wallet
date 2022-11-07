@@ -14,7 +14,7 @@ const CopyIconButton = ({ value, ...props }: Props) => {
     <IconButton
       size="sm"
       variant="ghost"
-      icon={<Icon as={<Ionicons name="copy-outline" />} />}
+      icon={<Icon as={<Ionicons name="copy-outline" />} color="white" />}
       onPress={() => {
         Clipboard.setStringAsync(value);
         toast.show({

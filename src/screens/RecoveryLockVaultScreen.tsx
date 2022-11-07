@@ -15,7 +15,7 @@ import {
   selectOwnerAddress,
   selectWalletAddress,
 } from "../features/wallet/walletSlice";
-import { signTransaction } from "../services/vault";
+import { signTransaction } from "../services/safe";
 import formatAmount from "../utils/formatAmount";
 import { getPrivateKey } from "../utils/wallet";
 

@@ -1,24 +1,22 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import { Box, Button, Icon, IconButton, Stack, Text } from "native-base";
+import { Box, Button, ScrollView, Stack, Text } from "native-base";
 import { useSelector } from "react-redux";
-import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
+import CollectibleGrid from "../components/CollectibleGrid/CollectibleGrid";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
-import WalletConnectPrompt from "../components/WalletConnectPrompt/WalletConnectPrompt";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
 import usePendingTxSubscription from "../hooks/usePendingTxSubscription";
-import useWalletConnectSubscription from "../hooks/useWalletConnectSubscription";
 import formatAddress from "../utils/formatAddress";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
-  // usePendingTxSubscription();
+
+  usePendingTxSubscription();
 
   return (
-    <Box flex={1} safeAreaTop pt={6}>
-      <Box
+    <ScrollView flex={1} pt="12" px="4">
+      {/* <Box
         flexDir="row"
         justifyContent="space-between"
         px="1"
@@ -28,17 +26,22 @@ const HomeScreen = () => {
           icon={<Icon as={Ionicons} name="settings-outline" />}
           onPress={() => navigation.navigate("Settings")}
         />
-      </Box>
-      <Box px="4" my="8" display="flex" flexDir="column" alignItems="center">
+      </Box> */}
+      <Text variant="h4" fontWeight="500" mb="6">
+        Your assets
+      </Text>
+      <Box p="6" bgColor="#4F5AFF33">
         <WalletBalance walletAddress={walletAddress} />
 
+        <Text color="#FFFFFFB2" mt="2">
+          Address
+        </Text>
         <Box flexDirection="row" alignItems="center">
-          <Text mr="1">{formatAddress(walletAddress)}</Text>
-          <CopyIconButton value={walletAddress} />
+          <Text>{formatAddress(walletAddress)}</Text>
+          {/* <CopyIconButton value={walletAddress} /> */}
         </Box>
-        <Stack direction="row" space={5}>
+        <Stack direction="row" space={2} mt="4">
           <Button
-            mt="5"
             onPress={() => navigation.navigate("SendAddress")}
             flex={1}
             rounded="full"
@@ -46,7 +49,6 @@ const HomeScreen = () => {
             Buy
           </Button>
           <Button
-            mt="5"
             onPress={() => navigation.navigate("SendAddress")}
             flex={1}
             rounded="full"
@@ -55,9 +57,19 @@ const HomeScreen = () => {
           </Button>
         </Stack>
       </Box>
-      <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
-      <WalletConnectPrompt walletAddress={walletAddress} />
-    </Box>
+      <Box flexDir="row" justifyContent="space-between" mt="6" mb="1">
+        <Text variant="subtitle1">Coins</Text>
+        <Text>View all</Text>
+      </Box>
+      <TokenBalances walletAddress={walletAddress} />
+      <Box flexDir="row" justifyContent="space-between" mt="6" mb="1">
+        <Text variant="subtitle1">Collectibles</Text>
+        <Text>View all</Text>
+      </Box>
+      <Box mx="-1" flex="1">
+        <CollectibleGrid walletAddress={walletAddress} />
+      </Box>
+    </ScrollView>
   );
 };
 

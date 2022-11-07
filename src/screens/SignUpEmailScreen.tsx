@@ -93,29 +93,33 @@ const SignUpEmailScreen = () => {
   });
 
   return (
-    <Box p="4">
-      <Text variant="subtitle1">Enter your email</Text>
-      <Text mb="4">
+    <Box p="4" flexDir="column" height="100%">
+      <Text variant="h4" mb="1">
+        Enter your email
+      </Text>
+      <Text fontSize="lg" mb="10">
         We use your email for 2-step verification when you withdraw from your
         account.
       </Text>
-      <FormControl isInvalid={formik.touched.email && !!formik.errors.email}>
+      <FormControl
+        isInvalid={formik.touched.email && !!formik.errors.email}
+        flex={1}
+      >
         <Input
-          placeholder="Email"
+          placeholder="Email Address"
           value={formik.values.email}
           onChangeText={formik.handleChange("email")}
           onBlur={formik.handleBlur("email")}
           keyboardType="email-address"
           autoCapitalize="none"
           autoFocus
-          size="lg"
         />
         <FormControl.ErrorMessage>
           {formik.errors.email}
         </FormControl.ErrorMessage>
       </FormControl>
       <Button
-        mt="4"
+        _text={{ fontSize: "xl" }}
         onPress={formik.handleSubmit}
         isLoading={isSigningUp || isSigningIn}
       >

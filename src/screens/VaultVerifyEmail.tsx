@@ -14,18 +14,16 @@ const VaultVerifyEmail = ({ route }) => {
   const dispatch = useDispatch();
   const { amount, address: to, token } = route.params;
 
-  const onSend = (transaction: providers.TransactionResponse) => {
+  const onSend = ({ hash, infuraHash }) => {
     toast.show({
       render: () => <ToastAlert status="success" title="Transaction sent" />,
       duration: 2000,
     });
-    dispatch(addPendingTransaction(transaction));
+    dispatch(addPendingTransaction({ hash, infuraHash }));
     navigation.navigate("Activity");
   };
 
-  const { mutate: sendEth, isLoading: isSendingEth } = useSendVaultEth({
-    onSuccess: onSend,
-  });
+  const { mutate: sendEth, isLoading: isSendingEth } = useSendVaultEth(onSend);
   const { mutate: sendToken, isLoading: isSendingToken } = useSendVaultToken({
     onSuccess: onSend,
   });

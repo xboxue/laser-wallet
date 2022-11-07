@@ -1,5 +1,8 @@
 import axios from "axios";
+import { getAddress } from "ethers/lib/utils";
 import Constants from "expo-constants";
+import { sortBy } from "lodash";
+import { SendTxOpts } from "safe-sdk-wrapper/dist/Safe";
 
 type GetSafeCreationDataArgs = {
   deployer: string;
@@ -15,26 +18,24 @@ type GetSafeCreationDataArgs = {
   setupData: string;
 };
 
-export const getSafeCreationData = async (
+export const createSafe = async (
   owners: string[],
-  salt: string,
-  threshold: number
+  saltNonce: string,
+  threshold: number,
+  gasLimit: number,
+  chainId: number
 ) => {
-  const { data } = await axios.post<GetSafeCreationDataArgs>(
-    `${Constants.expoConfig.extra.safeRelayApi}/api/v3/safes/`,
+  const { data } = await axios.post<{ relayTransactionHash: string }>(
+    `${Constants.expoConfig.extra.relayerApi}/wallets/`,
     {
       owners,
-      saltNonce: salt,
+      saltNonce,
       threshold,
+      gasLimit,
+      chainId,
     }
   );
   return data;
-};
-
-export const createSafe = async (address: string) => {
-  await axios.put(
-    `${Constants.expoConfig.extra.safeRelayApi}/api/v2/safes/${address}/funded/`
-  );
 };
 
 export const getSafeCreationTx = async (address: string) => {
@@ -44,18 +45,20 @@ export const getSafeCreationTx = async (address: string) => {
   return data;
 };
 
-type SendTransactionArgs = {
+type CreateMultisigTxArgs = {
   safe: string;
   to: string;
   value: string;
   data: string;
   operation: 0;
-  signatures: any[];
+  signature: string;
   safeTxGas: string;
-  dataGas: string;
+  refundReceiver: string;
   gasPrice: string;
   nonce: string;
-  gasToken: string;
+  gasToken?: string;
+  contractTransactionHash: string;
+  sender: string;
 };
 
 export type Transaction = {
@@ -78,6 +81,28 @@ export type Transaction = {
   value: string;
 };
 
+export const getMultsigTxSignatures = async (hash: string) => {
+  const { data } = await axios.get<{
+    results: { owner: string; signature: string }[];
+  }>(
+    `${Constants.expoConfig.extra.safeTransactionApi}/api/v1/multisig-transactions/${hash}/confirmations`
+  );
+  return (
+    "0x" +
+    sortBy(data.results, (result) => result.owner.toLowerCase())
+      .map(({ signature }) => signature.replace("0x", ""))
+      .join("")
+  );
+};
+
+export const confirmMultisigTx = async (hash: string, signature: string) => {
+  const { data } = await axios.post(
+    `${Constants.expoConfig.extra.safeTransactionApi}/api/v1/multisig-transactions/${hash}/confirmations`,
+    { signature }
+  );
+  return data;
+};
+
 type SendTransactionResponse = {
   to: string;
   ethereumTx: Transaction;
@@ -94,9 +119,11 @@ type SendTransactionResponse = {
   safeTxHash: string;
 };
 
-export const sendTransaction = async (options: SendTransactionArgs) => {
+export const createMultisigTx = async (options: CreateMultisigTxArgs) => {
   const { data } = await axios.post<SendTransactionResponse>(
-    `${Constants.expoConfig.extra.safeRelayApi}/api/v1/safes/${options.safe}/transactions/`,
+    `${Constants.expoConfig.extra.safeTransactionApi}/api/v1/safes/${getAddress(
+      options.safe
+    )}/multisig-transactions/`,
     options
   );
   return data;
@@ -113,19 +140,25 @@ type EstimateGasArgs = {
 
 type EstimateGasResponse = {
   safeTxGas: number;
-  baseGas: number;
-  dataGas: number;
-  operationalGas: number;
-  gasPrice: number;
-  lastUsedNonce: number;
-  gasToken: string;
-  refundReceiver: string;
 };
 
 export const estimateGas = async (options: EstimateGasArgs) => {
   const { data } = await axios.post<EstimateGasResponse>(
-    `${Constants.expoConfig.extra.safeRelayApi}/api/v2/safes/${options.safe}/transactions/estimate/`,
+    `${Constants.expoConfig.extra.safeTransactionApi}/api/v1/safes/${getAddress(
+      options.safe
+    )}/multisig-transactions/estimations/`,
     options
+  );
+  return data;
+};
+
+export const sendTransaction = async (
+  options: SendTxOpts & { sender: string; chainId: number }
+) => {
+  const { chainId, sender, ...tx } = options;
+  const { data } = await axios.post<{ relayTransactionHash: string }>(
+    `${Constants.expoConfig.extra.relayerApi}/transactions/`,
+    { transaction: tx, chainId, sender }
   );
   return data;
 };

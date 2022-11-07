@@ -32,11 +32,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const pendingTransactions = useSelector(selectPendingTransactions);
-  const pendingTxs = useMemo(
-    () => pendingTransactions.reverse(),
-    [pendingTransactions]
-  );
+  const pendingTxs = useSelector(selectPendingTransactions);
 
   const {
     data,
