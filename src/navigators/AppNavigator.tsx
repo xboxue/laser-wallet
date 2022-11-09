@@ -119,10 +119,26 @@ const AppNavigator = () => {
             component={TabNavigator}
             options={{ headerShown: false }}
           />
-          <Stack.Screen name="SendAddress" component={SendAddressScreen} />
-          <Stack.Screen name="SendAsset" component={SendAssetScreen} />
-          <Stack.Screen name="SendAmount" component={SendAmountScreen} />
-          <Stack.Screen name="SendConfirm" component={SendConfirmScreen} />
+          <Stack.Screen
+            name="Choose Recipient"
+            component={SendAddressScreen}
+            options={{ headerTitle: undefined }}
+          />
+          <Stack.Screen
+            name="Send Token"
+            component={SendAssetScreen}
+            options={{ headerTitle: undefined }}
+          />
+          <Stack.Screen
+            name="Enter Amount"
+            component={SendAmountScreen}
+            options={{ headerTitle: undefined }}
+          />
+          <Stack.Screen
+            name="Preview"
+            component={SendConfirmScreen}
+            options={{ headerTitle: undefined }}
+          />
           <Stack.Screen
             name="QRCodeScan"
             component={QRCodeScanScreen}

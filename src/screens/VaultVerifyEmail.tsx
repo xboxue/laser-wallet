@@ -29,10 +29,12 @@ const VaultVerifyEmail = ({ route }) => {
   });
 
   return (
-    <Box p="4">
-      <Text variant="subtitle1">Confirm transaction</Text>
-      <Text mb="4">
-        Please enter the verification code we sent to your email.
+    <Box p="4" flex="1">
+      <Text variant="h4" mb="1">
+        Enter your confirmation code
+      </Text>
+      <Text fontSize="lg" mb="10">
+        Please enter the confirmation code we sent to your email.
       </Text>
       <EmailCodeForm
         onSubmit={() => {

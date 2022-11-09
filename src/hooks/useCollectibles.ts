@@ -1,16 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import Constants from "expo-constants";
 
 const useCollectibles = (walletAddress: string) => {
   return useQuery(
     ["collectibles", walletAddress],
     async () => {
-      const { data } = await axios.get("https://api.opensea.io/api/v1/assets", {
-        params: { owner: "0x869Ce3c7415F06Db4ff6d599d629C1a9C7C8a820" },
-        headers: {
-          "X-API-KEY": "8e7b1de17b664412ad9b6a15be4196c8",
-        },
-      });
+      const { data } = await axios.get(
+        "https://testnets-api.opensea.io/api/v1/assets",
+        {
+          params: { owner: walletAddress },
+          // headers: {
+          //   "X-API-KEY": Constants.expoConfig.extra.openseaApiKey,
+          // },
+        }
+      );
       return data;
     },
     {

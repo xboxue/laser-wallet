@@ -16,6 +16,7 @@ import {
   selectVaultAddress,
   selectWalletAddress,
 } from "../features/wallet/walletSlice";
+import useExchangeRates from "../hooks/useExchangeRates";
 import useSendEth from "../hooks/useSendEth";
 import useSendToken from "../hooks/useSendToken";
 import formatAddress from "../utils/formatAddress";
@@ -33,6 +34,7 @@ const SendConfirmScreen = ({ route }) => {
   const email = useSelector(selectEmail);
   const { isSignedIn } = useAuth();
   const clerk = useClerk();
+  const { data: exchangeRates } = useExchangeRates();
 
   const onSuccess = (transaction: providers.TransactionResponse) => {
     toast.show({
@@ -119,49 +121,44 @@ const SendConfirmScreen = ({ route }) => {
       .add(feeData.maxPriorityFeePerGas)
       .mul(gasEstimate);
 
-    return (
-      <Text variant="subtitle2">
-        {formatAmount(gasFee, { precision: 6 })} ETH
-      </Text>
-    );
+    return <Text>{formatAmount(gasFee, { precision: 6 })} ETH</Text>;
   };
 
   return (
-    <Box p="4">
-      <Text variant="subtitle1" pb="2">
-        Review
-      </Text>
-      <Stack space="4">
+    <Box px="4" flex="1">
+      <Box alignItems="center" py="8">
+        <Text variant="h2" mt="2">
+          {amount} {token.symbol}
+        </Text>
+        <Text color="#FFFFFFB2" fontSize="lg">
+          ${(parseFloat(amount) * exchangeRates.USD).toFixed(2)}
+        </Text>
+      </Box>
+      <Stack space="4" flex="1">
         <Box flexDirection="row" justifyContent="space-between">
-          <Text variant="subtitle2">Amount</Text>
-          <Text variant="subtitle2">
-            {amount} {token.symbol}
-          </Text>
+          <Text variant="subtitle1">To</Text>
+          <Text>{ensName || formatAddress(to)}</Text>
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
-          <Text variant="subtitle2">To</Text>
-          <Text variant="subtitle2">{ensName || formatAddress(to)}</Text>
-        </Box>
-        <Box flexDirection="row" justifyContent="space-between">
-          <Text variant="subtitle2">Network fee (estimate)</Text>
+          <Text variant="subtitle1">Network fee (estimate)</Text>
           {renderGasFee()}
         </Box>
-        <Button
-          onPress={async () => {
-            // if (walletAddress === vaultAddress) {
-            sendEmailCode();
-            return navigation.navigate("VaultVerifyEmail", route.params);
-            // }
-
-            // if (token.isToken) sendToken({ to, amount, token });
-            // else sendEth({ to, amount });
-          }}
-          isLoading={isSendingEth || isSendingToken || isSendingEmailCode}
-          isDisabled={gasEstimateLoading}
-        >
-          Confirm
-        </Button>
       </Stack>
+      <Button
+        onPress={async () => {
+          // if (walletAddress === vaultAddress) {
+          sendEmailCode();
+          return navigation.navigate("VaultVerifyEmail", route.params);
+          // }
+
+          // if (token.isToken) sendToken({ to, amount, token });
+          // else sendEth({ to, amount });
+        }}
+        isLoading={isSendingEth || isSendingToken || isSendingEmailCode}
+        isDisabled={gasEstimateLoading}
+      >
+        Confirm
+      </Button>
     </Box>
   );
 };

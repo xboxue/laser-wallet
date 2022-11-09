@@ -4,47 +4,6 @@ import Constants from "expo-constants";
 import { sortBy } from "lodash";
 import { SendTxOpts } from "safe-sdk-wrapper/dist/Safe";
 
-type GetSafeCreationDataArgs = {
-  deployer: string;
-  funder: string;
-  gasEstimated: string; // it’s what the service gets as refund
-  gasPriceEstimated: string; // it’s what the service gets as refund
-  masterCopy: string;
-  payment: string; // it’s what the service gets as refund
-  paymentReceiver: string; // if NULL_ADDRESS (0x00...000) receiver would be the address sending the transaction
-  paymentToken: string; // if no gasToken was specified in the request this will be address(0) for ETH
-  proxyFactory: string;
-  safe: string;
-  setupData: string;
-};
-
-export const createSafe = async (
-  owners: string[],
-  saltNonce: string,
-  threshold: number,
-  gasLimit: number,
-  chainId: number
-) => {
-  const { data } = await axios.post<{ relayTransactionHash: string }>(
-    `${Constants.expoConfig.extra.relayerApi}/wallets/`,
-    {
-      owners,
-      saltNonce,
-      threshold,
-      gasLimit,
-      chainId,
-    }
-  );
-  return data;
-};
-
-export const getSafeCreationTx = async (address: string) => {
-  const { data } = await axios.get<{ blockNumber: string; txHash: string }>(
-    `${Constants.expoConfig.extra.safeRelayApi}/api/v2/safes/${address}/funded/`
-  );
-  return data;
-};
-
 type CreateMultisigTxArgs = {
   safe: string;
   to: string;
@@ -81,6 +40,42 @@ export type Transaction = {
   value: string;
 };
 
+type SendTransactionResponse = {
+  to: string;
+  ethereumTx: Transaction;
+  value: string;
+  data: string;
+  timestamp: string;
+  operation: 0;
+  safeTxGas: string;
+  dataGas: string;
+  gasPrice: string;
+  nonce: string;
+  gasToken: string;
+  refundReceiver: string;
+  safeTxHash: string;
+};
+
+export const createSafe = async (
+  owners: string[],
+  saltNonce: string,
+  threshold: number,
+  gasLimit: number,
+  chainId: number
+) => {
+  const { data } = await axios.post<{ relayTransactionHash: string }>(
+    `${Constants.expoConfig.extra.relayerApi}/wallets/`,
+    {
+      owners,
+      saltNonce,
+      threshold,
+      gasLimit,
+      chainId,
+    }
+  );
+  return data;
+};
+
 export const getMultsigTxSignatures = async (hash: string) => {
   const { data } = await axios.get<{
     results: { owner: string; signature: string }[];
@@ -101,22 +96,6 @@ export const confirmMultisigTx = async (hash: string, signature: string) => {
     { signature }
   );
   return data;
-};
-
-type SendTransactionResponse = {
-  to: string;
-  ethereumTx: Transaction;
-  value: string;
-  data: string;
-  timestamp: string;
-  operation: 0;
-  safeTxGas: string;
-  dataGas: string;
-  gasPrice: string;
-  nonce: string;
-  gasToken: string;
-  refundReceiver: string;
-  safeTxHash: string;
 };
 
 export const createMultisigTx = async (options: CreateMultisigTxArgs) => {
@@ -159,6 +138,24 @@ export const sendTransaction = async (
   const { data } = await axios.post<{ relayTransactionHash: string }>(
     `${Constants.expoConfig.extra.relayerApi}/transactions/`,
     { transaction: tx, chainId, sender }
+  );
+  return data;
+};
+
+export const getTransfers = async (safe: string) => {
+  const { data } = await axios.get(
+    `${Constants.expoConfig.extra.safeTransactionApi}/api/v1/safes/${getAddress(
+      safe
+    )}/transfers/`
+  );
+  return data;
+};
+
+export const getBalances = async (safe: string) => {
+  const { data } = await axios.get(
+    `${Constants.expoConfig.extra.safeTransactionApi}/api/v1/safes/${getAddress(
+      safe
+    )}/balances/usd/`
   );
   return data;
 };

@@ -54,20 +54,19 @@ const EmailCodeForm = ({ onSubmit, isSubmitting = false }: Props) => {
     <>
       <FormControl isInvalid={formik.touched.code && !!formik.errors.code}>
         <Input
-          placeholder="Code"
+          placeholder="Confirmation Code"
           value={formik.values.code}
           onChangeText={formik.handleChange("code")}
           onBlur={formik.handleBlur("code")}
           keyboardType="number-pad"
           autoFocus
-          size="lg"
         />
         <FormControl.ErrorMessage>
           {formik.errors.code}
         </FormControl.ErrorMessage>
       </FormControl>
       <Button
-        mt="4"
+        mt="auto"
         onPress={() => formik.handleSubmit()}
         isLoading={isVerifying || isSubmitting}
       >

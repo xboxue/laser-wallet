@@ -6,7 +6,7 @@ const useExchangeRates = () => {
     ["exchangeRates"],
     async () => {
       const { data } = await axios.get(
-        "https://api.coinbase.com/v2/exchange-rates"
+        "https://api.coinbase.com/v2/exchange-rates?currency=ETH"
       );
       return data;
     },

@@ -28,7 +28,7 @@ const WalletBalance = ({ walletAddress }: Props) => {
 
   return (
     <Text variant="h2" fontWeight="600">
-      ${(parseFloat(formatEther(balance.value)) / exchangeRates.ETH).toFixed(2)}
+      ${(parseFloat(formatEther(balance.value)) * exchangeRates.USD).toFixed(2)}
     </Text>
   );
 };

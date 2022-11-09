@@ -82,9 +82,12 @@ const theme = extendTheme({
           },
         },
         subtle: {
-          bgColor: "gray.100",
+          bgColor: "gray.800",
+          _text: {
+            color: "white",
+          },
           _pressed: {
-            bgColor: "gray.200",
+            bgColor: "gray.700",
           },
         },
       },
