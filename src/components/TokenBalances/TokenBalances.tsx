@@ -36,24 +36,26 @@ const TokenBalances = ({ walletAddress, onPress, limit }: Props) => {
       <TokenItem
         icon={
           <Image
-            source={item.token?.logoUri ? { uri: item.token.logoUri } : ethIcon}
+            source={{
+              uri:
+                item.symbolLogos?.[0].URI ||
+                "https://c.neevacdn.net/image/upload/tokenLogos/ethereum/ethereum.png",
+            }}
             fallbackSource={ethIcon}
             size="9"
             alt="Token icon"
+            rounded="full"
           />
         }
-        title={item.token?.name || "Ethereum"}
-        subtitle={`${formatAmount(item.balance, {
-          decimals: item.token?.decimals,
-        })} ${item.token?.symbol || "ETH"}`}
-        rightText={`$${parseFloat(item.fiatBalance).toFixed(2)}`}
+        title={item.name}
+        subtitle={`${item.pretty} ${item.symbol}`}
+        rightText={item.fiat ? `$${item.fiat[0].pretty}` : undefined}
         onPress={() =>
           onPress({
-            address: item.token?.address,
-            balance: item.balance,
-            symbol: item.token?.symbol || "ETH",
-            decimals: item.token?.decimals,
-            isToken: !!item.token,
+            address: item.contractAddress,
+            balance: item.value,
+            symbol: item.symbol,
+            decimals: item.decimals,
           })
         }
       />

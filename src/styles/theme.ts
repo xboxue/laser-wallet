@@ -80,6 +80,16 @@ const theme = extendTheme({
           _pressed: {
             opacity: 0.8,
           },
+          _disabled: {
+            opacity: 1,
+            _text: {
+              opacity: 0.4,
+            },
+          },
+          _loading: {
+            opacity: 0.8,
+            h: 47.2,
+          },
         },
         subtle: {
           bgColor: "gray.800",

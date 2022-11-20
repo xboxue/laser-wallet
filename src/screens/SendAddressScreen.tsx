@@ -44,7 +44,7 @@ const SendAddressScreen = () => {
   const navigation = useNavigation();
   const [value, setValue] = useState("");
   const chainId = useSelector(selectChainId);
-  const provider = useProvider({ chainId: 1 });
+  const provider = useProvider({ chainId });
 
   // const { data: ensAddress } = useQuery(["ensAddres", value, chainId], () => {
   //   return provider.resolveName(value);

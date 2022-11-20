@@ -1,171 +1,139 @@
+import Feather from "@expo/vector-icons/Feather";
+import { SafeAccountConfig, SafeFactory } from "@gnosis.pm/safe-core-sdk";
+import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Wallet } from "ethers";
-import { LaserFactory } from "laser-sdk";
-import { estimateDeployGas } from "laser-sdk/dist/utils";
-import { random } from "lodash";
-import { Box, Button, Skeleton, Text, useToast } from "native-base";
+import { BigNumber, ethers, utils } from "ethers";
+import { formatEther } from "ethers/lib/utils";
+import * as Clipboard from "expo-clipboard";
+import Constants from "expo-constants";
+import { Box, Icon, Skeleton, Text, useToast } from "native-base";
+import { Pressable } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useBalance, useFeeData, useProvider } from "wagmi";
+import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
 import ToastAlert from "../components/ToastAlert/ToastAlert";
-import WalletSelector from "../components/WalletSelector/WalletSelector";
 import { selectGuardianAddresses } from "../features/guardians/guardiansSlice";
 import { selectChainId } from "../features/network/networkSlice";
-import { addPendingTransaction } from "../features/transactions/transactionsSlice";
 import {
+  selectOwnerAddress,
   selectRecoveryOwnerAddress,
+  selectSafeConfig,
+  selectTrustedOwnerAddress,
   selectWalletAddress,
 } from "../features/wallet/walletSlice";
 import { useCreateVaultMutation } from "../graphql/types";
-import { getItem } from "../services/keychain";
+import useExchangeRates from "../hooks/useExchangeRates";
+import { createSafe } from "../services/relayer";
+import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
-import { getPrivateKey } from "../utils/wallet";
+import waitForTransaction from "../utils/waitForTransaction";
 
 const SignUpDeployWalletScreen = () => {
   const chainId = useSelector(selectChainId);
-  const provider = useProvider({ chainId });
-  const navigation = useNavigation();
-  const recoveryOwnerAddress = useSelector(selectRecoveryOwnerAddress);
-  const dispatch = useDispatch();
-
+  const safeConfig = useSelector(selectSafeConfig);
   const walletAddress = useSelector(selectWalletAddress);
-  const toast = useToast();
-  const guardianAddresses = useSelector(selectGuardianAddresses);
 
-  const { data: balance, isLoading: balanceLoading } = useBalance({
+  const {
+    data,
+    isLoading: isCreating,
+    mutate,
+  } = useMutation(
+    async () => {
+      const { relayTransactionHash: hash } = await createSafe({
+        owners: safeConfig?.safeAccountConfig.owners,
+        threshold: safeConfig?.safeAccountConfig.threshold,
+        payment: safeConfig?.safeAccountConfig.payment,
+        saltNonce: safeConfig?.safeDeploymentConfig?.saltNonce,
+        chainId,
+        safeAddress: walletAddress,
+      });
+
+      return waitForTransaction({ hash, chainId });
+    },
+    {
+      onSuccess: () => {
+        toast.show({
+          render: () => (
+            <ToastAlert status="success" title="Wallet activated" />
+          ),
+          duration: 2000,
+        });
+      },
+    }
+  );
+
+  const { data: balance } = useBalance({
     addressOrName: walletAddress,
     chainId,
     watch: true,
   });
 
+  const { data: exchangeRates } = useExchangeRates();
+
+  const toast = useToast();
+
   const [saveVault] = useCreateVaultMutation();
 
-  const { mutate: createVault, isLoading: isCreatingVault } = useMutation(
-    async () => {
-      const privateKey = await getPrivateKey(walletAddress);
-      const ownerPrivateKey = await getItem("ownerPrivateKey");
-      if (!ownerPrivateKey) throw new Error("No owner private key");
-
-      const owner = new Wallet(ownerPrivateKey);
-      const salt = random(0, 1000000);
-
-      const factory = new LaserFactory(provider, owner);
-      const vaultAddress = await factory.preComputeAddress(
-        owner.address,
-        [recoveryOwnerAddress],
-        guardianAddresses,
-        salt
-      );
-      await saveVault({
-        variables: { input: { address: vaultAddress, chain_id: chainId } },
-      });
-
-      return factory.createWallet(
-        owner.address,
-        [recoveryOwnerAddress],
-        guardianAddresses,
-        salt,
-        new Wallet(privateKey)
-      );
-    },
-    {
-      onSuccess: (transaction) => {
-        toast.show({
-          render: () => (
-            <ToastAlert status="success" title="Transaction sent" />
-          ),
-          duration: 2000,
-        });
-        dispatch(
-          addPendingTransaction({ ...transaction, isDeployVault: true })
-        );
-        navigation.navigate("Activity");
-      },
-    }
-  );
-
-  const { data: gasEstimate, isLoading: gasEstimateLoading } = useQuery(
-    ["gasEstimate", guardianAddresses],
-    () => estimateDeployGas(guardianAddresses, [recoveryOwnerAddress])
-  );
-
-  const { data: baseFeePerGas, isLoading: baseFeePerGasLoading } = useQuery(
-    ["baseFeePerGas"],
-    async () => {
-      const block = await provider.getBlock("latest");
-      return block.baseFeePerGas;
-    },
-    { refetchInterval: 5000 }
-  );
-  const { data: feeData, isLoading: feeDataLoading } = useFeeData();
-
-  const renderBalance = () => {
-    if (balanceLoading || !balance) return <Skeleton w="16" h="6" />;
-
-    return (
-      <Text variant="subtitle1">
-        {formatAmount(balance.value)} {balance.symbol}
-      </Text>
-    );
-  };
-
   const renderDeployFee = () => {
-    if (!feeData?.maxPriorityFeePerGas || !baseFeePerGas || !gasEstimate) {
-      return <Skeleton w="16" h="5" />;
-    }
-
-    const gasFee = baseFeePerGas
-      .add(feeData.maxPriorityFeePerGas)
-      .mul(gasEstimate);
+    if (!exchangeRates || !safeConfig) return <Skeleton w="16" h="5" />;
 
     return (
-      <Text variant="subtitle1">
-        {formatAmount(gasFee, { precision: 6 })} ETH
-      </Text>
+      <>
+        <Text variant="subtitle1">
+          {formatAmount(safeConfig.safeAccountConfig.payment, { precision: 6 })}{" "}
+          ETH
+        </Text>
+        <Text variant="subtitle1">
+          $
+          {(
+            parseFloat(formatEther(safeConfig.safeAccountConfig.payment)) *
+            exchangeRates.USD
+          ).toFixed(2)}
+        </Text>
+      </>
     );
   };
 
   return (
-    <Box p="4">
-      <Text variant="subtitle1">Activate vault</Text>
-      <Text mb="4">
-        There is a one-time network fee to activate your vault.
-      </Text>
-      <WalletSelector />
-      <Text variant="subtitle2" mt="2">
-        Balance:
-      </Text>
-      {renderBalance()}
-      <Text variant="subtitle2" mt="2">
-        Network fee:
+    <SignUpLayout
+      title="Your first deposit"
+      subtitle="There is a network fee to activate your wallet. This fee will be taken from your first deposit."
+      onNext={mutate}
+      isLoading={isCreating}
+    >
+      <Text variant="h6">Wallet address</Text>
+      <Pressable
+        onPress={() => {
+          Clipboard.setStringAsync(walletAddress);
+          toast.show({
+            render: () => (
+              <ToastAlert status="success" title="Copied to clipboard" />
+            ),
+            duration: 2000,
+          });
+        }}
+      >
+        <Box flexDirection="row" alignItems="center">
+          <Text variant="subtitle1">{formatAddress(walletAddress)}</Text>
+          <Icon as={<Feather name="copy" />} color="white" ml="1" />
+        </Box>
+      </Pressable>
+      <Text variant="h6" mt="4">
+        Network fee
       </Text>
       {renderDeployFee()}
-      <Button
-        mt="4"
-        isDisabled={
-          !baseFeePerGas ||
-          !feeData?.maxPriorityFeePerGas ||
-          !gasEstimate ||
-          !balance ||
-          baseFeePerGas
-            .add(feeData.maxPriorityFeePerGas)
-            .mul(gasEstimate)
-            .gt(balance.value)
-        }
-        onPress={() => createVault()}
-        isLoading={isCreatingVault}
-      >
-        Activate
-      </Button>
-      <Button
-        variant="subtle"
-        mt="2"
-        onPress={() => navigation.navigate("Home")}
-        isDisabled={isCreatingVault}
-      >
-        Activate later
-      </Button>
-    </Box>
+      <Text variant="h6" mt="4">
+        Balance:
+      </Text>
+      <Text variant="subtitle1">
+        {balance ? (
+          `${balance?.formatted} ${balance?.symbol}`
+        ) : (
+          <Skeleton w="16" h="5" />
+        )}
+      </Text>
+    </SignUpLayout>
   );
 };
 

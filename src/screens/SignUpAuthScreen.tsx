@@ -6,6 +6,7 @@ import { Platform } from "react-native";
 import { useDispatch } from "react-redux";
 import { setIsBiometricsEnabled } from "../features/auth/authSlice";
 import * as Device from "expo-device";
+import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
 
 const SignUpAuthScreen = ({ route }) => {
   const { nextScreen = "SignUpEmail" } = route.params || {};
@@ -31,30 +32,13 @@ const SignUpAuthScreen = ({ route }) => {
   );
 
   return (
-    <Box p="4" flexDir="column" height="100%" pb="5">
-      <Text variant="h4" mb={1}>
-        Enable Face ID
-      </Text>
-      <Text fontSize="lg" flex={1}>
-        Add an extra layer of security to prevent someone with your phone from
-        accessing your wallet.
-      </Text>
-      <Button
-        size="lg"
-        _text={{ fontSize: "xl" }}
-        onPress={async () => authenticate()}
-        isLoading={isAuthenticating}
-      >
-        {Platform.OS === "ios" ? "Use Face ID" : "Use fingerprint"}
-      </Button>
-      {/* <Button
-        mt="2"
-        variant="subtle"
-        onPress={() => navigation.navigate("SignUpPasscode")}
-      >
-        Create passcode
-      </Button> */}
-    </Box>
+    <SignUpLayout
+      title="Enable Face ID"
+      subtitle="Add an extra layer of security to prevent someone with your phone from accessing your wallet."
+      nextText={Platform.OS === "ios" ? "Use Face ID" : "Use fingerprint"}
+      onNext={authenticate}
+      isLoading={isAuthenticating}
+    />
   );
 };
 

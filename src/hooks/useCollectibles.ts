@@ -1,25 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import Constants from "expo-constants";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { selectChainId } from "../features/network/networkSlice";
+import { getNFTs } from "../services/nxyz";
 
 const useCollectibles = (walletAddress: string) => {
-  return useQuery(
+  const chainId = useSelector(selectChainId);
+
+  return useInfiniteQuery(
     ["collectibles", walletAddress],
-    async () => {
-      const { data } = await axios.get(
-        "https://testnets-api.opensea.io/api/v1/assets",
-        {
-          params: { owner: walletAddress },
-          // headers: {
-          //   "X-API-KEY": Constants.expoConfig.extra.openseaApiKey,
-          // },
-        }
-      );
-      return data;
+    async ({ pageParam }) => {
+      const data = await getNFTs(walletAddress, chainId, pageParam);
+      return { ...data, results: data.results.filter((nft) => !nft.isSpam) };
     },
-    {
-      select: (data) => data.assets.filter((asset) => asset.image_url),
-    }
+    { getNextPageParam: (lastPage) => lastPage.nextCursor }
   );
 };
 

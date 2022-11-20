@@ -3,9 +3,12 @@ import { ClerkAPIError, EmailCodeFactor } from "@clerk/types";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { useFormik } from "formik";
-import { Box, Button, FormControl, Input, Text } from "native-base";
+import { Input } from "native-base";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
+import ErrorDialog from "../components/ErrorDialog/ErrorDialog";
+import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
 import { setIsLaserGuardianEnabled } from "../features/guardians/guardiansSlice";
 
 const SignUpEmailScreen = () => {
@@ -15,6 +18,7 @@ const SignUpEmailScreen = () => {
   const { signIn } = useSignIn();
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const [error, setError] = useState<string | null>(null);
 
   const { mutate: signInWithEmail, isLoading: isSigningIn } = useMutation(
     async (email: string) => {
@@ -40,7 +44,7 @@ const SignUpEmailScreen = () => {
       },
       onError: (error) => {
         const clerkError = error?.errors?.[0] as ClerkAPIError;
-        if (clerkError) formik.setFieldError("email", clerkError.longMessage);
+        if (clerkError?.longMessage) setError(clerkError.longMessage);
       },
       meta: { disableErrorToast: true },
     }
@@ -65,7 +69,7 @@ const SignUpEmailScreen = () => {
           if (clerkError.code === "form_identifier_exists")
             return signInWithEmail(email);
 
-          formik.setFieldError("email", clerkError.longMessage);
+          if (clerkError.longMessage) setError(clerkError.longMessage);
         }
       },
       meta: { disableErrorToast: true },
@@ -80,7 +84,7 @@ const SignUpEmailScreen = () => {
           await signOut();
         } else {
           dispatch(setIsLaserGuardianEnabled(true));
-          return navigation.navigate("SignUpBackup");
+          return navigation.navigate("SignUpAddOwner");
         }
       }
       signUpWithEmail(values.email);
@@ -88,54 +92,33 @@ const SignUpEmailScreen = () => {
     validationSchema: yup.object().shape({
       email: yup.string().email("Invalid email").required("Required"),
     }),
-    validateOnChange: false,
-    validateOnBlur: false,
+    validateOnMount: true,
   });
 
   return (
-    <Box p="4" flexDir="column" height="100%">
-      <Text variant="h4" mb="1">
-        Enter your email
-      </Text>
-      <Text fontSize="lg" mb="10">
-        We use your email for 2-step verification when you withdraw from your
-        account.
-      </Text>
-      <FormControl
-        isInvalid={formik.touched.email && !!formik.errors.email}
-        flex={1}
-      >
-        <Input
-          placeholder="Email Address"
-          value={formik.values.email}
-          onChangeText={formik.handleChange("email")}
-          onBlur={formik.handleBlur("email")}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoFocus
-        />
-        <FormControl.ErrorMessage>
-          {formik.errors.email}
-        </FormControl.ErrorMessage>
-      </FormControl>
-      <Button
-        _text={{ fontSize: "xl" }}
-        onPress={formik.handleSubmit}
-        isLoading={isSigningUp || isSigningIn}
-      >
-        Next
-      </Button>
-      {/* <Button
-        variant="subtle"
-        mt="2"
-        onPress={() => {
-          dispatch(setIsLaserGuardianEnabled(false));
-          navigation.navigate("SignUpGuardians");
-        }}
-      >
-        Skip
-      </Button> */}
-    </Box>
+    <SignUpLayout
+      title="Enter your email"
+      subtitle="We use your email for 2-step verification when you withdraw from your account."
+      onNext={formik.handleSubmit}
+      isLoading={isSigningUp || isSigningIn}
+      isDisabled={!formik.isValid}
+    >
+      <ErrorDialog
+        isOpen={!!error}
+        onClose={() => setError(null)}
+        title="Your email address couldn't be added."
+        subtitle={error}
+      />
+      <Input
+        placeholder="Email Address"
+        value={formik.values.email}
+        onChangeText={formik.handleChange("email")}
+        onBlur={formik.handleBlur("email")}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoFocus
+      />
+    </SignUpLayout>
   );
 };
 

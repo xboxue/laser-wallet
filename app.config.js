@@ -34,7 +34,11 @@ export default {
   web: {
     favicon: "./assets/favicon.png",
   },
-  plugins: ["@react-native-google-signin/google-signin", "sentry-expo"],
+  plugins: [
+    "@react-native-google-signin/google-signin",
+    "@config-plugins/android-jsc-intl",
+    "sentry-expo",
+  ],
   extra: {
     infuraApiKey: process.env.INFURA_API_KEY,
     alchemyApiKey: process.env.ALCHEMY_API_KEY,

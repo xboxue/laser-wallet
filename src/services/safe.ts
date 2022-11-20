@@ -4,6 +4,38 @@ import Constants from "expo-constants";
 import { sortBy } from "lodash";
 import { SendTxOpts } from "safe-sdk-wrapper/dist/Safe";
 
+import SafeServiceClient, {
+  TransferListResponse,
+  TransferWithTokenInfoResponse,
+} from "@gnosis.pm/safe-service-client";
+import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
+import { ethers, providers } from "ethers";
+
+// const provider = new providers.InfuraProvider(
+//   // chainId,
+//   "goerli",
+//   Constants.manifest.extra.infuraApiKey
+// );
+
+// const ethAdapter = new EthersAdapter({
+//   ethers,
+//   signer: new ethers.Wallet(
+//     "0x0f4eb853643472a57e6be53f6e93743fd41faa96910ff62ffd18ff52efe76dc6",
+//     provider
+//   ),
+// });
+
+// const safeService = new SafeServiceClient({
+//   txServiceUrl: "https://safe-transaction-goerli.safe.global",
+//   ethAdapter,
+// });
+
+const getTransactionServiceUrl = (chainId: number) => {
+  if (chainId === 1) return "https://safe-transaction-mainnet.safe.global";
+  else if (chainId === 5) return "https://safe-transaction-goerli.safe.global";
+  else throw new Error("Chain not supported");
+};
+
 type CreateMultisigTxArgs = {
   safe: string;
   to: string;
@@ -54,26 +86,6 @@ type SendTransactionResponse = {
   gasToken: string;
   refundReceiver: string;
   safeTxHash: string;
-};
-
-export const createSafe = async (
-  owners: string[],
-  saltNonce: string,
-  threshold: number,
-  gasLimit: number,
-  chainId: number
-) => {
-  const { data } = await axios.post<{ relayTransactionHash: string }>(
-    `${Constants.expoConfig.extra.relayerApi}/wallets/`,
-    {
-      owners,
-      saltNonce,
-      threshold,
-      gasLimit,
-      chainId,
-    }
-  );
-  return data;
 };
 
 export const getMultsigTxSignatures = async (hash: string) => {
@@ -142,11 +154,21 @@ export const sendTransaction = async (
   return data;
 };
 
-export const getTransfers = async (safe: string) => {
-  const { data } = await axios.get(
-    `${Constants.expoConfig.extra.safeTransactionApi}/api/v1/safes/${getAddress(
+export const getTransfers = async (
+  safe: string,
+  chainId: number,
+  limit: number,
+  offset: number
+) => {
+  const { data } = await axios.get<
+    Omit<TransferListResponse, "results"> & {
+      results: TransferWithTokenInfoResponse[];
+    }
+  >(
+    `${getTransactionServiceUrl(chainId)}/api/v1/safes/${getAddress(
       safe
-    )}/transfers/`
+    )}/transfers/`,
+    { params: { limit, offset } }
   );
   return data;
 };

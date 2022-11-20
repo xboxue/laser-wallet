@@ -25,7 +25,7 @@ import ToastAlert from "../components/ToastAlert/ToastAlert";
 const HomeScreen = () => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
-  const { data: collectibles, isLoading } = useCollectibles(walletAddress);
+  const { data } = useCollectibles(walletAddress);
   const toast = useToast();
 
   usePendingTxSubscription();
@@ -92,14 +92,18 @@ const HomeScreen = () => {
       </Box>
       <Box flexDir="row" justifyContent="space-between" mt="6" mb="1">
         <Text variant="subtitle1">Coins</Text>
-        <Text>View all</Text>
+        <Pressable onPress={() => navigation.navigate("TokenBalances")}>
+          <Text>View all</Text>
+        </Pressable>
       </Box>
-      <TokenBalances walletAddress={walletAddress} limit={5} />
-      {collectibles?.length > 0 && (
+      <TokenBalances walletAddress={walletAddress} limit={4} />
+      {!!data?.pages?.[0].results.length && (
         <>
           <Box flexDir="row" justifyContent="space-between" mt="6" mb="1">
             <Text variant="subtitle1">Collectibles</Text>
-            <Text>View all</Text>
+            <Pressable onPress={() => navigation.navigate("Collectibles")}>
+              <Text>View all</Text>
+            </Pressable>
           </Box>
           <Box mx="-1" flex="1">
             <CollectibleGrid walletAddress={walletAddress} limit={3} />

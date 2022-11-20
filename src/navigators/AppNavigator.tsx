@@ -49,6 +49,9 @@ import TabNavigator from "./TabNavigator";
 import * as Device from "expo-device";
 import SignUpConfirmPasswordScreen from "../screens/SignUpConfirmPasswordScreen";
 import SignUpCreatingWalletScreen from "../screens/SignUpCreatingWalletScreen";
+import SignUpAddOwnerScreen from "../screens/SignUpAddOwnerScreen";
+import TokenBalancesScreen from "../screens/TokenBalancesScreen";
+import CollectiblesScreen from "../screens/CollectiblesScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -93,8 +96,8 @@ const AppNavigator = () => {
             component={SignUpVerifyEmailScreen}
           />
           <Stack.Screen
-            name="SignUpDeployWallet"
-            component={SignUpDeployWalletScreen}
+            name="SignUpAddOwner"
+            component={SignUpAddOwnerScreen}
           />
           <Stack.Screen
             name="RecoveryImportSeedPhrase"
@@ -218,6 +221,12 @@ const AppNavigator = () => {
             name="RecoveryLockVault"
             component={RecoveryLockVaultScreen}
           />
+          <Stack.Screen
+            name="SignUpDeployWallet"
+            component={SignUpDeployWalletScreen}
+          />
+          <Stack.Screen name="TokenBalances" component={TokenBalancesScreen} />
+          <Stack.Screen name="Collectibles" component={CollectiblesScreen} />
         </>
       );
 

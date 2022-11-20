@@ -1,29 +1,21 @@
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
-import { keyBy } from "lodash";
+import { useQueryClient } from "@tanstack/react-query";
+import { format, parseISO } from "date-fns";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { Box, Image, Pressable, Text } from "native-base";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { RefreshControl } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useProvider } from "wagmi";
-import { TRANSACTION_TYPES } from "../../constants/transactions";
-import { selectChainId } from "../../features/network/networkSlice";
-import {
-  removePendingTransaction,
-  selectPendingTransactions,
-} from "../../features/transactions/transactionsSlice";
-import useRefreshOnFocus from "../../hooks/useRefreshOnFocus";
-import { getTransactions } from "../../services/etherscan";
-import { getTransfers } from "../../services/safe";
-import { decodeTxDataByHash } from "../../utils/decodeTransactionData";
-import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
-import TokenTransactionItem from "../TokenTransactionItem/TokenTransactionItem";
-import WalletTransactionItem from "../WalletTransactionItem/WalletTransactionItem";
 import ethIcon from "../../../assets/eth-icon.png";
+import { selectChainId } from "../../features/network/networkSlice";
+import { selectPendingTransactions } from "../../features/transactions/transactionsSlice";
+import useExchangeRates from "../../hooks/useExchangeRates";
+import useTransfers from "../../hooks/useTransfers";
 import formatAddress from "../../utils/formatAddress";
 import formatAmount from "../../utils/formatAmount";
-import { format, formatISO, parseISO } from "date-fns";
+import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
 
 const TokenItem = ({
   onPress,
@@ -49,7 +41,7 @@ const TokenItem = ({
             <Text variant="subtitle1">{title}</Text>
             <Text color="text.300">{subtitle}</Text>
           </Box>
-          {rightText && <Text variant="subtitle2">{rightText}</Text>}
+          {rightText}
         </Box>
       )}
     </Pressable>
@@ -67,105 +59,23 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   const provider = useProvider({ chainId });
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const queryClient = useQueryClient();
+  const { data: exchangeRates } = useExchangeRates();
 
-  const { data: transfers, isLoading: transfersLoading } = useQuery(
-    ["transfers", walletAddress],
-    () => getTransfers(walletAddress),
-    { select: (data) => data.results }
+  const {
+    data,
+    isLoading: transfersLoading,
+    refetch,
+    isRefetching,
+    fetchNextPage,
+  } = useTransfers(walletAddress);
+
+  const transfers = useMemo(
+    () => data?.pages.flatMap((page) => page.results) || [],
+    [data]
   );
-  console.log(transfers);
 
   const pendingTxs = useSelector(selectPendingTransactions);
-
-  // const {
-  //   data,
-  //   isLoading: txsLoading,
-  //   refetch: refetchTxs,
-  //   hasNextPage,
-  //   fetchNextPage,
-  // } = useInfiniteQuery(
-  //   ["txs", walletAddress, chainId],
-  //   ({ pageParam = 1 }) =>
-  //     getTransactions({
-  //       address: walletAddress,
-  //       chainId,
-  //       sort: "desc",
-  //       page: pageParam,
-  //       offset: PAGE_SIZE,
-  //     }),
-  //   {
-  //     getNextPageParam: (lastPage, pages) => {
-  //       if (lastPage.length < PAGE_SIZE) return;
-  //       return pages.length + 1;
-  //     },
-  //   }
-  // );
-  // const txs = useMemo(() => data?.pages?.flat() || [], [data]);
-  // const txsByHash = useMemo(() => keyBy(txs, "hash"), [txs]);
-  // const allTxs = useMemo(
-  //   () => [...pendingTxs.filter((tx) => !txsByHash[tx.hash]), ...txs],
-  //   [pendingTxs, txs]
-  // );
-
-  // useRefreshOnFocus(refetchTxs);
-  // useEffect(() => {
-  //   for (const pendingTx of pendingTxs) {
-  //     if (txsByHash[pendingTx.hash])
-  //       dispatch(removePendingTransaction(pendingTx.hash));
-  //   }
-  // }, [pendingTxs, txsByHash]);
-
-  // const results = useQueries({
-  //   queries: allTxs.map((tx) => ({
-  //     queryKey: ["tx", tx.hash],
-  //     queryFn: () => decodeTxDataByHash(provider, tx.hash),
-  //   })),
-  // });
-
-  // useEffect(() => {
-  //   for (const [index, pendingTx] of Object.entries(pendingTxs)) {
-  //     if (pendingTx.confirmed) {
-  //       results[parseInt(index, 10)].refetch();
-  //       refetchTxs();
-  //     }
-  //   }
-  // }, [pendingTxs]);
-
-  // const ref = useRef([]);
-  // const items = useMemo(() => {
-  //   if (results.some((result) => result.isLoading)) return ref.current;
-  //   return results.map((result) => result.data);
-  // }, [results]);
-
-  // useEffect(() => {
-  //   ref.current = items;
-  // }, [items]);
-
-  // const renderTransaction = useCallback(
-  //   ({ item: txData }) => {
-  //     if (
-  //       txData.type === TRANSACTION_TYPES.TOKEN_APPROVE ||
-  //       txData.type === TRANSACTION_TYPES.TOKEN_TRANSFER
-  //     ) {
-  //       return (
-  //         <TokenTransactionItem
-  //           txData={txData}
-  //           onPress={() =>
-  //             navigation.navigate("TransactionDetails", { txData })
-  //           }
-  //         />
-  //       );
-  //     }
-
-  //     return (
-  //       <WalletTransactionItem
-  //         txData={txData}
-  //         onPress={() => navigation.navigate("TransactionDetails", { txData })}
-  //       />
-  //     );
-  //   },
-  //   [walletAddress]
-  // );
 
   // const renderEmptyComponent = useCallback(() => {
   //   return (
@@ -176,47 +86,151 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   //     </Box>
   //   );
   // }, [results]);
+  // if (
+  //   (tokenMetadataLoading && !!tokenAddresses.length) ||
+  //   (nftMetadataLoading && !!nfts.length) ||
+  //   transfersLoading
+  // ) {
+  //   return null;
+  // }
 
   const renderItem = ({ item }) => {
-    return (
-      <TokenItem
-        title={
-          item.type === "ETHER_TRANSFER" ? "Ethereum" : item.tokenInfo?.name
-        }
-        top={format(parseISO(item.executionDate), "MMM d h:mma")}
-        subtitle={
-          isEqualCaseInsensitive(item.to, walletAddress)
-            ? `From ${formatAddress(item.from)}`
-            : `To ${formatAddress(item.to)}`
-        }
-        rightText={
-          item.type === "ERC721_TRANSFER" ? undefined : isEqualCaseInsensitive(
-              item.to,
-              walletAddress
-            ) ? (
-            <Text color="success.500">
+    let rightText;
+    if (item.type === "ETHER_TRANSFER") {
+      if (isEqualCaseInsensitive(item.to, walletAddress)) {
+        rightText = (
+          <Box alignItems="flex-end">
+            <Text color="success.400" variant="subtitle1">
+              +{formatAmount(item.value)} ETH
+            </Text>
+            <Text color="text.300">
+              {exchangeRates && (
+                <Text color="text.300">
+                  {formatAmount(
+                    parseEther(item.value).mul(
+                      parseUnits(parseFloat(exchangeRates.USD).toFixed(2), 2)
+                    ),
+                    {
+                      decimals: 18 * 2 + 2,
+                      style: "currency",
+                      currency: "USD",
+                    }
+                  )}
+                </Text>
+              )}
+            </Text>
+          </Box>
+        );
+      } else {
+        rightText = (
+          <Box alignItems="flex-end">
+            <Text color="success.400" variant="subtitle1">
+              +{formatAmount(item.value)} ETH
+            </Text>
+            {exchangeRates && (
+              <Text color="text.300">
+                {formatAmount(
+                  parseEther(item.value).mul(
+                    parseUnits(parseFloat(exchangeRates.USD).toFixed(2), 2)
+                  ),
+                  {
+                    decimals: 18 * 2 + 2,
+                    style: "currency",
+                    currency: "USD",
+                  }
+                )}
+              </Text>
+            )}
+          </Box>
+        );
+      }
+    } else if (item.type === "ERC20_TRANSFER") {
+      if (isEqualCaseInsensitive(item.to, walletAddress)) {
+        rightText = (
+          <Box alignItems="flex-end">
+            <Text color="success.400" variant="subtitle1">
               +
               {formatAmount(item.value, {
                 decimals: item.tokenInfo?.decimals,
               })}{" "}
               {item.tokenInfo?.symbol || "ETH"}
             </Text>
-          ) : (
-            `-${formatAmount(item.value, {
-              decimals: item.tokenInfo?.decimals,
-            })} ${item.tokenInfo?.symbol || "ETH"}`
-          )
+            <Text color="text.300">
+              {formatAmount(
+                parseUnits(item.value, item.tokenInfo.decimals).mul(
+                  item.metadata.currentPrice.fiat[0].value
+                ),
+                {
+                  decimals:
+                    item.tokenInfo.decimals * 2 +
+                    item.metadata.currentPrice.fiat[0].decimals,
+                  style: "currency",
+                  currency: "USD",
+                }
+              )}
+            </Text>
+          </Box>
+        );
+      } else {
+        rightText = (
+          <Box alignItems="flex-end">
+            <Text variant="subtitle1" color="danger.400">
+              {`-${formatAmount(item.value, {
+                decimals: item.tokenInfo?.decimals,
+              })} ${item.tokenInfo?.symbol || "ETH"}`}
+            </Text>
+            <Text color="text.300">
+              {formatAmount(
+                parseUnits(item.value, item.tokenInfo.decimals).mul(
+                  item.metadata.currentPrice.fiat[0].value
+                ),
+                {
+                  decimals:
+                    item.tokenInfo.decimals * 2 +
+                    item.metadata.currentPrice.fiat[0].decimals,
+                  style: "currency",
+                  currency: "USD",
+                }
+              )}
+            </Text>
+          </Box>
+        );
+      }
+    }
+
+    return (
+      <TokenItem
+        title={
+          item.type === "ETHER_TRANSFER" ? "Ethereum" : item.tokenInfo?.name
         }
+        top={format(parseISO(item.executionDate), "MMM d 'at' h:mm a")}
+        subtitle={
+          isEqualCaseInsensitive(item.to, walletAddress)
+            ? `From ${formatAddress(item.from)}`
+            : `To ${formatAddress(item.to)}`
+        }
+        rightText={rightText}
         icon={
           <Image
             source={
               item.type === "ETHER_TRANSFER"
-                ? ethIcon
-                : { uri: item.tokenInfo?.logoUri }
+                ? {
+                    uri: "https://c.neevacdn.net/image/upload/tokenLogos/ethereum/ethereum.png",
+                  }
+                : item.type === "ERC20_TRANSFER"
+                ? {
+                    uri:
+                      item.metadata?.symbolLogos?.[0].URI ||
+                      "https://c.neevacdn.net/image/upload/tokenLogos/ethereum/ethereum.png",
+                  }
+                : item.type === "ERC721_TRANSFER"
+                ? { uri: item.metadata?.nft.previews[0].URI }
+                : undefined
             }
             fallbackSource={ethIcon}
             size="9"
             alt="Token icon"
+            rounded={item.type === "ERC721_TRANSFER" ? "sm" : "full"}
           />
         }
       />
@@ -226,20 +240,18 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   return (
     <Box px="4" flex="1">
       <FlashList
+        key="1"
         data={transfers}
+        onEndReached={fetchNextPage}
         renderItem={renderItem}
-        // key="1"
         estimatedItemSize={66}
-        // refreshControl={
-        //   <RefreshControl
-        //     refreshing={results.some((result) => result.isLoading)}
-        //     onRefresh={refetchTxs}
-        //   />
-        // }
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        }
         // onEndReached={() => {
         //   if (hasNextPage) fetchNextPage();
         // }}
-        // onEndReachedThreshold={0.3}
+        onEndReachedThreshold={0.3}
         // ListEmptyComponent={renderEmptyComponent}
       />
     </Box>
