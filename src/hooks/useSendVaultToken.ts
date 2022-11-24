@@ -14,7 +14,7 @@ import { erc20ABI, useProvider } from "wagmi";
 import { Erc20__factory, GnosisSafe__factory } from "../abis/types";
 import { selectChainId } from "../features/network/networkSlice";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
-import { signTransaction } from "../services/emailGuardian";
+import { signTransaction } from "../services/guardian";
 import { getItem } from "../services/keychain";
 import { estimateGas, sendTransaction } from "../services/safe";
 

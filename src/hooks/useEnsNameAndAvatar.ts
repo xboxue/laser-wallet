@@ -15,8 +15,8 @@ const useEnsNameAndAvatar = (address: string) => {
 
   // Fetch ENS avatar if address resolved to an ENS name
   const { data: ensAvatar, isLoading: ensAvatarLoading } = useEnsAvatar({
-    addressOrName: ensName as string,
-    enabled: !!ensName,
+    addressOrName: address,
+    enabled: isAddress(address),
     chainId,
   });
 

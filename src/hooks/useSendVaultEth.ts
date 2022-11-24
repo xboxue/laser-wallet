@@ -8,7 +8,7 @@ import { Safe } from "safe-sdk-wrapper";
 import { useProvider } from "wagmi";
 import { selectChainId } from "../features/network/networkSlice";
 import { selectWalletAddress } from "../features/wallet/walletSlice";
-import { signTransaction } from "../services/emailGuardian";
+import { signTransaction } from "../services/guardian";
 import { getItem } from "../services/keychain";
 import {
   createMultisigTx,

@@ -6,7 +6,7 @@ const getQueryClient = (onError: (error: unknown) => void) => {
     queryClient = new QueryClient({
       queryCache: new QueryCache({
         onError: (error, query) => {
-          if (!query?.meta?.disableErrorToast) onError(error);
+          if (!query.options.disableErrorToast) onError(error);
         },
       }),
       mutationCache: new MutationCache({

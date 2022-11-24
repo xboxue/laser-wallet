@@ -6,22 +6,24 @@ const StartScreen = () => {
   const navigation = useNavigation();
 
   return (
-    <Box flex={1} justifyContent="center" px="4" pb="20">
-      <Image
-        source={logoVertical}
-        alt="logo"
-        w="120"
-        h="120"
-        resizeMode="contain"
-        alignSelf="center"
-        mb="12"
-      />
+    <Box flex="1" p="4">
+      <Box flex="1" justifyContent="center">
+        <Image
+          source={logoVertical}
+          alt="logo"
+          w="130"
+          h="130"
+          resizeMode="contain"
+          alignSelf="center"
+          mb="40"
+        />
+      </Box>
       <Button onPress={() => navigation.navigate("SignUpAuth")}>
         Create new wallet
       </Button>
       <Button
         variant="subtle"
-        mt="2"
+        mt="4"
         onPress={() =>
           navigation.navigate("SignUpAuth", {
             nextScreen: "RecoveryImportSeedPhrase",

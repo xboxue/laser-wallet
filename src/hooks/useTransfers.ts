@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { isEqual, uniq, uniqWith } from "lodash";
 import { useSelector } from "react-redux";
+import { WETH_CONTRACT } from "../constants/contracts";
 import { selectChainId } from "../features/network/networkSlice";
 import { getNFTMetadata, getTokenMetadata } from "../services/nxyz";
 import { getTransfers } from "../services/safe";
@@ -41,8 +42,16 @@ const useTransfers = (walletAddress: string) => {
 
       const tokenAddresses = uniq(
         transfers
-          .filter((transfer) => transfer.type === "ERC20_TRANSFER")
-          .map((transfer) => transfer.tokenAddress as string)
+          .filter(
+            (transfer) =>
+              transfer.type === "ERC20_TRANSFER" ||
+              transfer.type === "ETHER_TRANSFER"
+          )
+          .map((transfer) =>
+            transfer.type === "ETHER_TRANSFER"
+              ? WETH_CONTRACT
+              : (transfer.tokenAddress as string)
+          )
       );
       const tokenMetadata = tokenAddresses.length
         ? await getTokenMetadata(tokenAddresses, chainId)
@@ -75,6 +84,13 @@ const useTransfers = (walletAddress: string) => {
               };
             }
 
+            if (transfer.type === "ETHER_TRANSFER") {
+              const metadata = tokenMetadata.find((token) =>
+                isEqualCaseInsensitive(token.contractAddress, WETH_CONTRACT)
+              );
+              return { ...transfer, metadata };
+            }
+
             return transfer;
           })
           .filter(
@@ -89,7 +105,6 @@ const useTransfers = (walletAddress: string) => {
         if (lastPage.count < PAGE_SIZE) return;
         return pages.length * PAGE_SIZE;
       },
-      onError: (err) => console.log(err.response.data),
     }
   );
 };

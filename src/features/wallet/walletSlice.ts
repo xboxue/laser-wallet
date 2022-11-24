@@ -17,6 +17,7 @@ interface WalletState {
   recoveryOwnerAddress: string | null;
   trustedOwnerAddress: string | null;
   safeConfig: DeploySafeProps | null;
+  safeDeployTxHash: string | null;
 }
 
 const initialState: WalletState = {
@@ -28,6 +29,7 @@ const initialState: WalletState = {
   recoveryOwnerAddress: null,
   trustedOwnerAddress: null,
   safeConfig: null,
+  safeDeployTxHash: null,
 };
 
 const walletSlice = createSlice({
@@ -58,14 +60,16 @@ const walletSlice = createSlice({
     setSafeConfig: (state, action: PayloadAction<DeploySafeProps>) => {
       state.safeConfig = action.payload;
     },
+    setSafeDeployTxHash: (state, action: PayloadAction<string | null>) => {
+      state.safeDeployTxHash = action.payload;
+    },
   },
 });
 
 export const selectWallets = (state: RootState) => state.wallet.wallets;
-export const selectWalletAddress = (state: RootState) => {
-  // if (!state.wallet.walletAddress) throw new Error("Wallet address not set");
-  return state.wallet.walletAddress;
-};
+export const selectWalletAddress = (state: RootState) =>
+  state.wallet.walletAddress;
+
 export const selectVaultAddress = (state: RootState) =>
   state.wallet.vaultAddress;
 export const selectEmail = (state: RootState) => state.wallet.email;
@@ -81,6 +85,9 @@ export const selectTrustedOwnerAddress = (state: RootState) => {
 export const selectSafeConfig = (state: RootState) => {
   return state.wallet.safeConfig;
 };
+export const selectSafeDeployTxHash = (state: RootState) => {
+  return state.wallet.safeDeployTxHash;
+};
 
 export const {
   setWalletAddress,
@@ -91,6 +98,7 @@ export const {
   setRecoveryOwnerAddress,
   setTrustedOwnerAddress,
   setSafeConfig,
+  setSafeDeployTxHash,
 } = walletSlice.actions;
 
 export default walletSlice.reducer;

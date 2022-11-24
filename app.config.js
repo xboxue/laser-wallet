@@ -52,6 +52,7 @@ export default {
     graphqlApi: process.env.GRAPHQL_API,
     relayerApi: process.env.RELAYER_API,
     safeTransactionApi: process.env.SAFE_TRANSACTION_API,
+    nxyzApiKey: process.env.NXYZ_API_KEY,
   },
   hooks: {
     postPublish: [

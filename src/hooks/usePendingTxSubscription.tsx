@@ -19,8 +19,7 @@ const usePendingTxSubscription = () => {
   useQueries({
     queries: pendingTxs.map((pendingTx) => ({
       queryKey: ["pendingTx", pendingTx.hash],
-      queryFn: () =>
-        waitForTransaction({ hash: pendingTx.infuraHash, chainId }),
+      queryFn: () => waitForTransaction({ hash: pendingTx.hash, chainId }),
       onSuccess: (receipt: providers.TransactionReceipt) => {
         dispatch(setTransactionConfirmed(pendingTx.hash));
 

@@ -56,11 +56,6 @@ const PAGE_SIZE = 15;
 
 const TransactionHistory = ({ walletAddress }: Props) => {
   const chainId = useSelector(selectChainId);
-  const provider = useProvider({ chainId });
-  const dispatch = useDispatch();
-  const navigation = useNavigation();
-  const queryClient = useQueryClient();
-  const { data: exchangeRates } = useExchangeRates();
 
   const {
     data,
@@ -96,106 +91,40 @@ const TransactionHistory = ({ walletAddress }: Props) => {
 
   const renderItem = ({ item }) => {
     let rightText;
-    if (item.type === "ETHER_TRANSFER") {
-      if (isEqualCaseInsensitive(item.to, walletAddress)) {
-        rightText = (
-          <Box alignItems="flex-end">
+    if (item.type === "ERC20_TRANSFER" || item.type === "ETHER_TRANSFER") {
+      const amount = `${formatAmount(item.value, {
+        decimals: item.tokenInfo?.decimals || 18,
+      })} ${item.tokenInfo?.symbol || "ETH"}`;
+
+      const amountUSD = item.metadata
+        ? formatAmount(
+            parseUnits(item.value, item.metadata.decimals).mul(
+              item.metadata.currentPrice.fiat[0].value
+            ),
+            {
+              decimals:
+                item.metadata.decimals * 2 +
+                item.metadata.currentPrice.fiat[0].decimals,
+              style: "currency",
+              currency: "USD",
+            }
+          )
+        : null;
+
+      rightText = (
+        <Box alignItems="flex-end">
+          {isEqualCaseInsensitive(item.to, walletAddress) ? (
             <Text color="success.400" variant="subtitle1">
-              +{formatAmount(item.value)} ETH
+              +{amount}
             </Text>
-            <Text color="text.300">
-              {exchangeRates && (
-                <Text color="text.300">
-                  {formatAmount(
-                    parseEther(item.value).mul(
-                      parseUnits(parseFloat(exchangeRates.USD).toFixed(2), 2)
-                    ),
-                    {
-                      decimals: 18 * 2 + 2,
-                      style: "currency",
-                      currency: "USD",
-                    }
-                  )}
-                </Text>
-              )}
+          ) : (
+            <Text color="danger.400" variant="subtitle1">
+              -{amount}
             </Text>
-          </Box>
-        );
-      } else {
-        rightText = (
-          <Box alignItems="flex-end">
-            <Text color="success.400" variant="subtitle1">
-              +{formatAmount(item.value)} ETH
-            </Text>
-            {exchangeRates && (
-              <Text color="text.300">
-                {formatAmount(
-                  parseEther(item.value).mul(
-                    parseUnits(parseFloat(exchangeRates.USD).toFixed(2), 2)
-                  ),
-                  {
-                    decimals: 18 * 2 + 2,
-                    style: "currency",
-                    currency: "USD",
-                  }
-                )}
-              </Text>
-            )}
-          </Box>
-        );
-      }
-    } else if (item.type === "ERC20_TRANSFER") {
-      if (isEqualCaseInsensitive(item.to, walletAddress)) {
-        rightText = (
-          <Box alignItems="flex-end">
-            <Text color="success.400" variant="subtitle1">
-              +
-              {formatAmount(item.value, {
-                decimals: item.tokenInfo?.decimals,
-              })}{" "}
-              {item.tokenInfo?.symbol || "ETH"}
-            </Text>
-            <Text color="text.300">
-              {formatAmount(
-                parseUnits(item.value, item.tokenInfo.decimals).mul(
-                  item.metadata.currentPrice.fiat[0].value
-                ),
-                {
-                  decimals:
-                    item.tokenInfo.decimals * 2 +
-                    item.metadata.currentPrice.fiat[0].decimals,
-                  style: "currency",
-                  currency: "USD",
-                }
-              )}
-            </Text>
-          </Box>
-        );
-      } else {
-        rightText = (
-          <Box alignItems="flex-end">
-            <Text variant="subtitle1" color="danger.400">
-              {`-${formatAmount(item.value, {
-                decimals: item.tokenInfo?.decimals,
-              })} ${item.tokenInfo?.symbol || "ETH"}`}
-            </Text>
-            <Text color="text.300">
-              {formatAmount(
-                parseUnits(item.value, item.tokenInfo.decimals).mul(
-                  item.metadata.currentPrice.fiat[0].value
-                ),
-                {
-                  decimals:
-                    item.tokenInfo.decimals * 2 +
-                    item.metadata.currentPrice.fiat[0].decimals,
-                  style: "currency",
-                  currency: "USD",
-                }
-              )}
-            </Text>
-          </Box>
-        );
-      }
+          )}
+          {amountUSD && <Text color="text.300">{amountUSD}</Text>}
+        </Box>
+      );
     }
 
     return (
@@ -213,11 +142,7 @@ const TransactionHistory = ({ walletAddress }: Props) => {
         icon={
           <Image
             source={
-              item.type === "ETHER_TRANSFER"
-                ? {
-                    uri: "https://c.neevacdn.net/image/upload/tokenLogos/ethereum/ethereum.png",
-                  }
-                : item.type === "ERC20_TRANSFER"
+              item.type === "ERC20_TRANSFER" || item.type === "ETHER_TRANSFER"
                 ? {
                     uri:
                       item.metadata?.symbolLogos?.[0].URI ||

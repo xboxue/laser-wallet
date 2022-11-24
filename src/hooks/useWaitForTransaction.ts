@@ -5,7 +5,7 @@ import waitForTransaction from "../utils/waitForTransaction";
 type WaitForTransactionOptions = {
   confirmations?: number;
   chainId: number;
-  hash: string;
+  hash?: string;
 } & UseQueryOptions<providers.TransactionReceipt>;
 
 const useWaitForTransaction = ({

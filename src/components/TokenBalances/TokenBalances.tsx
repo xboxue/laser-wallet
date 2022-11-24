@@ -11,13 +11,7 @@ import TokenItem from "../TokenItem/TokenItem";
 
 interface Props {
   walletAddress: string;
-  onPress: (token: {
-    address?: string;
-    balance: string;
-    symbol: string;
-    decimals: number;
-    isToken: boolean;
-  }) => void;
+  onPress: (token: any) => void;
   limit?: number;
 }
 
@@ -50,14 +44,7 @@ const TokenBalances = ({ walletAddress, onPress, limit }: Props) => {
         title={item.name}
         subtitle={`${item.pretty} ${item.symbol}`}
         rightText={item.fiat ? `$${item.fiat[0].pretty}` : undefined}
-        onPress={() =>
-          onPress({
-            address: item.contractAddress,
-            balance: item.value,
-            symbol: item.symbol,
-            decimals: item.decimals,
-          })
-        }
+        onPress={() => onPress(item)}
       />
     );
   }, []);

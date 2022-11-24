@@ -1,32 +1,69 @@
+import Feather from "@expo/vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
+import { ethers } from "ethers";
+import * as Clipboard from "expo-clipboard";
 import {
   Box,
   Button,
+  Circle,
   Icon,
   ScrollView,
   Stack,
   Text,
   useToast,
 } from "native-base";
-import { useSelector } from "react-redux";
+import { useState } from "react";
+import { Pressable } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import CollectibleGrid from "../components/CollectibleGrid/CollectibleGrid";
-import CopyIconButton from "../components/CopyIconButton/CopyIconButton";
+import DeployBottomSheet from "../components/DeployBottomSheet/DeployBottomSheet";
+import ToastAlert from "../components/ToastAlert/ToastAlert";
 import TokenBalances from "../components/TokenBalances/TokenBalances";
 import WalletBalance from "../components/WalletBalance/WalletBalance";
-import { selectWalletAddress } from "../features/wallet/walletSlice";
+import { selectChainId } from "../features/network/networkSlice";
+import {
+  selectSafeDeployTxHash,
+  selectWalletAddress,
+  setSafeDeployTxHash,
+} from "../features/wallet/walletSlice";
 import useCollectibles from "../hooks/useCollectibles";
 import usePendingTxSubscription from "../hooks/usePendingTxSubscription";
+import useWaitForTransaction from "../hooks/useWaitForTransaction";
+import { getSafeService } from "../services/safe";
 import formatAddress from "../utils/formatAddress";
-import Feather from "@expo/vector-icons/Feather";
-import { Pressable } from "react-native";
-import * as Clipboard from "expo-clipboard";
-import ToastAlert from "../components/ToastAlert/ToastAlert";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
   const { data } = useCollectibles(walletAddress);
   const toast = useToast();
+  const [deploySheetOpen, setDeploySheetOpen] = useState(false);
+  const chainId = useSelector(selectChainId);
+  const dispatch = useDispatch();
+  const safeDeployTxHash = useSelector(selectSafeDeployTxHash);
+
+  useWaitForTransaction({
+    hash: safeDeployTxHash,
+    chainId,
+    onSuccess: () => {
+      refetchSafeCreationInfo();
+      dispatch(setSafeDeployTxHash(null));
+    },
+  });
+
+  const {
+    data: safeCreationInfo,
+    isLoading: safeCreationInfoLoading,
+    refetch: refetchSafeCreationInfo,
+  } = useQuery(
+    ["safeCreationInfo", walletAddress],
+    async () => {
+      const safeService = getSafeService(chainId);
+      return safeService.getSafeCreationInfo(walletAddress);
+    },
+    { disableErrorToast: true, retry: false }
+  );
 
   usePendingTxSubscription();
 
@@ -37,17 +74,16 @@ const HomeScreen = () => {
         paddingHorizontal: 16,
       }}
     >
-      {/* <Box
-        flexDir="row"
-        justifyContent="space-between"
-        px="1"
-        alignItems="flex-start"
-      >
-        <IconButton
-          icon={<Icon as={Ionicons} name="settings-outline" />}
-          onPress={() => navigation.navigate("Settings")}
+      {deploySheetOpen && (
+        <DeployBottomSheet
+          isOpen={deploySheetOpen}
+          onClose={() => setDeploySheetOpen(false)}
+          onSuccess={(hash) => {
+            dispatch(setSafeDeployTxHash(hash));
+            setDeploySheetOpen(false);
+          }}
         />
-      </Box> */}
+      )}
       <Text variant="h4" fontWeight="500" mb="6">
         Your assets
       </Text>
@@ -90,6 +126,37 @@ const HomeScreen = () => {
           </Button>
         </Stack>
       </Box>
+      {!safeCreationInfoLoading && !safeCreationInfo && (
+        <Pressable onPress={() => setDeploySheetOpen(true)}>
+          {({ pressed }) => (
+            <Box
+              flexDir="row"
+              alignItems="center"
+              p="4"
+              bgColor="gray.900"
+              rounded="lg"
+              mt="4"
+            >
+              <Circle bgColor="gray.700" size="9" mr="4">
+                {/* <Icon as={<Ionicons name="person" />} size="4" color="gray.200" /> */}
+              </Circle>
+              {safeDeployTxHash ? (
+                <Box>
+                  <Text variant="subtitle1">Wallet activating</Text>
+                  <Text color="text.300">This may take up to 1 hour</Text>
+                </Box>
+              ) : (
+                <Box>
+                  <Text variant="subtitle1">Activate your wallet</Text>
+                  <Text color="text.300">
+                    Get started by depositing to your account
+                  </Text>
+                </Box>
+              )}
+            </Box>
+          )}
+        </Pressable>
+      )}
       <Box flexDir="row" justifyContent="space-between" mt="6" mb="1">
         <Text variant="subtitle1">Coins</Text>
         <Pressable onPress={() => navigation.navigate("TokenBalances")}>

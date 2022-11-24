@@ -1,56 +1,42 @@
-import { useAuth, useClerk, useSignIn } from "@clerk/clerk-expo";
+import { useClerk, useSignIn } from "@clerk/clerk-expo";
 import { EmailCodeFactor } from "@clerk/types";
+import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
+import SafeServiceClient from "@gnosis.pm/safe-service-client";
 import { useNavigation } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { providers } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
-import { Box, Button, Skeleton, Stack, Text, useToast } from "native-base";
-import { useDispatch, useSelector } from "react-redux";
+import { constants, ethers, providers } from "ethers";
+import { getAddress, parseEther, parseUnits } from "ethers/lib/utils";
+import Constants from "expo-constants";
+import { Box, Button, Image, Skeleton, Stack, Text } from "native-base";
+import { useSelector } from "react-redux";
 import { useFeeData, useProvider } from "wagmi";
 import { Erc20__factory } from "../abis/types";
-import ToastAlert from "../components/ToastAlert/ToastAlert";
+import { WETH_CONTRACT } from "../constants/contracts";
 import { selectChainId } from "../features/network/networkSlice";
-import { addPendingTransaction } from "../features/transactions/transactionsSlice";
 import {
   selectEmail,
-  selectVaultAddress,
   selectWalletAddress,
 } from "../features/wallet/walletSlice";
-import useExchangeRates from "../hooks/useExchangeRates";
-import useSendEth from "../hooks/useSendEth";
-import useSendToken from "../hooks/useSendToken";
+import { getTokenMetadata } from "../services/nxyz";
+import { getSafeService } from "../services/safe";
 import formatAddress from "../utils/formatAddress";
 import formatAmount from "../utils/formatAmount";
 
 const SendConfirmScreen = ({ route }) => {
   const chainId = useSelector(selectChainId);
   const walletAddress = useSelector(selectWalletAddress);
-  const vaultAddress = useSelector(selectVaultAddress);
   const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const toast = useToast();
-  const provider = useProvider({ chainId });
   const { signIn } = useSignIn();
   const email = useSelector(selectEmail);
-  const { isSignedIn } = useAuth();
   const clerk = useClerk();
-  const { data: exchangeRates } = useExchangeRates();
+  const provider = useProvider({ chainId });
+  const { amount, amountUSD, address: to, ensName, token } = route.params;
 
-  const onSuccess = (transaction: providers.TransactionResponse) => {
-    toast.show({
-      render: () => <ToastAlert status="success" title="Transaction sent" />,
-      duration: 2000,
-    });
-    dispatch(addPendingTransaction(transaction));
-    navigation.navigate("Activity");
-  };
-
-  const { mutate: sendEth, isLoading: isSendingEth } = useSendEth({
-    onSuccess,
-  });
-  const { mutate: sendToken, isLoading: isSendingToken } = useSendToken({
-    onSuccess,
-  });
+  const { data: tokenMetadata, isLoading: tokenMetadataLoading } = useQuery(
+    ["tokenMetadata", WETH_CONTRACT],
+    () => getTokenMetadata([WETH_CONTRACT], chainId),
+    { select: ([data]) => data }
+  );
 
   const { mutate: sendEmailCode, isLoading: isSendingEmailCode } = useMutation(
     async () => {
@@ -74,87 +60,109 @@ const SendConfirmScreen = ({ route }) => {
     }
   );
 
-  const { amount, address: to, ensName, token } = route.params;
-
-  const { data: baseFeePerGas, isLoading: baseFeePerGasLoading } = useQuery(
-    ["baseFeePerGas"],
-    async () => {
-      const block = await provider.getBlock("latest");
-      return block.baseFeePerGas;
-    },
-    { refetchInterval: 5000 }
-  );
   const { data: feeData, isLoading: feeDataLoading } = useFeeData();
 
   const { data: gasEstimate, isLoading: gasEstimateLoading } = useQuery(
-    ["gasEstimate", amount, to, token],
+    ["gasEstimate", amount, to, token.contractAddress],
     async () => {
-      if (token.isToken) {
-        const erc20 = Erc20__factory.connect(token.address, provider);
-        return erc20.estimateGas.transfer(
-          to,
-          parseUnits(amount, token.decimals),
-          { from: walletAddress }
-        );
+      let tx: { to: string; value: string; data: string };
+
+      if (token.contractAddress === constants.AddressZero) {
+        tx = { to, value: parseEther(amount).toString(), data: "0x" };
+      } else {
+        const erc20 = Erc20__factory.connect(token.contractAddress, provider);
+        tx = {
+          to: getAddress(token.contractAddress),
+          value: "0",
+          data: erc20.interface.encodeFunctionData("transfer", [
+            to,
+            parseUnits(amount, token.decimals),
+          ]),
+        };
       }
-      return provider.estimateGas({
-        from: walletAddress,
-        to,
-        value: parseEther(amount),
-      });
+
+      const safeService = getSafeService(chainId);
+      const { safeTxGas } = await safeService.estimateSafeTransaction(
+        getAddress(walletAddress),
+        { to: tx.to, data: tx.data, value: tx.value.toString(), operation: 0 }
+      );
+
+      return safeTxGas;
     }
   );
 
   const renderGasFee = () => {
     if (
-      feeDataLoading ||
       !feeData?.maxPriorityFeePerGas ||
-      baseFeePerGasLoading ||
-      !baseFeePerGas ||
-      gasEstimateLoading ||
+      !feeData?.lastBaseFeePerGas ||
       !gasEstimate
     ) {
       return <Skeleton w="16" h="5" />;
     }
 
-    const gasFee = baseFeePerGas
+    const gasFee = feeData.lastBaseFeePerGas
       .add(feeData.maxPriorityFeePerGas)
       .mul(gasEstimate);
 
-    return <Text>{formatAmount(gasFee, { precision: 6 })} ETH</Text>;
+    return (
+      <Box alignItems="flex-end">
+        {tokenMetadata && (
+          <Text variant="subtitle1">
+            {formatAmount(
+              gasFee.mul(tokenMetadata.currentPrice.fiat[0].value),
+              {
+                decimals: 20,
+                style: "currency",
+                currency: "USD",
+              }
+            )}
+          </Text>
+        )}
+        <Text color="text.300">
+          {formatAmount(gasFee, { minimumFractionDigits: 6 })} ETH
+        </Text>
+      </Box>
+    );
   };
 
   return (
     <Box px="4" flex="1">
       <Box alignItems="center" py="8">
-        <Text variant="h2" mt="2">
+        <Image
+          source={{
+            uri:
+              token.symbolLogos?.[0].URI ||
+              "https://c.neevacdn.net/image/upload/tokenLogos/ethereum/ethereum.png",
+          }}
+          size="16"
+          alt="Token icon"
+        />
+        <Text variant="h3" mt="2">
           {amount} {token.symbol}
         </Text>
-        <Text color="#FFFFFFB2" fontSize="lg">
-          ${(parseFloat(amount) * exchangeRates.USD).toFixed(2)}
+        <Text color="text.300" variant="h5">
+          {amountUSD}
         </Text>
       </Box>
       <Stack space="4" flex="1">
         <Box flexDirection="row" justifyContent="space-between">
           <Text variant="subtitle1">To</Text>
-          <Text>{ensName || formatAddress(to)}</Text>
+          <Box alignItems="flex-end">
+            <Text variant="subtitle1">{ensName || formatAddress(to)}</Text>
+            {ensName && <Text color="text.300">{formatAddress(to)}</Text>}
+          </Box>
         </Box>
         <Box flexDirection="row" justifyContent="space-between">
-          <Text variant="subtitle1">Network fee (estimate)</Text>
+          <Text variant="subtitle1">Network fee</Text>
           {renderGasFee()}
         </Box>
       </Stack>
       <Button
-        onPress={async () => {
-          // if (walletAddress === vaultAddress) {
+        onPress={() => {
           sendEmailCode();
-          return navigation.navigate("VaultVerifyEmail", route.params);
-          // }
-
-          // if (token.isToken) sendToken({ to, amount, token });
-          // else sendEth({ to, amount });
+          navigation.navigate("VaultVerifyEmail", route.params);
         }}
-        isLoading={isSendingEth || isSendingToken || isSendingEmailCode}
+        isLoading={isSendingEmailCode}
         isDisabled={gasEstimateLoading}
       >
         Confirm
