@@ -5,8 +5,8 @@ import { Box, Button, Text } from "native-base";
 import { Platform } from "react-native";
 import { useDispatch } from "react-redux";
 import { setIsBiometricsEnabled } from "../features/auth/authSlice";
-import * as Device from "expo-device";
 import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
+import { isDevice } from "expo-device";
 
 const SignUpAuthScreen = ({ route }) => {
   const { nextScreen = "SignUpEmail" } = route.params || {};
@@ -14,7 +14,7 @@ const SignUpAuthScreen = ({ route }) => {
   const dispatch = useDispatch();
   const { mutate: authenticate, isLoading: isAuthenticating } = useMutation(
     async () => {
-      if (!Device.isDevice) return true;
+      if (!isDevice) return true;
       const { success } = await LocalAuthentication.authenticateAsync({
         cancelLabel: "Cancel",
         disableDeviceFallback: true,

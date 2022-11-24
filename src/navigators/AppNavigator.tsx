@@ -8,7 +8,6 @@ import {
   selectWalletAddress,
   selectWallets,
 } from "../features/wallet/walletSlice";
-import QRCodeScanScreen from "../screens/QRCodeScanScreen";
 import RecoveryAccountVaultsScreen from "../screens/RecoveryAccountVaultsScreen";
 import RecoveryBackupPasswordScreen from "../screens/RecoveryBackupPasswordScreen";
 import RecoveryBackupsScreen from "../screens/RecoveryBackupsScreen";
@@ -46,12 +45,12 @@ import StartScreen from "../screens/StartScreen";
 import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 import VaultVerifyEmail from "../screens/VaultVerifyEmail";
 import TabNavigator from "./TabNavigator";
-import * as Device from "expo-device";
 import SignUpConfirmPasswordScreen from "../screens/SignUpConfirmPasswordScreen";
 import SignUpCreatingWalletScreen from "../screens/SignUpCreatingWalletScreen";
 import SignUpAddOwnerScreen from "../screens/SignUpAddOwnerScreen";
 import TokenBalancesScreen from "../screens/TokenBalancesScreen";
 import CollectiblesScreen from "../screens/CollectiblesScreen";
+import { isDevice } from "expo-device";
 
 const Stack = createNativeStackNavigator();
 
@@ -114,7 +113,7 @@ const AppNavigator = () => {
         </>
       );
 
-    if (authenticated || !Device.isDevice)
+    if (authenticated || isDevice)
       return (
         <>
           <Stack.Screen
@@ -141,14 +140,6 @@ const AppNavigator = () => {
             name="Preview"
             component={SendConfirmScreen}
             options={{ headerTitle: undefined }}
-          />
-          <Stack.Screen
-            name="QRCodeScan"
-            component={QRCodeScanScreen}
-            options={{
-              headerTransparent: true,
-              headerStyle: { backgroundColor: "transparent" },
-            }}
           />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen

@@ -1,3 +1,4 @@
+import { isDevice } from "expo-device";
 import { Platform } from "react-native";
 import {
   setInternetCredentials,
@@ -13,6 +14,7 @@ export const setItem = async (
   options?: Options
 ) => {
   try {
+    if (!isDevice && options) options.accessControl = undefined;
     await setInternetCredentials(key, key, value, options);
     Sentry.Native.addBreadcrumb({
       message: `Keychain: saved string for key: ${key}`,
