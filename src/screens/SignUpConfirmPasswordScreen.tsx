@@ -12,6 +12,7 @@ import { ACCESSIBLE, ACCESS_CONTROL } from "react-native-keychain";
 import { useDispatch, useSelector } from "react-redux";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
+import { BACKUP_PREFIX } from "../constants/backups";
 import { selectChainId } from "../features/network/networkSlice";
 import {
   selectTrustedOwnerAddress,
@@ -21,6 +22,7 @@ import {
   setWalletAddress,
 } from "../features/wallet/walletSlice";
 import { useCreateVaultMutation } from "../graphql/types";
+import { createBackup } from "../services/cloudBackup";
 import { setItem } from "../services/keychain";
 
 const DEPLOY_GAS_PRICE = parseUnits("15", "gwei");
@@ -55,13 +57,13 @@ const SignUpConfirmPasswordScreen = ({ route }) => {
       const owner = Wallet.generate();
       const recoveryOwner = Wallet.generate();
 
-      // await createBackup(
-      //   JSON.stringify({
-      //     recoveryOwnerPrivateKey: recoveryOwner.getPrivateKeyString(),
-      //   }),
-      //   password,
-      //   `${BACKUP_PREFIX.VAULT}_${recoveryOwner.getAddressString()}`
-      // );
+      await createBackup(
+        JSON.stringify({
+          recoveryOwnerPrivateKey: recoveryOwner.getPrivateKeyString(),
+        }),
+        password,
+        `${BACKUP_PREFIX.VAULT}_${recoveryOwner.getAddressString()}`
+      );
 
       await setItem("ownerPrivateKey", owner.getPrivateKeyString(), {
         accessControl: ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
