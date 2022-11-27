@@ -70,7 +70,7 @@ const HomeScreen = () => {
   return (
     <ScrollView
       contentContainerStyle={{
-        paddingVertical: 40,
+        paddingVertical: 60,
         paddingHorizontal: 16,
       }}
     >

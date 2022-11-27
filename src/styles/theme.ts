@@ -62,6 +62,7 @@ const theme = extendTheme({
       },
       baseStyle: {
         color: "white",
+        bgColor: "transparent",
       },
     },
     Button: {

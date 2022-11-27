@@ -1,4 +1,4 @@
-import { Box, Button, Text } from "native-base";
+import { Box, Button, KeyboardAvoidingView, Text } from "native-base";
 
 interface Props {
   onNext: () => void;
@@ -24,36 +24,44 @@ const SignUpLayout = ({
   showSkip = false,
 }: Props) => {
   return (
-    <Box p="4" pb="6" flex="1">
-      <Text variant="h4" mb="1">
-        {title}
-      </Text>
-      <Text fontSize="lg" mb="10">
-        {subtitle}
-      </Text>
-      {children}
-      <Box flexDir="row" mt="auto">
-        {showSkip && (
+    <Box safeAreaBottom flex="1">
+      <KeyboardAvoidingView
+        p="4"
+        keyboardVerticalOffset={24}
+        behavior="padding"
+        flex="1"
+      >
+        <Text variant="h4" mb="1">
+          {title}
+        </Text>
+        <Text fontSize="lg" mb="10">
+          {subtitle}
+        </Text>
+        {children}
+        <Box flex="1" />
+        <Box flexDir="row">
+          {showSkip && (
+            <Button
+              variant="subtle"
+              _text={{ fontSize: "lg" }}
+              flex="1"
+              onPress={onSkip}
+              mr="4"
+            >
+              Skip
+            </Button>
+          )}
           <Button
-            variant="subtle"
             _text={{ fontSize: "lg" }}
+            onPress={onNext}
+            isLoading={isLoading}
+            isDisabled={isDisabled}
             flex="1"
-            onPress={onSkip}
-            mr="4"
           >
-            Skip
+            {nextText}
           </Button>
-        )}
-        <Button
-          _text={{ fontSize: "lg" }}
-          onPress={onNext}
-          isLoading={isLoading}
-          isDisabled={isDisabled}
-          flex="1"
-        >
-          {nextText}
-        </Button>
-      </Box>
+        </Box>
+      </KeyboardAvoidingView>
     </Box>
   );
 };

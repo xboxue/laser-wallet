@@ -126,7 +126,7 @@ const SendConfirmScreen = ({ route }) => {
   };
 
   return (
-    <Box px="4" flex="1">
+    <Box px="4" flex="1" safeAreaBottom>
       <Box alignItems="center" py="8">
         <Image
           source={{

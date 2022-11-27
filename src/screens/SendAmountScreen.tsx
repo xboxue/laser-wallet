@@ -35,7 +35,7 @@ const SendAmountScreen = ({ route }) => {
   );
 
   return (
-    <Box flex="1">
+    <Box flex="1" safeAreaBottom>
       <Box p="4" pt="0" flex="1">
         <Box
           flexDir="row"

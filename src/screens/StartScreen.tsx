@@ -6,7 +6,7 @@ const StartScreen = () => {
   const navigation = useNavigation();
 
   return (
-    <Box flex="1" p="4">
+    <Box flex="1" p="4" safeAreaBottom>
       <Box flex="1" justifyContent="center">
         <Image
           source={logoVertical}

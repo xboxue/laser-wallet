@@ -113,7 +113,7 @@ const AppNavigator = () => {
         </>
       );
 
-    if (authenticated || isDevice)
+    if (authenticated || !isDevice)
       return (
         <>
           <Stack.Screen
@@ -235,7 +235,7 @@ const AppNavigator = () => {
       screenOptions={{
         headerBackTitleVisible: false,
         headerTitle: "",
-        // headerStyle: { backgroundColor: "white" },
+        headerStyle: { backgroundColor: "black" },
         headerShadowVisible: false,
       }}
     >
