@@ -7,7 +7,7 @@ import { parseUnits } from "ethers/lib/utils";
 import Constants from "expo-constants";
 import { useFormik } from "formik";
 import { Input } from "native-base";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ACCESSIBLE, ACCESS_CONTROL } from "react-native-keychain";
 import { useDispatch, useSelector } from "react-redux";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
@@ -34,6 +34,7 @@ const SignUpConfirmPasswordScreen = ({ route }) => {
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
   const [saveVault] = useCreateVaultMutation();
   const trustedOwnerAddress = useSelector(selectTrustedOwnerAddress);
+  const ref = useRef();
 
   const formik = useFormik({
     initialValues: { password: "" },
@@ -141,7 +142,8 @@ const SignUpConfirmPasswordScreen = ({ route }) => {
         onChangeText={formik.handleChange("password")}
         onBlur={formik.handleBlur("password")}
         type="password"
-        autoFocus
+        ref={ref}
+        onLayout={() => ref.current?.focus()}
       />
     </SignUpLayout>
   );

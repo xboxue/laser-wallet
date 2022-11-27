@@ -27,7 +27,7 @@ const SignUpLayout = ({
     <Box safeAreaBottom flex="1">
       <KeyboardAvoidingView
         p="4"
-        keyboardVerticalOffset={24}
+        keyboardVerticalOffset={110}
         behavior="padding"
         flex="1"
       >

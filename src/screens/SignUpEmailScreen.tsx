@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { useFormik } from "formik";
 import { Input } from "native-base";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
 import ErrorDialog from "../components/ErrorDialog/ErrorDialog";
@@ -19,6 +19,7 @@ const SignUpEmailScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
+  const ref = useRef();
 
   const { mutate: signInWithEmail, isLoading: isSigningIn } = useMutation(
     async (email: string) => {
@@ -116,7 +117,8 @@ const SignUpEmailScreen = () => {
         onBlur={formik.handleBlur("email")}
         keyboardType="email-address"
         autoCapitalize="none"
-        autoFocus
+        ref={ref}
+        onLayout={() => ref.current?.focus()}
       />
     </SignUpLayout>
   );

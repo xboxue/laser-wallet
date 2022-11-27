@@ -4,7 +4,7 @@ import { StackActions, useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { useFormik } from "formik";
 import { Input } from "native-base";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
 import ErrorDialog from "../components/ErrorDialog/ErrorDialog";
@@ -19,6 +19,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
   const dispatch = useDispatch();
   const clerk = useClerk();
   const [error, setError] = useState<string | null>(null);
+  const ref = useRef();
 
   const { mutate: verifySignInCode, isLoading: isVerifyingSignIn } =
     useMutation(
@@ -106,7 +107,8 @@ const SignUpVerifyEmailScreen = ({ route }) => {
         onChangeText={formik.handleChange("code")}
         onBlur={formik.handleBlur("code")}
         keyboardType="number-pad"
-        autoFocus
+        ref={ref}
+        onLayout={() => ref.current?.focus()}
       />
     </SignUpLayout>
   );

@@ -1,7 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
 import { Input } from "native-base";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import * as yup from "yup";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
 import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
@@ -9,6 +9,7 @@ import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
 const SignUpBackupPasswordScreen = () => {
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
   const navigation = useNavigation();
+  const ref = useRef();
 
   const formik = useFormik({
     initialValues: { password: "" },
@@ -43,6 +44,8 @@ const SignUpBackupPasswordScreen = () => {
         onBlur={formik.handleBlur("password")}
         type="password"
         autoFocus
+        ref={ref}
+        onLayout={() => ref.current?.focus()}
       />
     </SignUpLayout>
   );
