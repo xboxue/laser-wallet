@@ -32,6 +32,7 @@ const SignUpBackupPasswordScreen = () => {
       subtitle="We encrypt your backup so that only you can restore your wallet. Do not lose this password."
       isDisabled={!formik.isValid}
       onNext={formik.handleSubmit}
+      hasInput
     >
       <EnableICloudPrompt
         open={iCloudPromptOpen}

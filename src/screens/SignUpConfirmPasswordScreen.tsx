@@ -130,6 +130,7 @@ const SignUpConfirmPasswordScreen = ({ route }) => {
       onNext={formik.handleSubmit}
       nextText="Create backup"
       isDisabled={!formik.isValid}
+      hasInput
     >
       <EnableICloudPrompt
         open={iCloudPromptOpen}

@@ -103,6 +103,7 @@ const SignUpEmailScreen = () => {
       onNext={formik.handleSubmit}
       isLoading={isSigningUp || isSigningIn}
       isDisabled={!formik.isValid}
+      hasInput
     >
       <ErrorDialog
         isOpen={!!error}

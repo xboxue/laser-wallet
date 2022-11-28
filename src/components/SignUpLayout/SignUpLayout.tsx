@@ -10,6 +10,7 @@ interface Props {
   isDisabled?: boolean;
   nextText?: string;
   showSkip?: boolean;
+  hasInput?: boolean;
 }
 
 const SignUpLayout = ({
@@ -22,12 +23,14 @@ const SignUpLayout = ({
   isDisabled,
   nextText = "Next",
   showSkip = false,
+  hasInput = false,
 }: Props) => {
   return (
     <Box safeAreaBottom flex="1">
       <KeyboardAvoidingView
         p="4"
         keyboardVerticalOffset={110}
+        enabled={hasInput}
         behavior="padding"
         flex="1"
       >

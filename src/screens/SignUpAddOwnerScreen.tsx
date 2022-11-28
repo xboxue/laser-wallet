@@ -2,6 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { isAddress } from "ethers/lib/utils";
 import { useFormik } from "formik";
 import { Input } from "native-base";
+import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useEnsAddress } from "wagmi";
 import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
@@ -12,6 +13,7 @@ const SignUpAddOwnerScreen = () => {
   const navigation = useNavigation();
   const chainId = useSelector(selectChainId);
   const dispatch = useDispatch();
+  const ref = useRef();
 
   const formik = useFormik({
     initialValues: { address: "" },
@@ -44,6 +46,7 @@ const SignUpAddOwnerScreen = () => {
       isDisabled={!isAddress(formik.values.address) && !ensAddress}
       showSkip
       onSkip={() => navigation.navigate("SignUpBackup", {})}
+      hasInput
     >
       <Input
         placeholder="ENS or Address"
@@ -52,7 +55,8 @@ const SignUpAddOwnerScreen = () => {
         onBlur={formik.handleBlur("address")}
         autoCorrect={false}
         autoCapitalize="none"
-        autoFocus
+        ref={ref}
+        onLayout={() => ref.current?.focus()}
       />
     </SignUpLayout>
   );

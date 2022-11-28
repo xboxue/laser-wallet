@@ -94,6 +94,7 @@ const SignUpVerifyEmailScreen = ({ route }) => {
       onNext={formik.handleSubmit}
       isLoading={isVerifyingSignIn || isVerifyingSignUp}
       isDisabled={!formik.isValid}
+      hasInput
     >
       <ErrorDialog
         isOpen={!!error}
