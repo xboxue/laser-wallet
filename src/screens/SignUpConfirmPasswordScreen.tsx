@@ -52,7 +52,7 @@ const SignUpConfirmPasswordScreen = ({ route }) => {
     async (password: string) => {
       const provider = new providers.InfuraProvider(
         chainId,
-        Constants.manifest.extra.infuraApiKey
+        Constants.expoConfig.extra.infuraApiKey
       );
 
       const owner = Wallet.generate();

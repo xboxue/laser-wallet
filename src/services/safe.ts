@@ -17,7 +17,7 @@ export const getTransactionServiceUrl = (chainId: number) => {
 export const getSafeService = (chainId: number) => {
   const provider = new providers.InfuraProvider(
     chainId,
-    Constants.manifest.extra.infuraApiKey
+    Constants.expoConfig.extra.infuraApiKey
   );
 
   const ethAdapter = new EthersAdapter({

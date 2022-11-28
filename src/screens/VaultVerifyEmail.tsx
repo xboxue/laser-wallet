@@ -80,7 +80,7 @@ const VaultVerifyEmail = ({ route }) => {
 
       const provider = new providers.InfuraProvider(
         chainId,
-        Constants.manifest.extra.infuraApiKey
+        Constants.expoConfig.extra.infuraApiKey
       );
 
       let tx: { to: string; value: string; data: string };
@@ -113,7 +113,7 @@ const VaultVerifyEmail = ({ route }) => {
         safeTransactionData: {
           ...tx,
           gasPrice: parseEther("100").toString(),
-          refundReceiver: Constants.manifest.extra.relayerAddress,
+          refundReceiver: Constants.expoConfig.extra.relayerAddress,
         },
       });
       const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
