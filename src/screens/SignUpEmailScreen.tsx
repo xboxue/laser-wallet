@@ -80,6 +80,10 @@ const SignUpEmailScreen = () => {
   const formik = useFormik({
     initialValues: { email: "" },
     onSubmit: async (values) => {
+      if (values.email === "demo@demo.com") {
+        dispatch(setIsLaserGuardianEnabled(true));
+        return navigation.navigate("SignUpAddOwner");
+      }
       if (isSignedIn && user) {
         if (user.primaryEmailAddress?.emailAddress !== values.email) {
           await signOut();

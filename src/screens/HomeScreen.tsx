@@ -60,9 +60,16 @@ const HomeScreen = () => {
     ["safeCreationInfo", walletAddress],
     async () => {
       const safeService = getSafeService(chainId);
-      return safeService.getSafeCreationInfo(walletAddress);
+      try {
+        const safeCreationInfo = await safeService.getSafeCreationInfo(
+          walletAddress
+        );
+        return safeCreationInfo;
+      } catch (error) {
+        return null;
+      }
     },
-    { disableErrorToast: true, retry: false }
+    { disableErrorToast: true }
   );
 
   usePendingTxSubscription();

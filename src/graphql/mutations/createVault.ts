@@ -4,7 +4,7 @@ const CREATE_VAULT = gql`
   mutation CreateVault($input: vault_insert_input!) {
     insert_vault_one(
       object: $input
-      on_conflict: { constraint: vault_address_key, update_columns: [address] }
+      on_conflict: { constraint: vault_address_key, update_columns: [] }
     ) {
       address
       chain_id

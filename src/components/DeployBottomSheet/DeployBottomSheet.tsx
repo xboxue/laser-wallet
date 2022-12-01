@@ -86,7 +86,7 @@ const DeployBottomSheet = ({ isOpen, onClose, onSuccess }: Props) => {
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose}>
-      <Box p="4">
+      <Box p="4" safeAreaBottom>
         <Text variant="h5" mb="1">
           Activate your wallet
         </Text>

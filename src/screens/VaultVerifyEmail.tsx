@@ -36,7 +36,7 @@ const VaultVerifyEmail = ({ route }) => {
 
   const { signIn } = useSignIn();
   const clerk = useClerk();
-  const { getToken } = useAuth();
+  const { isSignedIn, getToken } = useAuth();
 
   const { mutate: verifySignInCode, isLoading: isVerifyingSignIn } =
     useMutation(
@@ -158,8 +158,8 @@ const VaultVerifyEmail = ({ route }) => {
   const formik = useFormik({
     initialValues: { code: "" },
     onSubmit: (values) => {
-      // verifySignInCode(values.code);
-      executeTx();
+      if (isSignedIn) executeTx();
+      else verifySignInCode(values.code);
     },
     validationSchema: yup.object().shape({
       code: yup.string().required("Required"),
