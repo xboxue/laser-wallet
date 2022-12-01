@@ -10,7 +10,7 @@ import { getAddress, parseEther, parseUnits } from "ethers/lib/utils";
 import Constants from "expo-constants";
 import { useFormik } from "formik";
 import { Input, useToast } from "native-base";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 import { Erc20__factory } from "../abis/types";
@@ -33,6 +33,7 @@ const VaultVerifyEmail = ({ route }) => {
   const chainId = useSelector(selectChainId);
   const { amount, address: to, token } = route.params;
   const [error, setError] = useState<string | null>(null);
+  const ref = useRef();
 
   const { signIn } = useSignIn();
   const clerk = useClerk();
@@ -60,15 +61,6 @@ const VaultVerifyEmail = ({ route }) => {
         meta: { disableErrorToast: true },
       }
     );
-
-  // const onSend = ({ hash, infuraHash }) => {
-  //   toast.show({
-  //     render: () => <ToastAlert status="success" title="Transaction sent" />,
-  //     duration: 2000,
-  //   });
-  //   dispatch(addPendingTransaction({ hash, infuraHash }));
-  //   navigation.navigate("Activity");
-  // };
 
   const { mutate: executeTx, isLoading: isExecuting } = useMutation(
     async () => {
@@ -174,6 +166,7 @@ const VaultVerifyEmail = ({ route }) => {
       onNext={formik.handleSubmit}
       isLoading={isVerifyingSignIn || isExecuting}
       isDisabled={!formik.isValid}
+      hasInput
     >
       <ErrorDialog
         isOpen={!!error}
@@ -187,7 +180,8 @@ const VaultVerifyEmail = ({ route }) => {
         onChangeText={formik.handleChange("code")}
         onBlur={formik.handleBlur("code")}
         keyboardType="number-pad"
-        autoFocus
+        ref={ref}
+        onLayout={() => ref.current?.focus()}
       />
     </SignUpLayout>
   );
