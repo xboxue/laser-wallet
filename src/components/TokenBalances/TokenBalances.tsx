@@ -51,7 +51,18 @@ const TokenBalances = ({ walletAddress, onPress, limit }: Props) => {
 
   return (
     <FlashList
-      data={balances.slice(0, limit)}
+      data={
+        balances.length
+          ? balances.slice(0, limit)
+          : [
+              {
+                name: "Ethereum",
+                pretty: "0",
+                symbol: "ETH",
+                fiat: [{ pretty: "0.00" }],
+              },
+            ]
+      }
       estimatedItemSize={77}
       renderItem={({ item }) => renderItem(item)}
       refreshControl={

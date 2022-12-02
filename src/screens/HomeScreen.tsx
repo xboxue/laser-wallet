@@ -1,13 +1,12 @@
 import Feather from "@expo/vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
-import { ethers } from "ethers";
 import * as Clipboard from "expo-clipboard";
 import {
   Box,
   Button,
-  Circle,
   Icon,
+  Image,
   ScrollView,
   Stack,
   Text,
@@ -16,6 +15,9 @@ import {
 import { useState } from "react";
 import { Pressable } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import padlockIcon from "../../assets/padlock.png";
+import clockIcon from "../../assets/clock.png";
+import ActionCard from "../components/ActionCard/ActionCard";
 import CollectibleGrid from "../components/CollectibleGrid/CollectibleGrid";
 import DeployBottomSheet from "../components/DeployBottomSheet/DeployBottomSheet";
 import ToastAlert from "../components/ToastAlert/ToastAlert";
@@ -118,14 +120,19 @@ const HomeScreen = () => {
         </Pressable>
         <Stack direction="row" space={2} mt="4">
           <Button
-            onPress={() => navigation.navigate("SendAddress")}
+            onPress={() => {
+              navigation.navigate("SendAddress");
+            }}
             flex={1}
             rounded="full"
           >
             Buy
           </Button>
           <Button
-            onPress={() => navigation.navigate("Choose Recipient")}
+            onPress={() => {
+              if (!safeCreationInfo) return setDeploySheetOpen(true);
+              navigation.navigate("Choose Recipient");
+            }}
             flex={1}
             rounded="full"
           >
@@ -133,44 +140,36 @@ const HomeScreen = () => {
           </Button>
         </Stack>
       </Box>
-      {!safeCreationInfoLoading && !safeCreationInfo && (
-        <Pressable onPress={() => setDeploySheetOpen(true)}>
-          {({ pressed }) => (
-            <Box
-              flexDir="row"
-              alignItems="center"
-              p="4"
-              bgColor="gray.900"
-              rounded="lg"
-              mt="4"
-            >
-              <Circle bgColor="gray.700" size="9" mr="4">
-                {/* <Icon as={<Ionicons name="person" />} size="4" color="gray.200" /> */}
-              </Circle>
-              {safeDeployTxHash ? (
-                <Box>
-                  <Text variant="subtitle1">Wallet activating</Text>
-                  <Text color="text.300">This may take up to 1 hour</Text>
-                </Box>
-              ) : (
-                <Box>
-                  <Text variant="subtitle1">Activate your wallet</Text>
-                  <Text color="text.300">
-                    Get started by depositing to your account
-                  </Text>
-                </Box>
-              )}
-            </Box>
-          )}
-        </Pressable>
-      )}
+      {!safeCreationInfoLoading &&
+        !safeCreationInfo &&
+        (safeDeployTxHash ? (
+          <ActionCard
+            onPress={() => {}}
+            title="Wallet activating"
+            subtitle="This may take up to 1 hour"
+            icon={<Image source={clockIcon} w="50px" h="50px" alt="Clock" />}
+            mt="4"
+          />
+        ) : (
+          <ActionCard
+            onPress={() => setDeploySheetOpen(true)}
+            title="Activate your wallet"
+            subtitle="Get started by depositing to your account"
+            icon={<Image source={padlockIcon} size="10" mr="1" alt="Padlock" />}
+            mt="4"
+          />
+        ))}
       <Box flexDir="row" justifyContent="space-between" mt="6" mb="1">
         <Text variant="subtitle1">Coins</Text>
         <Pressable onPress={() => navigation.navigate("TokenBalances")}>
           <Text>View all</Text>
         </Pressable>
       </Box>
-      <TokenBalances walletAddress={walletAddress} limit={4} />
+      <TokenBalances
+        walletAddress={walletAddress}
+        limit={4}
+        onPress={() => {}}
+      />
       {!!data?.pages?.[0].results.length && (
         <>
           <Box flexDir="row" justifyContent="space-between" mt="6" mb="1">
