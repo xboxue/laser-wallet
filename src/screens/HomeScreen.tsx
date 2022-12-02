@@ -145,17 +145,19 @@ const HomeScreen = () => {
         (safeDeployTxHash ? (
           <ActionCard
             onPress={() => {}}
-            title="Wallet activating"
+            title="Account activating"
             subtitle="This may take up to 1 hour"
             icon={<Image source={clockIcon} w="50px" h="50px" alt="Clock" />}
+            key={safeDeployTxHash}
             mt="4"
           />
         ) : (
           <ActionCard
             onPress={() => setDeploySheetOpen(true)}
-            title="Activate your wallet"
-            subtitle="Get started by depositing to your account"
+            title="Activate your account"
+            subtitle="Get started by depositing ETH"
             icon={<Image source={padlockIcon} size="10" mr="1" alt="Padlock" />}
+            key={safeDeployTxHash}
             mt="4"
           />
         ))}
