@@ -28,11 +28,11 @@ const StartScreen = () => {
         _text={{ fontSize: "lg" }}
         variant="subtle"
         mt="4"
-        onPress={() =>
-          navigation.navigate("SignUpAuth", {
-            nextScreen: "RecoveryImportSeedPhrase",
-          })
-        }
+        // onPress={() =>
+        //   navigation.navigate("SignUpAuth", {
+        //     nextScreen: "RecoveryImportSeedPhrase",
+        //   })
+        // }
       >
         I already have a wallet
       </Button>
