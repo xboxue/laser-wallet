@@ -8,7 +8,7 @@ const TokenBalancesScreen = () => {
 
   return (
     <Box p="4" pt="0" flex="1">
-      <TokenBalances walletAddress={walletAddress} />
+      <TokenBalances walletAddress={walletAddress} onPress={() => {}} />
     </Box>
   );
 };

@@ -51,6 +51,7 @@ import SignUpAddOwnerScreen from "../screens/SignUpAddOwnerScreen";
 import TokenBalancesScreen from "../screens/TokenBalancesScreen";
 import CollectiblesScreen from "../screens/CollectiblesScreen";
 import { isDevice } from "expo-device";
+import SignUpAccessCodeScreen from "../screens/SignUpAccessCodeScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -97,6 +98,10 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SignUpAddOwner"
             component={SignUpAddOwnerScreen}
+          />
+          <Stack.Screen
+            name="SignUpAccessCode"
+            component={SignUpAccessCodeScreen}
           />
           <Stack.Screen
             name="RecoveryImportSeedPhrase"

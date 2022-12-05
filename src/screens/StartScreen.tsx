@@ -20,7 +20,7 @@ const StartScreen = () => {
       </Box>
       <Button
         _text={{ fontSize: "lg" }}
-        onPress={() => navigation.navigate("SignUpAuth")}
+        onPress={() => navigation.navigate("SignUpAccessCode")}
       >
         Create new wallet
       </Button>
