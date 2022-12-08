@@ -2,4 +2,5 @@
   <string name="app_name">Laser</string>
   <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
+  <string name="server_client_id">731661315757-qf0qpvrce290nn34311alei9enr6ih7a.apps.googleusercontent.com</string>
 </resources>

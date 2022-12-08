@@ -1,4 +1,5 @@
 import { Box, Button, KeyboardAvoidingView, Text } from "native-base";
+import { Platform } from "react-native";
 
 interface Props {
   onNext: () => void;
@@ -31,7 +32,7 @@ const SignUpLayout = ({
         p="4"
         keyboardVerticalOffset={110}
         enabled={hasInput}
-        behavior="padding"
+        behavior={Platform.select({ ios: "padding" })}
         flex="1"
       >
         <Text variant="h4" mb="1">
