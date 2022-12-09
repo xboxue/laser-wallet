@@ -55,10 +55,6 @@ const AppWithQueryClient = () => {
       ),
       duration: 2000,
     });
-    if (error) {
-      console.error(error);
-      Sentry.Native.captureException(error);
-    }
   };
 
   return (
