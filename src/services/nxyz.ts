@@ -87,3 +87,28 @@ export const getNFTs = async (
     throw error;
   }
 };
+
+export const getTransactions = async (
+  address: string,
+  chainId: number,
+  cursor?: string
+) => {
+  try {
+    const { headers, data } = await axios.get(
+      `https://api.n.xyz/api/v1/address/${address}/transactions`,
+      {
+        params: {
+          chainID: getChain(chainId),
+          apikey: Constants.expoConfig.extra.nxyzApiKey,
+          cursor,
+        },
+      }
+    );
+    return { results: data, nextCursor: headers["x-doc-next-cursor"] };
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      return { results: [] };
+    }
+    throw error;
+  }
+};

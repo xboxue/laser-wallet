@@ -59,45 +59,39 @@ const useTransfers = (walletAddress: string) => {
 
       return {
         ...data,
-        results: transfers
-          .map((transfer) => {
-            if (transfer.type === "ERC721_TRANSFER") {
-              return {
-                ...transfer,
-                metadata: nftMetadata.find(
-                  (nft) =>
-                    nft.contractAddress === transfer.tokenAddress &&
-                    nft.nft.tokenID === transfer.tokenId
-                ),
-              };
-            }
+        results: transfers.map((transfer) => {
+          if (transfer.type === "ERC721_TRANSFER") {
+            return {
+              ...transfer,
+              metadata: nftMetadata.find(
+                (nft) =>
+                  nft.contractAddress === transfer.tokenAddress &&
+                  nft.nft.tokenID === transfer.tokenId
+              ),
+            };
+          }
 
-            if (transfer.type === "ERC20_TRANSFER") {
-              return {
-                ...transfer,
-                metadata: tokenMetadata.find((token) =>
-                  isEqualCaseInsensitive(
-                    token.contractAddress,
-                    transfer.tokenAddress
-                  )
-                ),
-              };
-            }
+          if (transfer.type === "ERC20_TRANSFER") {
+            return {
+              ...transfer,
+              metadata: tokenMetadata.find((token) =>
+                isEqualCaseInsensitive(
+                  token.contractAddress,
+                  transfer.tokenAddress
+                )
+              ),
+            };
+          }
 
-            if (transfer.type === "ETHER_TRANSFER") {
-              const metadata = tokenMetadata.find((token) =>
-                isEqualCaseInsensitive(token.contractAddress, WETH_CONTRACT)
-              );
-              return { ...transfer, metadata };
-            }
+          if (transfer.type === "ETHER_TRANSFER") {
+            const metadata = tokenMetadata.find((token) =>
+              isEqualCaseInsensitive(token.contractAddress, WETH_CONTRACT)
+            );
+            return { ...transfer, metadata };
+          }
 
-            return transfer;
-          })
-          .filter(
-            (transfer) =>
-              transfer.type !== "ERC20_TRANSFER" ||
-              transfer.metadata?.currentPrice?.fiat?.[0].value > 1
-          ),
+          return transfer;
+        }),
       };
     },
     {

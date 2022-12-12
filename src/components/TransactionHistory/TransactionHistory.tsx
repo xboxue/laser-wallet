@@ -1,21 +1,22 @@
-import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
+import { orderBy, sortBy } from "lodash";
 import { Box, Image, Pressable, Text } from "native-base";
 import { useMemo } from "react";
 import { RefreshControl } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { useProvider } from "wagmi";
+import { useSelector } from "react-redux";
+import bagIcon from "../../../assets/bag.png";
 import ethIcon from "../../../assets/eth-icon.png";
 import { selectChainId } from "../../features/network/networkSlice";
 import { selectPendingTransactions } from "../../features/transactions/transactionsSlice";
-import useExchangeRates from "../../hooks/useExchangeRates";
 import useTransfers from "../../hooks/useTransfers";
+import { getTransactions } from "../../services/nxyz";
 import formatAddress from "../../utils/formatAddress";
 import formatAmount from "../../utils/formatAmount";
 import isEqualCaseInsensitive from "../../utils/isEqualCaseInsensitive";
+import Constants from "expo-constants";
 
 const TokenItem = ({
   onPress,
@@ -36,7 +37,7 @@ const TokenItem = ({
           rounded="xl"
         >
           {icon}
-          <Box ml="4" flex={1}>
+          <Box ml="4" flex="1">
             <Text color="text.300">{top}</Text>
             <Text variant="subtitle1">{title}</Text>
             <Text color="text.300">{subtitle}</Text>
@@ -58,45 +59,77 @@ const TransactionHistory = ({ walletAddress }: Props) => {
   const chainId = useSelector(selectChainId);
 
   const {
-    data,
+    data: txs = [],
+    refetch: refetchTxs,
+    isRefetching: isRefetchingTxs,
+  } = useQuery(
+    ["transactions", walletAddress],
+    () => getTransactions(walletAddress, chainId),
+    { select: (data) => data?.results }
+  );
+
+  const {
+    data: transfersData,
     isLoading: transfersLoading,
-    refetch,
-    isRefetching,
+    refetch: refetchTransfers,
+    isRefetching: isRefetchingTransfers,
     fetchNextPage,
   } = useTransfers(walletAddress);
 
   const transfers = useMemo(
-    () => data?.pages.flatMap((page) => page.results) || [],
-    [data]
+    () => transfersData?.pages.flatMap((page) => page.results) || [],
+    [transfersData]
+  );
+
+  const allTxs = useMemo(
+    () =>
+      orderBy(
+        [
+          ...txs.filter(
+            (tx) =>
+              isEqualCaseInsensitive(tx.toAddress, walletAddress) &&
+              !transfers.find((transfer) =>
+                isEqualCaseInsensitive(
+                  transfer.transactionHash,
+                  tx.transactionHash
+                )
+              )
+          ),
+          ...transfers.filter(
+            (transfer) =>
+              !isEqualCaseInsensitive(
+                transfer.to,
+                Constants.expoConfig.extra.relayerAddress
+              )
+          ),
+        ],
+        (tx) => tx.executionDate || tx.timestamp,
+        "desc"
+      ),
+    [txs, transfers]
   );
 
   const pendingTxs = useSelector(selectPendingTransactions);
 
-  // const renderEmptyComponent = useCallback(() => {
-  //   return (
-  //     <Box justifyContent="center" alignItems="center" flex={1}>
-  //       {!txsLoading && !results.some((result) => result.isLoading) && (
-  //         <Text variant="subtitle1">No transactions</Text>
-  //       )}
-  //     </Box>
-  //   );
-  // }, [results]);
-  // if (
-  //   (tokenMetadataLoading && !!tokenAddresses.length) ||
-  //   (nftMetadataLoading && !!nfts.length) ||
-  //   transfersLoading
-  // ) {
-  //   return null;
-  // }
+  const renderEmptyComponent = () => {
+    return (
+      <Box justifyContent="center" alignItems="center" pt="20">
+        <Image source={bagIcon} size="xl" alt="bag" />
+        <Text variant="h6" mt="4">
+          No transactions
+        </Text>
+      </Box>
+    );
+  };
 
-  const renderItem = ({ item }) => {
+  const renderItem = (item) => {
     let rightText;
     if (item.type === "ERC20_TRANSFER" || item.type === "ETHER_TRANSFER") {
       const amount = `${formatAmount(item.value, {
         decimals: item.tokenInfo?.decimals || 18,
       })} ${item.tokenInfo?.symbol || "ETH"}`;
 
-      const amountUSD = item.metadata
+      const amountUSD = item.metadata?.currentPrice?.fiat
         ? formatAmount(
             parseUnits(item.value, item.metadata.decimals).mul(
               item.metadata.currentPrice.fiat[0].value
@@ -162,22 +195,74 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     );
   };
 
+  const renderIncomingItem = (item) => {
+    let rightText = (
+      <Box>
+        {isEqualCaseInsensitive(item.toAddress, walletAddress) ? (
+          <Text color="success.400" variant="subtitle1">
+            +{item.value.pretty} {item.value.symbol}
+          </Text>
+        ) : (
+          <Text color="danger.400" variant="subtitle1">
+            -{item.value.pretty} {item.value.symbol}
+          </Text>
+        )}
+        {item.value.fiat && (
+          <Text color="text.300">${item.value.fiat[0].pretty}</Text>
+        )}
+      </Box>
+    );
+
+    return (
+      <TokenItem
+        title={item.value.name}
+        top={format(parseISO(item.timestamp), "MMM d 'at' h:mm a")}
+        subtitle={
+          isEqualCaseInsensitive(item.toAddress, walletAddress)
+            ? `From ${formatAddress(item.fromAddress)}`
+            : `To ${formatAddress(item.toAddress)}`
+        }
+        rightText={rightText}
+        icon={
+          <Image
+            source={{
+              uri:
+                item.value.symbolLogos?.[0].URI ||
+                "https://c.neevacdn.net/image/upload/tokenLogos/ethereum/ethereum.png",
+            }}
+            fallbackSource={ethIcon}
+            size="9"
+            alt="Token icon"
+            rounded={"sm"}
+          />
+        }
+      />
+    );
+  };
+
   return (
     <Box px="4" flex="1">
       <FlashList
-        key="1"
-        data={transfers}
+        data={allTxs}
         onEndReached={fetchNextPage}
-        renderItem={renderItem}
+        renderItem={({ item }) =>
+          item.type ? renderItem(item) : renderIncomingItem(item)
+        }
         estimatedItemSize={66}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+          <RefreshControl
+            refreshing={isRefetchingTransfers}
+            onRefresh={() => {
+              refetchTxs();
+              refetchTransfers();
+            }}
+          />
         }
         // onEndReached={() => {
         //   if (hasNextPage) fetchNextPage();
         // }}
         onEndReachedThreshold={0.3}
-        // ListEmptyComponent={renderEmptyComponent}
+        ListEmptyComponent={renderEmptyComponent}
       />
     </Box>
   );

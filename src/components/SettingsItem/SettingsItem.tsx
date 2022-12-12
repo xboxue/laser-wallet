@@ -4,9 +4,10 @@ interface Props {
   onPress?: () => void;
   title: string;
   icon: React.ReactNode;
+  rightComponent?: React.ReactNode;
 }
 
-const SettingsItem = ({ onPress, icon, title }: Props) => {
+const SettingsItem = ({ onPress, icon, title, rightComponent }: Props) => {
   return (
     <Pressable onPress={onPress}>
       {({ isPressed }) => (
@@ -15,14 +16,15 @@ const SettingsItem = ({ onPress, icon, title }: Props) => {
           py="3"
           flexDir="row"
           alignItems="center"
-          opacity={isPressed ? "0.2" : "1"}
+          opacity={isPressed && onPress ? "0.2" : "1"}
         >
           <Circle bg="gray.800" size="10">
             {icon}
           </Circle>
-          <Text variant="subtitle1" ml="3">
+          <Text variant="subtitle1" ml="3" flex="1">
             {title}
           </Text>
+          {rightComponent}
         </Box>
       )}
     </Pressable>

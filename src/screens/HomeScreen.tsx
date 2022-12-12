@@ -1,3 +1,4 @@
+import { Linking, RefreshControl } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
@@ -15,7 +16,7 @@ import {
 import { useState } from "react";
 import { Pressable } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import padlockIcon from "../../assets/padlock.png";
+import lockIcon from "../../assets/lock.png";
 import clockIcon from "../../assets/clock.png";
 import ActionCard from "../components/ActionCard/ActionCard";
 import CollectibleGrid from "../components/CollectibleGrid/CollectibleGrid";
@@ -34,6 +35,7 @@ import usePendingTxSubscription from "../hooks/usePendingTxSubscription";
 import useWaitForTransaction from "../hooks/useWaitForTransaction";
 import { getSafeService } from "../services/safe";
 import formatAddress from "../utils/formatAddress";
+import useBalances from "../hooks/useBalances";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -44,6 +46,7 @@ const HomeScreen = () => {
   const chainId = useSelector(selectChainId);
   const dispatch = useDispatch();
   const safeDeployTxHash = useSelector(selectSafeDeployTxHash);
+  const { refetch, isRefetching } = useBalances(walletAddress);
 
   useWaitForTransaction({
     hash: safeDeployTxHash,
@@ -82,6 +85,9 @@ const HomeScreen = () => {
         paddingVertical: 60,
         paddingHorizontal: 16,
       }}
+      refreshControl={
+        <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+      }
     >
       {deploySheetOpen && (
         <DeployBottomSheet
@@ -120,9 +126,7 @@ const HomeScreen = () => {
         </Pressable>
         <Stack direction="row" space={2} mt="4">
           <Button
-            onPress={() => {
-              navigation.navigate("SendAddress");
-            }}
+            onPress={() => Linking.openURL("https://buy.moonpay.com")}
             flex={1}
             rounded="full"
           >
@@ -147,7 +151,7 @@ const HomeScreen = () => {
             onPress={() => {}}
             title="Account activating"
             subtitle="This may take up to 1 hour"
-            icon={<Image source={clockIcon} w="50px" h="50px" alt="Clock" />}
+            icon={<Image source={clockIcon} size="10" mr="1" alt="Clock" />}
             key={safeDeployTxHash}
             mt="4"
           />
@@ -156,7 +160,7 @@ const HomeScreen = () => {
             onPress={() => setDeploySheetOpen(true)}
             title="Activate your account"
             subtitle="Get started by depositing ETH"
-            icon={<Image source={padlockIcon} size="10" mr="1" alt="Padlock" />}
+            icon={<Image source={lockIcon} size="10" mr="1" alt="Padlock" />}
             key={safeDeployTxHash}
             mt="4"
           />

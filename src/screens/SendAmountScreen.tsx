@@ -46,7 +46,7 @@ const SendAmountScreen = ({ route }) => {
           <Button
             variant="subtle"
             onPress={() => {
-              if (!tokenMetadata) return;
+              if (!tokenMetadata?.currentPrice?.fiat) return;
               if (isUSDInput) {
                 setIsUSDInput(false);
                 setAmount(
@@ -133,7 +133,7 @@ const SendAmountScreen = ({ route }) => {
                 {token.symbol}
               </Text>
             ) : (
-              tokenMetadata && (
+              tokenMetadata?.currentPrice?.fiat && (
                 <Text color="text.300" fontSize="lg">
                   {formatAmount(
                     parseUnits(amount, token.decimals).mul(
@@ -187,7 +187,7 @@ const SendAmountScreen = ({ route }) => {
                     { decimals: token.decimals }
                   )
                 : amount,
-              amountUSD: !tokenMetadata
+              amountUSD: !tokenMetadata?.currentPrice.fiat
                 ? null
                 : isUSDInput
                 ? Intl.NumberFormat("en", {
