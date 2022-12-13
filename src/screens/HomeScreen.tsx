@@ -40,13 +40,13 @@ import useBalances from "../hooks/useBalances";
 const HomeScreen = () => {
   const navigation = useNavigation();
   const walletAddress = useSelector(selectWalletAddress);
-  const { data } = useCollectibles(walletAddress);
+  const { refetch: refetchCollectibles, data } = useCollectibles(walletAddress);
   const toast = useToast();
   const [deploySheetOpen, setDeploySheetOpen] = useState(false);
   const chainId = useSelector(selectChainId);
   const dispatch = useDispatch();
   const safeDeployTxHash = useSelector(selectSafeDeployTxHash);
-  const { refetch, isRefetching } = useBalances(walletAddress);
+  const { refetch: refetchBalances, isRefetching } = useBalances(walletAddress);
 
   useWaitForTransaction({
     hash: safeDeployTxHash,
@@ -86,7 +86,14 @@ const HomeScreen = () => {
         paddingHorizontal: 16,
       }}
       refreshControl={
-        <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={() => {
+            refetchBalances();
+            refetchCollectibles();
+            refetchSafeCreationInfo();
+          }}
+        />
       }
     >
       {deploySheetOpen && (

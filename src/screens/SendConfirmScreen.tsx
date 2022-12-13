@@ -68,7 +68,11 @@ const SendConfirmScreen = ({ route }) => {
       let tx: { to: string; value: string; data: string };
 
       if (token.contractAddress === constants.AddressZero) {
-        tx = { to, value: parseEther(amount).toString(), data: "0x" };
+        tx = {
+          to: getAddress(to),
+          value: parseEther(amount).toString(),
+          data: "0x",
+        };
       } else {
         const erc20 = Erc20__factory.connect(token.contractAddress, provider);
         tx = {

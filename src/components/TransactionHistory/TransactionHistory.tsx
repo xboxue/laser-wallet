@@ -109,8 +109,6 @@ const TransactionHistory = ({ walletAddress }: Props) => {
     [txs, transfers]
   );
 
-  const pendingTxs = useSelector(selectPendingTransactions);
-
   const renderEmptyComponent = () => {
     return (
       <Box justifyContent="center" alignItems="center" pt="20">
