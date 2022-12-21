@@ -1,0 +1,37 @@
+diff --git a/node_modules/@gnosis.pm/safe-core-sdk/dist/src/safeFactory/index.d.ts b/node_modules/@gnosis.pm/safe-core-sdk/dist/src/safeFactory/index.d.ts
+index 69dee34..cb52a90 100644
+--- a/node_modules/@gnosis.pm/safe-core-sdk/dist/src/safeFactory/index.d.ts
++++ b/node_modules/@gnosis.pm/safe-core-sdk/dist/src/safeFactory/index.d.ts
+@@ -44,6 +44,7 @@ declare class SafeFactory {
+     getChainId(): Promise<number>;
+     private encodeSetupCallData;
+     predictSafeAddress({ safeAccountConfig, safeDeploymentConfig }: PredictSafeProps): Promise<string>;
++    estimateDeploySafeGas({ safeAccountConfig, safeDeploymentConfig, options }: DeploySafeProps): Promise<number>;
+     deploySafe({ safeAccountConfig, safeDeploymentConfig, options, callback }: DeploySafeProps): Promise<Safe>;
+ }
+ export default SafeFactory;
+diff --git a/node_modules/@gnosis.pm/safe-core-sdk/dist/src/safeFactory/index.js b/node_modules/@gnosis.pm/safe-core-sdk/dist/src/safeFactory/index.js
+index b219824..e4abf69 100644
+--- a/node_modules/@gnosis.pm/safe-core-sdk/dist/src/safeFactory/index.js
++++ b/node_modules/@gnosis.pm/safe-core-sdk/dist/src/safeFactory/index.js
+@@ -80,6 +80,20 @@ class SafeFactory {
+             paymentReceiver
+         ]);
+     }
++    async estimateDeploySafeGas({ safeAccountConfig, safeDeploymentConfig, options }) {
++        var _a;
++        (0, utils_1.validateSafeAccountConfig)(safeAccountConfig);
++        if (safeDeploymentConfig) {
++            (0, utils_1.validateSafeDeploymentConfig)(safeDeploymentConfig);
++        }
++        const signerAddress = await __classPrivateFieldGet(this, _SafeFactory_ethAdapter, "f").getSignerAddress();
++        const initializer = await this.encodeSetupCallData(safeAccountConfig);
++        const saltNonce = (_a = safeDeploymentConfig === null || safeDeploymentConfig === void 0 ? void 0 : safeDeploymentConfig.saltNonce) !== null && _a !== void 0 ? _a : (Date.now() * 1000 + Math.floor(Math.random() * 1000)).toString();
++        if ((options === null || options === void 0 ? void 0 : options.gas) && (options === null || options === void 0 ? void 0 : options.gasLimit)) {
++            throw new Error('Cannot specify gas and gasLimit together in transaction options');
++        }
++        return __classPrivateFieldGet(this, _SafeFactory_safeProxyFactoryContract, "f").estimateGas('createProxyWithNonce', [__classPrivateFieldGet(this, _SafeFactory_gnosisSafeContract, "f").getAddress(), initializer, saltNonce], { from: signerAddress, ...options });
++    }
+     async predictSafeAddress({ safeAccountConfig, safeDeploymentConfig }) {
+         (0, utils_1.validateSafeAccountConfig)(safeAccountConfig);
+         (0, utils_1.validateSafeDeploymentConfig)(safeDeploymentConfig);

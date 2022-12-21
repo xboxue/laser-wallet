@@ -1,4 +1,5 @@
-import { Avatar, Box, Pressable, Text } from "native-base";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Box, Circle, Icon, Image, Pressable, Text } from "native-base";
 import formatAddress from "../../utils/formatAddress";
 
 interface Props {
@@ -17,14 +18,23 @@ const AddressOrEnsPreviewItem = ({
   return (
     <Pressable onPress={() => onPress?.(address, ensName)}>
       <Box flexDirection="row" alignItems="center" mt="3">
-        <Avatar source={ensAvatar ? { uri: ensAvatar } : undefined}>
-          {ensName ? ensName[0] : "0x"}
-        </Avatar>
-        <Box ml="2">
+        {ensAvatar ? (
+          <Image
+            source={{ uri: ensAvatar }}
+            alt="avatar"
+            size="9"
+            borderRadius="full"
+          />
+        ) : (
+          <Circle bgColor="gray.700" size="9">
+            <Icon as={<Ionicons name="person" />} size="4" color="gray.200" />
+          </Circle>
+        )}
+        <Box ml="4">
           {ensName ? (
             <>
               <Text variant="subtitle1">{ensName}</Text>
-              <Text>{formatAddress(address)}</Text>
+              <Text variant="body2">{formatAddress(address)}</Text>
             </>
           ) : (
             <Text variant="subtitle1">{formatAddress(address)}</Text>

@@ -20,7 +20,8 @@ const networkSlice = createSlice({
   },
 });
 
-export const selectChainId = (state: RootState) => state.network.chainId;
+export const selectChainId = (state: RootState) =>
+  state.wallet.isDemoMode ? 1 : state.network.chainId;
 
 export const { setChainId } = networkSlice.actions;
 

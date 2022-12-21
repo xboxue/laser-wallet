@@ -1,4 +1,4 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import Feather from "@expo/vector-icons/Feather";
 import * as Clipboard from "expo-clipboard";
 import { Icon, IconButton, IIconButtonProps, useToast } from "native-base";
 import ToastAlert from "../ToastAlert/ToastAlert";
@@ -12,9 +12,9 @@ const CopyIconButton = ({ value, ...props }: Props) => {
 
   return (
     <IconButton
-      size="sm"
-      variant="ghost"
-      icon={<Icon as={<Ionicons name="copy-outline" />} />}
+      size="xs"
+      variant="unstyled"
+      icon={<Icon as={<Feather name="copy" />} color="white" />}
       onPress={() => {
         Clipboard.setStringAsync(value);
         toast.show({

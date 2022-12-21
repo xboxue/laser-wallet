@@ -25,6 +25,7 @@ const TokenTransactionItem = ({ txData, onPress }: Props) => {
   const walletAddress = useSelector(selectWalletAddress);
 
   const renderTokenTitle = useCallback(() => {
+    return txData.tokenSymbol;
     if (txData.type === TRANSACTION_TYPES.TOKEN_TRANSFER) {
       if (isEqualCaseInsensitive(txData.args.recipient.address, walletAddress))
         return `Receive ${txData.tokenSymbol}`;

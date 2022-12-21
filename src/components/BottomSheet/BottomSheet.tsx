@@ -4,6 +4,7 @@ import {
   BottomSheetView,
   useBottomSheetDynamicSnapPoints,
 } from "@gorhom/bottom-sheet";
+import { useTheme } from "native-base";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 const BottomSheet = ({ children, isOpen, onClose }: Props) => {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const initialSnapPoints = useMemo(() => ["CONTENT_HEIGHT"], []);
+  const theme = useTheme();
 
   const {
     animatedHandleHeight,
@@ -52,6 +54,8 @@ const BottomSheet = ({ children, isOpen, onClose }: Props) => {
       contentHeight={animatedContentHeight}
       onChange={handleSheetChanges}
       backdropComponent={renderBackdrop}
+      backgroundStyle={{ backgroundColor: theme.colors.gray[900] }}
+      handleIndicatorStyle={{ backgroundColor: theme.colors.gray[700] }}
     >
       <BottomSheetView onLayout={handleContentLayout}>
         {children}

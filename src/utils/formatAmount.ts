@@ -1,15 +1,16 @@
 import { BigNumberish } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
-import { round } from "lodash";
 
-interface FormatOptions {
+interface FormatOptions extends Intl.NumberFormatOptions {
   decimals?: number;
-  precision?: number;
 }
 
 const formatAmount = (amount: BigNumberish, options: FormatOptions = {}) => {
-  const { decimals = 18, precision = 4 } = options;
-  return round(parseFloat(formatUnits(amount, decimals)), precision);
+  const { decimals = 18, ...rest } = options;
+
+  return new Intl.NumberFormat("en", rest).format(
+    parseFloat(formatUnits(amount, decimals))
+  );
 };
 
 export default formatAmount;

@@ -1,3 +1,4 @@
+import { DeploySafeProps } from "@gnosis.pm/safe-core-sdk";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../store";
 
@@ -14,6 +15,10 @@ interface WalletState {
   email: string | null;
   ownerAddress: string | null;
   recoveryOwnerAddress: string | null;
+  trustedOwnerAddress: string | null;
+  safeConfig: DeploySafeProps | null;
+  safeDeployTxHash: string | null;
+  isDemoMode: boolean;
 }
 
 const initialState: WalletState = {
@@ -23,6 +28,10 @@ const initialState: WalletState = {
   email: null,
   ownerAddress: null,
   recoveryOwnerAddress: null,
+  trustedOwnerAddress: null,
+  safeConfig: null,
+  safeDeployTxHash: null,
+  isDemoMode: false,
 };
 
 const walletSlice = createSlice({
@@ -47,25 +56,47 @@ const walletSlice = createSlice({
     setRecoveryOwnerAddress: (state, action: PayloadAction<string>) => {
       state.recoveryOwnerAddress = action.payload;
     },
+    setTrustedOwnerAddress: (state, action: PayloadAction<string>) => {
+      state.trustedOwnerAddress = action.payload;
+    },
+    setSafeConfig: (state, action: PayloadAction<DeploySafeProps>) => {
+      state.safeConfig = action.payload;
+    },
+    setSafeDeployTxHash: (state, action: PayloadAction<string | null>) => {
+      state.safeDeployTxHash = action.payload;
+    },
+    setIsDemoMode: (state, action: PayloadAction<boolean>) => {
+      state.isDemoMode = action.payload;
+    },
   },
 });
 
 export const selectWallets = (state: RootState) => state.wallet.wallets;
-export const selectWalletAddress = (state: RootState) => {
-  if (!state.wallet.walletAddress) throw new Error("Wallet address not set");
-  return state.wallet.walletAddress;
-};
+export const selectWalletAddress = (state: RootState) =>
+  state.wallet.isDemoMode
+    ? "0xdafcA7a5E3B67b8f36C1FdD7691eD85bbB54Cc18"
+    : state.wallet.walletAddress;
+
 export const selectVaultAddress = (state: RootState) =>
   state.wallet.vaultAddress;
 export const selectEmail = (state: RootState) => state.wallet.email;
 export const selectOwnerAddress = (state: RootState) => {
-  if (!state.wallet.ownerAddress) throw new Error("Owner address not set");
   return state.wallet.ownerAddress;
 };
 export const selectRecoveryOwnerAddress = (state: RootState) => {
-  if (!state.wallet.recoveryOwnerAddress)
-    throw new Error("Recovery owner address not set");
   return state.wallet.recoveryOwnerAddress;
+};
+export const selectTrustedOwnerAddress = (state: RootState) => {
+  return state.wallet.trustedOwnerAddress;
+};
+export const selectSafeConfig = (state: RootState) => {
+  return state.wallet.safeConfig;
+};
+export const selectSafeDeployTxHash = (state: RootState) => {
+  return state.wallet.safeDeployTxHash;
+};
+export const selectIsDemoMode = (state: RootState) => {
+  return state.wallet.isDemoMode;
 };
 
 export const {
@@ -75,6 +106,10 @@ export const {
   setEmail,
   setOwnerAddress,
   setRecoveryOwnerAddress,
+  setTrustedOwnerAddress,
+  setSafeConfig,
+  setSafeDeployTxHash,
+  setIsDemoMode,
 } = walletSlice.actions;
 
 export default walletSlice.reducer;

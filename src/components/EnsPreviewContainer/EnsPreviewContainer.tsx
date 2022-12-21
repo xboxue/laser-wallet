@@ -11,6 +11,7 @@ interface Props {
 
 const EnsPreviewContainer = ({ ensName, onPress, errorComponent }: Props) => {
   const { address, ensAvatar, isLoading } = useEnsAddressAndAvatar(ensName);
+  // if (isLoading) return <Skeleton />;
   if (isLoading) return <Skeleton />;
   if (!address || !isAddress(address)) return <>{errorComponent}</>;
 

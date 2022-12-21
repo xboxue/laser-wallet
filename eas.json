@@ -16,9 +16,11 @@
         "LASER_GUARDIAN_ADDRESS": "0x358b966d85359875156829850ad0f5b7647c6fed",
         "SENTRY_ORG": "laser",
         "SENTRY_PROJECT": "react-native",
-        "VAULT_API": "https://laser-vault.herokuapp.com",
+        "VAULT_API": "https://laser-backend.fly.dev",
         "CLERK_API": "clerk.eager.panda-0.lcl.dev",
-        "GRAPHQL_API": "https://laser.hasura.app/v1/graphql"
+        "GRAPHQL_API": "https://laser.hasura.app/v1/graphql",
+        "RELAYER_ADDRESS": "0xcC9d02aBe5487dd64A890bBfFd0b05cF7901043c",
+        "RELAYER_API": "https://laser-relayer.fly.dev"
       }
     },
     "preview": {
@@ -28,9 +30,11 @@
         "LASER_GUARDIAN_ADDRESS": "0x358b966d85359875156829850ad0f5b7647c6fed",
         "SENTRY_ORG": "laser",
         "SENTRY_PROJECT": "react-native",
-        "VAULT_API": "https://laser-vault.herokuapp.com",
+        "VAULT_API": "https://laser-backend.fly.dev",
         "CLERK_API": "clerk.eager.panda-0.lcl.dev",
-        "GRAPHQL_API": "https://laser.hasura.app/v1/graphql"
+        "GRAPHQL_API": "https://laser.hasura.app/v1/graphql",
+        "RELAYER_ADDRESS": "0xcC9d02aBe5487dd64A890bBfFd0b05cF7901043c",
+        "RELAYER_API": "https://laser-relayer.fly.dev"
       }
     },
     "production": {
@@ -39,9 +43,11 @@
         "LASER_GUARDIAN_ADDRESS": "0x358b966d85359875156829850ad0f5b7647c6fed",
         "SENTRY_ORG": "laser",
         "SENTRY_PROJECT": "react-native",
-        "VAULT_API": "https://laser-vault.herokuapp.com",
+        "VAULT_API": "https://laser-backend.fly.dev",
         "CLERK_API": "clerk.eager.panda-0.lcl.dev",
-        "GRAPHQL_API": "https://laser.hasura.app/v1/graphql"
+        "GRAPHQL_API": "https://laser.hasura.app/v1/graphql",
+        "RELAYER_ADDRESS": "0xcC9d02aBe5487dd64A890bBfFd0b05cF7901043c",
+        "RELAYER_API": "https://laser-relayer.fly.dev"
       }
     }
   },

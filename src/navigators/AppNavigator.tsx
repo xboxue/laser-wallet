@@ -3,8 +3,11 @@ import { ChevronLeftIcon } from "native-base";
 import { Platform } from "react-native";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../features/auth/authSlice";
-import { selectWallets } from "../features/wallet/walletSlice";
-import QRCodeScanScreen from "../screens/QRCodeScanScreen";
+import {
+  selectVaultAddress,
+  selectWalletAddress,
+  selectWallets,
+} from "../features/wallet/walletSlice";
 import RecoveryAccountVaultsScreen from "../screens/RecoveryAccountVaultsScreen";
 import RecoveryBackupPasswordScreen from "../screens/RecoveryBackupPasswordScreen";
 import RecoveryBackupsScreen from "../screens/RecoveryBackupsScreen";
@@ -42,15 +45,22 @@ import StartScreen from "../screens/StartScreen";
 import TransactionDetailsScreen from "../screens/TransactionDetailsScreen";
 import VaultVerifyEmail from "../screens/VaultVerifyEmail";
 import TabNavigator from "./TabNavigator";
+import SignUpConfirmPasswordScreen from "../screens/SignUpConfirmPasswordScreen";
+import SignUpCreatingWalletScreen from "../screens/SignUpCreatingWalletScreen";
+import SignUpAddOwnerScreen from "../screens/SignUpAddOwnerScreen";
+import TokenBalancesScreen from "../screens/TokenBalancesScreen";
+import CollectiblesScreen from "../screens/CollectiblesScreen";
+import { isDevice } from "expo-device";
+import SignUpAccessCodeScreen from "../screens/SignUpAccessCodeScreen";
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
-  const wallets = useSelector(selectWallets);
+  const walletAddress = useSelector(selectWalletAddress);
   const authenticated = useSelector(selectIsAuthenticated);
 
   const renderScreens = () => {
-    if (!wallets.length)
+    if (!walletAddress)
       return (
         <>
           <Stack.Screen
@@ -73,6 +83,27 @@ const AppNavigator = () => {
             component={SignUpBackupPasswordScreen}
           />
           <Stack.Screen
+            name="SignUpConfirmPassword"
+            component={SignUpConfirmPasswordScreen}
+          />
+          <Stack.Screen
+            name="SignUpCreatingWallet"
+            component={SignUpCreatingWalletScreen}
+          />
+          <Stack.Screen name="SignUpEmail" component={SignUpEmailScreen} />
+          <Stack.Screen
+            name="SignUpVerifyEmail"
+            component={SignUpVerifyEmailScreen}
+          />
+          <Stack.Screen
+            name="SignUpAddOwner"
+            component={SignUpAddOwnerScreen}
+          />
+          <Stack.Screen
+            name="SignUpAccessCode"
+            component={SignUpAccessCodeScreen}
+          />
+          <Stack.Screen
             name="RecoveryImportSeedPhrase"
             component={RecoveryImportSeedPhraseScreen}
           />
@@ -87,7 +118,7 @@ const AppNavigator = () => {
         </>
       );
 
-    if (authenticated)
+    if (authenticated || !isDevice)
       return (
         <>
           <Stack.Screen
@@ -96,20 +127,24 @@ const AppNavigator = () => {
             options={{ headerShown: false }}
           />
           <Stack.Screen
-            name="SignUpDeployWallet"
-            component={SignUpDeployWalletScreen}
+            name="Choose Recipient"
+            component={SendAddressScreen}
+            options={{ headerTitle: undefined }}
           />
-          <Stack.Screen name="SendAddress" component={SendAddressScreen} />
-          <Stack.Screen name="SendAsset" component={SendAssetScreen} />
-          <Stack.Screen name="SendAmount" component={SendAmountScreen} />
-          <Stack.Screen name="SendConfirm" component={SendConfirmScreen} />
           <Stack.Screen
-            name="QRCodeScan"
-            component={QRCodeScanScreen}
-            options={{
-              headerTransparent: true,
-              headerStyle: { backgroundColor: "transparent" },
-            }}
+            name="Send Token"
+            component={SendAssetScreen}
+            options={{ headerTitle: undefined }}
+          />
+          <Stack.Screen
+            name="Enter Amount"
+            component={SendAmountScreen}
+            options={{ headerTitle: undefined }}
+          />
+          <Stack.Screen
+            name="Preview"
+            component={SendConfirmScreen}
+            options={{ headerTitle: undefined }}
           />
           <Stack.Screen name="Settings" component={SettingsScreen} />
           <Stack.Screen
@@ -136,11 +171,6 @@ const AppNavigator = () => {
           <Stack.Screen
             name="TransactionDetails"
             component={TransactionDetailsScreen}
-          />
-          <Stack.Screen name="SignUpEmail" component={SignUpEmailScreen} />
-          <Stack.Screen
-            name="SignUpVerifyEmail"
-            component={SignUpVerifyEmailScreen}
           />
           <Stack.Screen
             name="SignUpGuardians"
@@ -187,6 +217,12 @@ const AppNavigator = () => {
             name="RecoveryLockVault"
             component={RecoveryLockVaultScreen}
           />
+          <Stack.Screen
+            name="SignUpDeployWallet"
+            component={SignUpDeployWalletScreen}
+          />
+          <Stack.Screen name="TokenBalances" component={TokenBalancesScreen} />
+          <Stack.Screen name="Collectibles" component={CollectiblesScreen} />
         </>
       );
 
@@ -204,7 +240,7 @@ const AppNavigator = () => {
       screenOptions={{
         headerBackTitleVisible: false,
         headerTitle: "",
-        headerStyle: { backgroundColor: "white" },
+        headerStyle: { backgroundColor: "black" },
         headerShadowVisible: false,
       }}
     >

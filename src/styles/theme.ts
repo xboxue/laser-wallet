@@ -1,9 +1,18 @@
 import { extendTheme } from "native-base";
 
 const theme = extendTheme({
+  useSystemColorMode: false,
+  initialColorMode: "dark",
   components: {
     Text: {
+      baseStyle: {
+        color: "white",
+      },
       variants: {
+        h2: {
+          fontSize: 40,
+          fontWeight: 700,
+        },
         h3: {
           fontSize: "3xl",
           fontWeight: 700,
@@ -44,21 +53,52 @@ const theme = extendTheme({
         },
       },
     },
-    Button: {
+    Input: {
+      defaultProps: {
+        selectionColor: "#2432FF",
+        p: 0,
+        size: "2xl",
+        borderWidth: 0,
+      },
       baseStyle: {
-        borderRadius: "3",
+        color: "white",
+        bgColor: "transparent",
+      },
+    },
+    Button: {
+      defaultProps: {
+        _text: {
+          fontWeight: 600,
+          fontSize: "md",
+        },
+      },
+      baseStyle: {
+        rounded: "full",
       },
       variants: {
         solid: {
-          bgColor: "gray.900",
+          bgColor: "#2432FF",
           _pressed: {
-            bgColor: "gray.700",
+            opacity: 0.8,
+          },
+          _disabled: {
+            opacity: 1,
+            _text: {
+              opacity: 0.4,
+            },
+          },
+          _loading: {
+            opacity: 0.8,
+            h: 47.2,
           },
         },
         subtle: {
-          bgColor: "gray.100",
+          bgColor: "gray.800",
+          _text: {
+            color: "white",
+          },
           _pressed: {
-            bgColor: "gray.200",
+            bgColor: "gray.700",
           },
         },
       },

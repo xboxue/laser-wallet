@@ -3,11 +3,8 @@ import { providers } from "ethers";
 import { RootState } from "../../store";
 import { CallRequest } from "../walletConnect/walletConnectSlice";
 
-export interface PendingTransaction extends providers.TransactionResponse {
+export interface PendingTransaction {
   hash: string;
-  callRequest?: CallRequest;
-  isDeployVault?: boolean;
-  isLockVault?: boolean;
   confirmed?: boolean;
 }
 

@@ -9,15 +9,14 @@ interface Props {
 const EnableICloudPrompt = ({ open, onClose }: Props) => {
   return (
     <BottomSheet isOpen={open} onClose={onClose}>
-      <Box p="4">
+      <Box p="4" pb="6">
         <Text variant="subtitle1" mb="1">
-          Backup your recovery key
+          Backup on iCloud
         </Text>
         <Text mb="3">
-          Please sign in to iCloud to save an encrypted copy of your recovery
-          key.
+          Please sign in to iCloud and enable iCloud Drive to continue.
         </Text>
-        <Stack space="2" px="1" mb="5">
+        <Stack space="2" px="1" mb="6">
           <Text variant="subtitle2">1. Open Settings app</Text>
           <Text variant="subtitle2">2. Sign in to iCloud</Text>
           <Text variant="subtitle2">3. Turn on iCloud Drive</Text>

@@ -8,7 +8,7 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NavigationContainer } from "@react-navigation/native";
+import { DarkTheme, NavigationContainer } from "@react-navigation/native";
 import { QueryClientProvider } from "@tanstack/react-query";
 import AppLoading from "expo-app-loading";
 import Constants from "expo-constants";
@@ -55,10 +55,6 @@ const AppWithQueryClient = () => {
       ),
       duration: 2000,
     });
-    if (error) {
-      console.error(error);
-      Sentry.Native.captureException(error);
-    }
   };
 
   return (
@@ -69,7 +65,7 @@ const AppWithQueryClient = () => {
       })}
     >
       <QueryClientProvider client={getQueryClient(onError)}>
-        <NavigationContainer theme={{ colors: { background: "white" } }}>
+        <NavigationContainer theme={DarkTheme}>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <BottomSheetModalProvider>
               <AppNavigator />

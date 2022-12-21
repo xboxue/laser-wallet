@@ -5,7 +5,7 @@ import {
   LaserWallet__factory,
 } from "laser-sdk/dist/typechain";
 import { erc20ABI, erc721ABI } from "wagmi";
-import { Erc20__factory } from "../abis/types";
+import { Erc20__factory, GnosisSafe__factory } from "../abis/types";
 import { TRANSACTION_TYPES } from "../constants/transactions";
 
 export const decodeTxDataByHash = async (
@@ -67,8 +67,8 @@ const decodeContractData = async (
   contractAddress: string
 ) => {
   try {
-    const vaultInterface = new ethers.utils.Interface(LaserWallet__factory.abi);
-    const { args } = vaultInterface.parseTransaction({ data: callData });
+    const safeInterface = new ethers.utils.Interface(GnosisSafe__factory.abi);
+    const { args } = safeInterface.parseTransaction({ data: callData });
     const [to, value, data] = args;
     return decodePendingTxData(provider, {
       from: contractAddress,

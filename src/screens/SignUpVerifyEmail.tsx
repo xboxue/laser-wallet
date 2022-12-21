@@ -1,12 +1,15 @@
 import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-expo";
+import { ClerkAPIError } from "@clerk/types";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import { useFormik } from "formik";
-import { Box, Button, FormControl, Input, Text } from "native-base";
+import { Input } from "native-base";
+import { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as yup from "yup";
+import ErrorDialog from "../components/ErrorDialog/ErrorDialog";
+import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
 import { setEmail } from "../features/wallet/walletSlice";
-import { ClerkAPIError } from "@clerk/types";
 
 const SignUpVerifyEmailScreen = ({ route }) => {
   const { isSignUp } = route.params;
@@ -15,6 +18,8 @@ const SignUpVerifyEmailScreen = ({ route }) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const clerk = useClerk();
+  const [error, setError] = useState<string | null>(null);
+  const ref = useRef();
 
   const { mutate: verifySignInCode, isLoading: isVerifyingSignIn } =
     useMutation(
@@ -33,11 +38,11 @@ const SignUpVerifyEmailScreen = ({ route }) => {
       {
         onSuccess: async (data) => {
           dispatch(setEmail(data.identifier));
-          navigation.dispatch(StackActions.replace("SignUpDeployWallet"));
+          navigation.dispatch(StackActions.replace("SignUpAddOwner"));
         },
         onError: (error) => {
           const clerkError = error?.errors?.[0] as ClerkAPIError;
-          if (clerkError) formik.setFieldError("code", clerkError.longMessage);
+          if (clerkError?.longMessage) setError(clerkError.longMessage);
         },
         meta: { disableErrorToast: true },
       }
@@ -60,11 +65,11 @@ const SignUpVerifyEmailScreen = ({ route }) => {
       {
         onSuccess: async (data) => {
           dispatch(setEmail(data.emailAddress));
-          navigation.dispatch(StackActions.replace("SignUpDeployWallet"));
+          navigation.dispatch(StackActions.replace("SignUpAddOwner"));
         },
         onError: (error) => {
           const clerkError = error?.errors?.[0] as ClerkAPIError;
-          if (clerkError) formik.setFieldError("code", clerkError.longMessage);
+          if (clerkError?.longMessage) setError(clerkError.longMessage);
         },
         meta: { disableErrorToast: true },
       }
@@ -79,37 +84,34 @@ const SignUpVerifyEmailScreen = ({ route }) => {
     validationSchema: yup.object().shape({
       code: yup.string().required("Required"),
     }),
-    validateOnChange: false,
+    validateOnMount: true,
   });
 
   return (
-    <Box p="4">
-      <Text variant="subtitle1">Verify your email</Text>
-      <Text mb="4">
-        Please enter the verification code we sent to your email.
-      </Text>
-      <FormControl isInvalid={formik.touched.code && !!formik.errors.code}>
-        <Input
-          placeholder="Code"
-          value={formik.values.code}
-          onChangeText={formik.handleChange("code")}
-          onBlur={formik.handleBlur("code")}
-          keyboardType="number-pad"
-          autoFocus
-          size="lg"
-        />
-        <FormControl.ErrorMessage>
-          {formik.errors.code}
-        </FormControl.ErrorMessage>
-      </FormControl>
-      <Button
-        mt="4"
-        onPress={formik.handleSubmit}
-        isLoading={isVerifyingSignIn || isVerifyingSignUp}
-      >
-        Next
-      </Button>
-    </Box>
+    <SignUpLayout
+      title="Enter your confirmation code"
+      subtitle="Please enter the confirmation code we sent to your email."
+      onNext={formik.handleSubmit}
+      isLoading={isVerifyingSignIn || isVerifyingSignUp}
+      isDisabled={!formik.isValid}
+      hasInput
+    >
+      <ErrorDialog
+        isOpen={!!error}
+        onClose={() => setError(null)}
+        title="Your email address couldn't be verified."
+        subtitle={error}
+      />
+      <Input
+        placeholder="Confirmation Code"
+        value={formik.values.code}
+        onChangeText={formik.handleChange("code")}
+        onBlur={formik.handleBlur("code")}
+        keyboardType="number-pad"
+        ref={ref}
+        onLayout={() => ref.current?.focus()}
+      />
+    </SignUpLayout>
   );
 };
 

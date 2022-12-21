@@ -1,3 +1,4 @@
+import { isDevice } from "expo-device";
 import { Platform } from "react-native";
 import {
   setInternetCredentials,
@@ -13,10 +14,11 @@ export const setItem = async (
   options?: Options
 ) => {
   try {
+    if (!isDevice && options) options.accessControl = undefined;
     await setInternetCredentials(key, key, value, options);
     Sentry.Native.addBreadcrumb({
       message: `Keychain: saved string for key: ${key}`,
-      level: Sentry.Native.Severity.Info,
+      // level: Sentry.Native.Severity.Info,
     });
   } catch (error) {
     Sentry.Native.captureMessage("Keychain write first attempt failed");
@@ -26,7 +28,7 @@ export const setItem = async (
       await setInternetCredentials(key, key, value, options);
       Sentry.Native.addBreadcrumb({
         message: `Keychain: saved string for key on second attempt: ${key}`,
-        level: Sentry.Native.Severity.Info,
+        // level: Sentry.Native.Severity.Info,
       });
     } catch (error) {
       Sentry.Native.captureMessage("Keychain write second attempt failed");
@@ -57,13 +59,13 @@ export const getItem = async (
     if (credentials) {
       Sentry.Native.addBreadcrumb({
         message: `Keychain: loaded string for key: ${key}`,
-        level: Sentry.Native.Severity.Info,
+        // level: Sentry.Native.Severity.Info,
       });
       return credentials.password;
     }
     Sentry.Native.addBreadcrumb({
       message: `Keychain: string does not exist for key: ${key}`,
-      level: Sentry.Native.Severity.Info,
+      // level: Sentry.Native.Severity.Info,
     });
   } catch (error) {
     if (
@@ -78,13 +80,13 @@ export const getItem = async (
         if (credentials) {
           Sentry.Native.addBreadcrumb({
             message: `Keychain: loaded string for key on second attempt: ${key}`,
-            level: Sentry.Native.Severity.Info,
+            // level: Sentry.Native.Severity.Info,
           });
           return credentials.password;
         }
         Sentry.Native.addBreadcrumb({
           message: `Keychain: string does not exist for key: ${key}`,
-          level: Sentry.Native.Severity.Info,
+          // level: Sentry.Native.Severity.Info,
         });
       } catch (error) {
         Sentry.Native.captureMessage("Keychain read second attempt failed");

@@ -5,9 +5,10 @@ import { Box, Button, Text } from "native-base";
 import { useState } from "react";
 import { Platform } from "react-native";
 import EnableICloudPrompt from "../components/EnableICloudPrompt/EnableICloudPrompt";
+import SignUpLayout from "../components/SignUpLayout/SignUpLayout";
 import { signInToCloud } from "../services/cloudBackup";
 
-const SignUpBackupScreen = ({ route }) => {
+const SignUpBackupScreen = () => {
   const navigation = useNavigation();
   const [iCloudPromptOpen, setICloudPromptOpen] = useState(false);
 
@@ -15,31 +16,31 @@ const SignUpBackupScreen = ({ route }) => {
     async () => await signInToCloud(),
     {
       onSuccess: () => {
-        navigation.navigate("SignUpBackupPassword", route.params);
+        navigation.navigate("SignUpBackupPassword");
       },
       onError: (error) => {
         if (error instanceof Error && error.message === "iCloud not available")
           setICloudPromptOpen(true);
       },
-      // meta: { disableErrorToast: true },
+      meta: { disableErrorToast: true },
     }
   );
 
   return (
-    <Box p="4">
-      <Text variant="subtitle1">Back up your wallet</Text>
-      <Text>
-        Your backup will be used to recover your wallet in case your device is
-        lost.
-      </Text>
-      <Button mt="6" isLoading={isLoading} onPress={() => signIn()}>
-        {`Back up on ${Platform.OS === "ios" ? "iCloud" : "Google Drive"}`}
-      </Button>
+    <SignUpLayout
+      title="Back up your wallet"
+      subtitle="Your backup will be used to recover your wallet in case your device is lost."
+      isLoading={isLoading}
+      onNext={signIn}
+      nextText={`Back up on ${
+        Platform.OS === "ios" ? "iCloud" : "Google Drive"
+      }`}
+    >
       <EnableICloudPrompt
         open={iCloudPromptOpen}
         onClose={() => setICloudPromptOpen(false)}
       />
-    </Box>
+    </SignUpLayout>
   );
 };
 

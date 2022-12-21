@@ -1,4 +1,4 @@
-import { useClerk, useSignIn } from "@clerk/clerk-expo";
+import { useAuth, useClerk, useSignIn, useUser } from "@clerk/clerk-expo";
 import { SignInResource } from "@clerk/types";
 import { ClerkAPIError } from "@clerk/types";
 import { useMutation } from "@tanstack/react-query";
@@ -14,9 +14,12 @@ interface Props {
 const EmailCodeForm = ({ onSubmit, isSubmitting = false }: Props) => {
   const { signIn } = useSignIn();
   const clerk = useClerk();
+  const { isSignedIn, user } = useUser();
 
   const { mutate: verifyCode, isLoading: isVerifying } = useMutation(
     async (code: string) => {
+      if (isSignedIn && user.primaryEmailAddress?.emailAddress)
+        return user.primaryEmailAddress.emailAddress;
       if (!signIn) throw new Error();
       const signInAttempt = await signIn.attemptFirstFactor({
         strategy: "email_code",
@@ -51,20 +54,19 @@ const EmailCodeForm = ({ onSubmit, isSubmitting = false }: Props) => {
     <>
       <FormControl isInvalid={formik.touched.code && !!formik.errors.code}>
         <Input
-          placeholder="Code"
+          placeholder="Confirmation Code"
           value={formik.values.code}
           onChangeText={formik.handleChange("code")}
           onBlur={formik.handleBlur("code")}
           keyboardType="number-pad"
           autoFocus
-          size="lg"
         />
         <FormControl.ErrorMessage>
           {formik.errors.code}
         </FormControl.ErrorMessage>
       </FormControl>
       <Button
-        mt="4"
+        mt="auto"
         onPress={() => formik.handleSubmit()}
         isLoading={isVerifying || isSubmitting}
       >

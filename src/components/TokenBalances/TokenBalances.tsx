@@ -1,177 +1,72 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { useQuery } from "@tanstack/react-query";
-import { add, format, fromUnixTime } from "date-fns";
-import { LaserWallet__factory } from "laser-sdk/dist/typechain";
-import { Circle, Icon, Image } from "native-base";
-import { useMemo } from "react";
+import { parseUnits } from "ethers/lib/utils";
+import { Image } from "native-base";
+import { useCallback } from "react";
 import { RefreshControl } from "react-native";
-import { useSelector } from "react-redux";
-import { useBalance, useProvider } from "wagmi";
 import ethIcon from "../../../assets/eth-icon.png";
-import { selectChainId } from "../../features/network/networkSlice";
-import { selectVaultAddress } from "../../features/wallet/walletSlice";
+import useBalances from "../../hooks/useBalances";
 import useRefreshOnFocus from "../../hooks/useRefreshOnFocus";
-import useTokenBalances from "../../hooks/useTokenBalances";
 import formatAmount from "../../utils/formatAmount";
 import TokenItem from "../TokenItem/TokenItem";
 
-const IPFS_GATEWAY_URL = "https://cloudflare-ipfs.com/ipfs/";
-
 interface Props {
   walletAddress: string;
-  onPress: (token: {
-    address?: string;
-    balance: string;
-    symbol: string;
-    decimals: number;
-    isToken: boolean;
-  }) => void;
+  onPress: (token: any) => void;
+  limit?: number;
 }
 
-const TokenBalances = ({ walletAddress, onPress }: Props) => {
-  const chainId = useSelector(selectChainId);
-  const vaultAddress = useSelector(selectVaultAddress);
-  const navigation = useNavigation();
-  const provider = useProvider({ chainId });
-
-  const { data: vaultConfig, isLoading: vaultConfigLoading } = useQuery(
-    ["vaultConfig", vaultAddress],
-    () => {
-      if (!vaultAddress) throw new Error();
-      const vault = LaserWallet__factory.connect(vaultAddress, provider);
-      return vault.getConfig();
-    },
-    { enabled: !!vaultAddress }
-  );
-
+const TokenBalances = ({ walletAddress, onPress, limit }: Props) => {
   const {
-    data: balance,
-    isLoading: balanceLoading,
-    refetch: refetchBalance,
-  } = useBalance({
-    addressOrName: walletAddress,
-    chainId,
-    watch: true,
-  });
+    data: balances = [],
+    isLoading,
+    refetch,
+  } = useBalances(walletAddress);
 
-  const {
-    data: tokens = [],
-    isLoading: tokensLoading,
-    refetch: refetchTokens,
-  } = useTokenBalances(walletAddress);
+  useRefreshOnFocus(refetch);
+  useRefreshOnFocus(refetch);
 
-  useRefreshOnFocus(refetchBalance);
-  useRefreshOnFocus(refetchTokens);
-
-  const notifications = useMemo(() => {
-    if (!vaultAddress)
-      return [
-        {
-          icon: (
-            <Circle bg="gray.800" size="9">
-              <Icon as={Ionicons} color="white" name="ios-arrow-up" size="5" />
-            </Circle>
-          ),
-          title: "Activate vault",
-          subtitle: "Secure your wallet with your vault.",
-          onPress: () => navigation.navigate("SignUpEmail"),
-        },
-      ];
-
-    if (vaultConfig?._isLocked)
-      return [
-        {
-          icon: (
-            <Circle bg="gray.800" size="9">
-              <Icon
-                as={Ionicons}
-                color="white"
-                name="lock-closed-outline"
-                size="4"
-              />
-            </Circle>
-          ),
-          title: "Vault is locked",
-          subtitle: `Vault will be unlocked on ${format(
-            add(fromUnixTime(vaultConfig.configTimestamp.toNumber()), {
-              days: 2,
-            }),
-            "LLL d, h:mm a"
-          )}`,
-        },
-      ];
-
-    return [];
-  }, [vaultConfig]);
-
-  const tokenData = useMemo(() => {
-    return tokens.map((token) => ({
-      title: token.name,
-      subtitle: token.symbol,
-      rightText: formatAmount(token.balance, { decimals: token.decimals }),
-      icon: (
-        <Image
-          source={{
-            uri: token.logoURI.replace("ipfs://", IPFS_GATEWAY_URL),
-          }}
-          fallbackSource={ethIcon}
-          size="9"
-          alt="Token icon"
-        />
-      ),
-      onPress: () =>
-        onPress({
-          address: token.address,
-          balance: token.balance.toString(),
-          symbol: token.symbol,
-          decimals: token.decimals,
-          isToken: true,
-        }),
-    }));
-  }, [tokens]);
-
-  const balanceData = useMemo(() => {
-    if (!balance) return [];
-    return [
-      {
-        title: "Ethereum",
-        subtitle: balance.symbol,
-        rightText: formatAmount(balance.value, {
-          decimals: balance.decimals,
-        }),
-        icon: <Image source={ethIcon} size="9" alt="Token icon" />,
-        onPress: () =>
-          onPress({
-            balance: balance.value.toString(),
-            symbol: balance.symbol,
-            decimals: balance.decimals,
-            isToken: false,
-          }),
-      },
-    ];
-  }, [balance]);
-
-  const items = useMemo(
-    () => [...notifications, ...balanceData, ...tokenData],
-    [balanceData, tokenData, notifications]
-  );
+  const renderItem = useCallback((item) => {
+    return (
+      <TokenItem
+        icon={
+          <Image
+            source={{
+              uri:
+                item.symbolLogos?.[0].URI ||
+                "https://c.neevacdn.net/image/upload/tokenLogos/ethereum/ethereum.png",
+            }}
+            fallbackSource={ethIcon}
+            size="9"
+            alt="Token icon"
+            rounded="full"
+          />
+        }
+        title={item.name}
+        subtitle={`${item.pretty} ${item.symbol}`}
+        rightText={item.fiat ? `$${item.fiat[0].pretty}` : undefined}
+        onPress={() => onPress(item)}
+      />
+    );
+  }, []);
 
   return (
     <FlashList
-      data={items}
+      data={
+        balances.length
+          ? balances.slice(0, limit)
+          : [
+              {
+                name: "Ethereum",
+                pretty: "0",
+                symbol: "ETH",
+                fiat: [{ pretty: "0.00" }],
+              },
+            ]
+      }
       estimatedItemSize={77}
-      renderItem={({ item }) => <TokenItem {...item} />}
-      contentContainerStyle={{ paddingTop: 8 }}
+      renderItem={({ item }) => renderItem(item)}
       refreshControl={
-        <RefreshControl
-          refreshing={tokensLoading || balanceLoading}
-          onRefresh={() => {
-            refetchBalance();
-            refetchTokens();
-          }}
-        />
+        <RefreshControl refreshing={isLoading} onRefresh={refetch} />
       }
     />
   );

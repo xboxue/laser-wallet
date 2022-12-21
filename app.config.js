@@ -3,7 +3,7 @@ import "dotenv/config";
 export default {
   name: "Laser",
   slug: "laser-wallet",
-  version: "1.0.7",
+  version: "1.0.12",
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -17,7 +17,7 @@ export default {
     url: "https://u.expo.dev/7a661128-fd6d-4dce-b72e-2f5f2ead8a58",
   },
   assetBundlePatterns: ["**/*"],
-  runtimeVersion: "1.0.7",
+  runtimeVersion: "1.0.12",
   ios: {
     supportsTablet: false,
     buildNumber: "1",
@@ -34,18 +34,22 @@ export default {
   web: {
     favicon: "./assets/favicon.png",
   },
-  plugins: ["@react-native-google-signin/google-signin", "sentry-expo"],
+  plugins: [
+    "@react-native-google-signin/google-signin",
+    "@config-plugins/android-jsc-intl",
+    "sentry-expo",
+  ],
   extra: {
     infuraApiKey: process.env.INFURA_API_KEY,
     alchemyApiKey: process.env.ALCHEMY_API_KEY,
-    etherscanApiKey: process.env.ETHERSCAN_API_KEY,
     laserGuardianAddress: process.env.LASER_GUARDIAN_ADDRESS,
     relayerAddress: process.env.RELAYER_ADDRESS,
     sentryDsn: process.env.SENTRY_DSN,
     vaultApi: process.env.VAULT_API,
     graphqlApi: process.env.GRAPHQL_API,
     clerkApi: process.env.CLERK_API,
-    graphqlApi: process.env.GRAPHQL_API,
+    relayerApi: process.env.RELAYER_API,
+    nxyzApiKey: process.env.NXYZ_API_KEY,
   },
   hooks: {
     postPublish: [

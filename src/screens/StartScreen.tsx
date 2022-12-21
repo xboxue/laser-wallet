@@ -6,27 +6,33 @@ const StartScreen = () => {
   const navigation = useNavigation();
 
   return (
-    <Box flex={1} justifyContent="center" px="4" pb="20">
-      <Image
-        source={logoVertical}
-        alt="logo"
-        w="120"
-        h="120"
-        resizeMode="contain"
-        alignSelf="center"
-        mb="12"
-      />
-      <Button onPress={() => navigation.navigate("SignUpAuth")}>
+    <Box flex="1" p="4" safeAreaBottom>
+      <Box flex="1" justifyContent="center">
+        <Image
+          source={logoVertical}
+          alt="logo"
+          w="130"
+          h="130"
+          resizeMode="contain"
+          alignSelf="center"
+          mb="40"
+        />
+      </Box>
+      <Button
+        _text={{ fontSize: "lg" }}
+        onPress={() => navigation.navigate("SignUpAccessCode")}
+      >
         Create new wallet
       </Button>
       <Button
+        _text={{ fontSize: "lg" }}
         variant="subtle"
-        mt="2"
-        onPress={() =>
-          navigation.navigate("SignUpAuth", {
-            nextScreen: "RecoveryImportSeedPhrase",
-          })
-        }
+        mt="4"
+        // onPress={() =>
+        //   navigation.navigate("SignUpAuth", {
+        //     nextScreen: "RecoveryImportSeedPhrase",
+        //   })
+        // }
       >
         I already have a wallet
       </Button>

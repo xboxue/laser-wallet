@@ -4,6 +4,7 @@ import HomeScreen from "../screens/HomeScreen";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Icon } from "native-base";
 import theme from "../styles/theme";
+import SettingsScreen from "../screens/SettingsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -12,14 +13,11 @@ const TabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          elevation: 0,
-          borderTopColor: theme.colors.gray[200],
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 60,
+        tabBarShowLabel: false,
+        headerStyle: {
+          backgroundColor: "transparent",
         },
-        tabBarActiveTintColor: theme.colors.gray[800],
+        tabBarActiveTintColor: theme.colors.gray[200],
         tabBarInactiveTintColor: theme.colors.gray[400],
       }}
     >
@@ -40,6 +38,17 @@ const TabNavigator = () => {
           headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <Icon as={<Ionicons name="flash" />} size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          headerShown: true,
+          tabBarIcon: ({ color, size }) => (
+            <Icon as={<Ionicons name="settings" />} size={size} color={color} />
           ),
         }}
       />

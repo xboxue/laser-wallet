@@ -10,6 +10,7 @@ import {
   LaserWallet__factory,
 } from "laser-sdk/dist/typechain";
 import { LaserCreatedEvent } from "laser-sdk/dist/typechain/deployments/mainnet/LaserFactory";
+import { orderBy, sortBy } from "lodash";
 import { Circle, Icon } from "native-base";
 import { useMemo } from "react";
 import { chain } from "wagmi";
@@ -66,12 +67,8 @@ const RecoveryBackupsScreen = ({ route }) => {
     [recoveryOwnerResults]
   );
 
-  // const backupRecoveryOwners = backups
-  //   .map((backup) => backup.name.split("_")[2])
-  //   .filter((address) => address);
-
   const backupsWithVaults = useMemo(() => {
-    return backups.map((backup) => {
+    return orderBy(backups, "lastModified", "desc").map((backup) => {
       const backupRecoveryOwner = backup.name.split("_")[2];
       if (!backupRecoveryOwner) return { ...backup, vaults: [] };
 

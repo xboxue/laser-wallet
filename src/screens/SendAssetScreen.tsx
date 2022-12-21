@@ -9,21 +9,16 @@ const SendAssetScreen = ({ route }) => {
   const walletAddress = useSelector(selectWalletAddress);
 
   return (
-    <Box flex={1}>
-      <Text variant="subtitle1" p="4" pb="0">
-        Choose asset
-      </Text>
-      {walletAddress && (
-        <TokenBalances
-          walletAddress={walletAddress}
-          onPress={(token) =>
-            navigation.navigate("SendAmount", {
-              ...route.params,
-              token,
-            })
-          }
-        />
-      )}
+    <Box flex={1} px="4">
+      <TokenBalances
+        walletAddress={walletAddress}
+        onPress={(token) =>
+          navigation.navigate("Enter Amount", {
+            ...route.params,
+            token,
+          })
+        }
+      />
     </Box>
   );
 };

@@ -81,9 +81,7 @@ const WalletTransactionItem = ({ txData, onPress }: Props) => {
 
   const renderTitle = useCallback(() => {
     if (txData.type === TRANSACTION_TYPES.SEND) {
-      if (isEqualCaseInsensitive(txData.from.address, walletAddress))
-        return "Send ETH";
-      return "Receive ETH";
+      return "Ethereum";
     }
 
     return titles[txData.type];
